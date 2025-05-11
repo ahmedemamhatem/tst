@@ -144,6 +144,20 @@ app_license = "mit"
 # 		"on_trash": "method"
 # 	}
 # }
+fixtures = [
+    {
+        "dt": "Custom Field",
+        "filters": [
+            ["module", "=", "Tst"]
+        ]
+    },
+    {
+        "dt": "Property Setter",
+        "filters": [
+            ["module", "=", "Tst"]
+        ]
+    }
+]
 
 # Scheduled Tasks
 # ---------------
