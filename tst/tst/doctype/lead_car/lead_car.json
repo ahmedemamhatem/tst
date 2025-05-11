@@ -1,50 +1,50 @@
 {
- "actions": [],
- "allow_rename": 1,
- "creation": "2025-05-11 22:09:31.116203",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "car_type",
-  "qty",
-  "city"
- ],
- "fields": [
-  {
-   "fieldname": "car_type",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Car Type",
-   "options": "\nSmall\nLarge\nEquipment\nStations\nWarehouses\nTanks"
-  },
-  {
-   "fieldname": "qty",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Qty",
-   "reqd": 1
-  },
-  {
-   "fieldname": "city",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "City",
-   "options": "City"
-  }
- ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
- "istable": 1,
- "links": [],
- "modified": "2025-05-19 21:53:05.938241",
- "modified_by": "Administrator",
- "module": "Tst",
- "name": "Lead Car",
- "owner": "Administrator",
- "permissions": [],
- "row_format": "Dynamic",
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+   "actions": [],
+   "allow_rename": 1,
+   "creation": "2025-05-11 22:09:31.116203",
+   "doctype": "DocType",
+   "editable_grid": 1,
+   "engine": "InnoDB",
+   "field_order": [
+      "car_type",
+      "qty",
+      "city"
+   ],
+   "fields": [
+      {
+         "fieldname": "car_type",
+         "fieldtype": "Select",
+         "in_list_view": 1,
+         "label": "Car Type",
+         "options": "\nSmall\nLarge\nEquipment\nStations\nWarehouses\nTanks"
+      },
+      {
+         "fieldname": "qty",
+         "fieldtype": "Float",
+         "in_list_view": 1,
+         "label": "Qty",
+         "reqd": 1
+      },
+      {
+         "fieldname": "city",
+         "fieldtype": "Link",
+         "in_list_view": 1,
+         "label": "City",
+         "options": "City"
+      }
+   ],
+   "grid_page_length": 50,
+   "index_web_pages_for_search": 1,
+   "istable": 1,
+   "links": [],
+   "modified": "2025-05-19 21:53:05.938241",
+   "modified_by": "Administrator",
+   "module": "Tst",
+   "name": "Lead Car",
+   "owner": "Administrator",
+   "permissions": [],
+   "row_format": "Dynamic",
+   "sort_field": "modified",
+   "sort_order": "DESC",
+   "states": []
 }
