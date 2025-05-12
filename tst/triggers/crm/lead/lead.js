@@ -128,7 +128,7 @@ function add_create_lead_visit_button(frm) {
 }
 // === Utility: Add "Make Quotation" button ===
 function add_make_quotation_button(frm) {
-    frm.remove_custom_button(__('Quotation'), __('Create')); 
+    frm.remove_custom_button(__('Quotation'), __('Create'));
 }
 
 // === Utility: Dynamically observe and clean buttons ===
