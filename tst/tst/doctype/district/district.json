@@ -1,40 +1,51 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{city_in_english} - {city_in_arabic}",
- "creation": "2025-05-11 21:26:05.978740",
+ "autoname": "format:{district_in_english} - {district_in_arabic}",
+ "creation": "2025-05-11 21:36:59.373789",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "city_in_arabic",
-  "city_in_english"
+  "city",
+  "district_in_arabic",
+  "district_in_english"
  ],
  "fields": [
   {
-   "fieldname": "city_in_arabic",
+   "description": "The city to which the district belongs.",
+   "fieldname": "city",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "City",
+   "options": "City",
+   "reqd": 1
+  },
+  {
+   "fieldname": "district_in_arabic",
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "City In Arabic",
+   "label": "District In Arabic",
    "reqd": 1,
    "unique": 1
   },
   {
-   "fieldname": "city_in_english",
+   "fieldname": "district_in_english",
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "City In English",
+   "label": "District In English",
    "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-13 22:30:29.647397",
+ "modified": "2025-05-13 22:29:33.032986",
  "modified_by": "Administrator",
  "module": "Tst",
- "name": "City",
+ "name": "District",
  "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
