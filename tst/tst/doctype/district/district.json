@@ -1,93 +1,93 @@
 {
- "actions": [],
- "allow_rename": 1,
- "autoname": "format:{english_name} - {arabic_name}",
- "creation": "2025-05-11 21:36:59.373789",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "city",
-  "arabic_name",
-  "english_name"
- ],
- "fields": [
-  {
-   "description": "The city to which the district belongs.",
-   "fieldname": "city",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "City",
-   "options": "City",
-   "reqd": 1
-  },
-  {
-   "fieldname": "arabic_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Arabic Name",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
-   "fieldname": "english_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "English Name",
-   "reqd": 1
-  }
- ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2025-05-13 23:38:05.858888",
- "modified_by": "Administrator",
- "module": "Tst",
- "name": "District",
- "naming_rule": "Expression",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Sales User",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Sales Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "row_format": "Dynamic",
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+   "actions": [],
+   "allow_rename": 1,
+   "autoname": "format:{english_name} - {arabic_name}",
+   "creation": "2025-05-11 21:36:59.373789",
+   "doctype": "DocType",
+   "engine": "InnoDB",
+   "field_order": [
+      "city",
+      "arabic_name",
+      "english_name"
+   ],
+   "fields": [
+      {
+         "description": "The city to which the district belongs.",
+         "fieldname": "city",
+         "fieldtype": "Link",
+         "in_list_view": 1,
+         "in_standard_filter": 1,
+         "label": "City",
+         "options": "City",
+         "reqd": 1
+      },
+      {
+         "fieldname": "arabic_name",
+         "fieldtype": "Data",
+         "in_list_view": 1,
+         "in_standard_filter": 1,
+         "label": "Arabic Name",
+         "reqd": 1,
+         "unique": 1
+      },
+      {
+         "fieldname": "english_name",
+         "fieldtype": "Data",
+         "in_list_view": 1,
+         "in_standard_filter": 1,
+         "label": "English Name",
+         "reqd": 1
+      }
+   ],
+   "grid_page_length": 50,
+   "index_web_pages_for_search": 1,
+   "links": [],
+   "modified": "2025-05-13 23:38:05.858888",
+   "modified_by": "Administrator",
+   "module": "Tst",
+   "name": "District",
+   "naming_rule": "Expression",
+   "owner": "Administrator",
+   "permissions": [
+      {
+         "create": 1,
+         "delete": 1,
+         "email": 1,
+         "export": 1,
+         "print": 1,
+         "read": 1,
+         "report": 1,
+         "role": "System Manager",
+         "share": 1,
+         "write": 1
+      },
+      {
+         "create": 1,
+         "delete": 1,
+         "email": 1,
+         "export": 1,
+         "print": 1,
+         "read": 1,
+         "report": 1,
+         "role": "Sales User",
+         "share": 1,
+         "write": 1
+      },
+      {
+         "create": 1,
+         "delete": 1,
+         "email": 1,
+         "export": 1,
+         "print": 1,
+         "read": 1,
+         "report": 1,
+         "role": "Sales Manager",
+         "share": 1,
+         "write": 1
+      }
+   ],
+   "row_format": "Dynamic",
+   "sort_field": "modified",
+   "sort_order": "DESC",
+   "states": []
 }
