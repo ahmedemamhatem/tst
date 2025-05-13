@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class Neighborhood(Document):
+class District(Document):
 	pass
