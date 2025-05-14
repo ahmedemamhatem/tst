@@ -1,24 +1,24 @@
 frappe.ui.form.on('Quotation', {
-    party_name: function(frm) {
+    party_name: function (frm) {
         if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
-            frappe.db.get_doc('Lead', frm.doc.party_name).then(function(lead_doc) {
+            frappe.db.get_doc('Lead', frm.doc.party_name).then(function (lead_doc) {
                 frm.set_value('custom_number_of_cars', lead_doc.custom_number_of_cars);
             });
         }
     },
-    quotation_to: function(frm) {
+    quotation_to: function (frm) {
         if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
-            frappe.db.get_doc('Lead', frm.doc.party_name).then(function(lead_doc) {
+            frappe.db.get_doc('Lead', frm.doc.party_name).then(function (lead_doc) {
                 frm.set_value('custom_number_of_cars', lead_doc.custom_number_of_cars);
             });
         } else {
             frm.set_value('custom_number_of_cars', null);
         }
     },
-    refresh: function(frm) {
+    refresh: function (frm) {
         // On form load, ensure the value is set if needed
         if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
-            frappe.db.get_doc('Lead', frm.doc.party_name).then(function(lead_doc) {
+            frappe.db.get_doc('Lead', frm.doc.party_name).then(function (lead_doc) {
                 frm.set_value('custom_number_of_cars', lead_doc.custom_number_of_cars);
             });
         }
@@ -26,16 +26,16 @@ frappe.ui.form.on('Quotation', {
 });
 
 frappe.ui.form.on('Quotation', {
-    onload: function(frm) {
+    onload: function (frm) {
         toggle_print_and_email_buttons(frm);
     },
-    refresh: function(frm) {
+    refresh: function (frm) {
         setTimeout(() => {
             frm.remove_custom_button(__('Set as Lost'));
         }, 300);
         toggle_print_and_email_buttons(frm);
     },
-    custom_quotation_templet: function(frm) {
+    custom_quotation_templet: function (frm) {
         frm.clear_table('items');
         frm.refresh_field('items');
         if (!frm.doc.custom_quotation_templet) return;
@@ -45,10 +45,10 @@ frappe.ui.form.on('Quotation', {
             args: {
                 template_name: frm.doc.custom_quotation_templet
             },
-            callback: function(r) {
+            callback: function (r) {
                 console.log('Custom endpoint Quotation Templet Items return:', r);
                 if (r.message && Array.isArray(r.message) && r.message.length > 0) {
-                    r.message.forEach(function(item) {
+                    r.message.forEach(function (item) {
                         if (item.item_code) {
                             let child = frm.add_child("items");
                             child.item_code = item.item_code;
@@ -61,7 +61,7 @@ frappe.ui.form.on('Quotation', {
                     frappe.msgprint(__('No items found in the selected quotation template.'));
                 }
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 frappe.msgprint(__('Could not fetch template items. Please check your permissions or network connection.'));
             }
         });
@@ -139,7 +139,7 @@ function toggle_print_and_email_buttons(frm) {
 
 // List view: Hide Print and Email only if filtering by Draft (docstatus=0)
 frappe.listview_settings['Quotation'] = {
-    refresh: function(listview) {
+    refresh: function (listview) {
         // Check if list is filtered to drafts (docstatus == 0)
         let draft_filter = listview.filter_area
             && listview.filter_area.filter_list
@@ -156,7 +156,7 @@ frappe.listview_settings['Quotation'] = {
                 .hide();
         }
     },
-    onload: function(listview) {
+    onload: function (listview) {
         // Also hide on load if possible
         listview.page.btn_print && listview.page.btn_print.hide();
         listview.page.btn_email && listview.page.btn_email.hide();
