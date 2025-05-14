@@ -1,14 +1,14 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{district_in_english} - {district_in_arabic}",
+ "autoname": "format:{english_name} - {arabic_name}",
  "creation": "2025-05-11 21:36:59.373789",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "city",
-  "district_in_arabic",
-  "district_in_english"
+  "arabic_name",
+  "english_name"
  ],
  "fields": [
   {
@@ -22,27 +22,27 @@
    "reqd": 1
   },
   {
-   "fieldname": "district_in_arabic",
+   "fieldname": "arabic_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "District In Arabic",
+   "label": "Arabic Name",
    "reqd": 1,
    "unique": 1
   },
   {
-   "fieldname": "district_in_english",
+   "fieldname": "english_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "District In English",
+   "label": "English Name",
    "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-13 22:29:33.032986",
+ "modified": "2025-05-13 23:38:05.858888",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "District",
