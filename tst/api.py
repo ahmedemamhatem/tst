@@ -5,6 +5,7 @@ import io
 from erpnext.stock.utils import get_stock_balance
 
 
+
 @frappe.whitelist()
 def upload_serials_from_file(file_url, docname, row_idx, doctype):
     """
