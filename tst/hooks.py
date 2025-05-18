@@ -66,7 +66,9 @@ doc_events = {
 
 # include js in doctype views
 doctype_js = {"Lead" : "triggers/crm/lead/lead.js",
-              "Quotation": "triggers/selling/quotation/quotation.js"}
+              "Quotation": "triggers/selling/quotation/quotation.js",
+              "Purchase Receipt": "public/js/upload_serials.js"
+              }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
