@@ -1,0 +1,153 @@
+import frappe
+from frappe.utils import flt
+import erpnext
+from frappe import _
+
+
+
+import frappe
+
+def get_item_valuation_rate(item_code, warehouse=None):
+    """
+    If warehouse is given: Get valuation_rate from Bin for this warehouse.
+    If not: Get the highest (MAX) valuation_rate from Bin for this item.
+    If nothing in Bin: fallback to Item.valuation_rate.
+    """
+    valuation_rate = None
+    if warehouse:
+        valuation_rate = frappe.db.get_value(
+            "Bin",
+            {"item_code": item_code, "warehouse": warehouse},
+            "valuation_rate"
+        )
+    else:
+        result = frappe.db.sql(
+            "SELECT MAX(valuation_rate) FROM `tabBin` WHERE item_code = %s",
+            (item_code,),
+            as_list=True
+        )
+        valuation_rate = result[0][0] if result and result[0][0] is not None else None
+
+    if valuation_rate is None:
+        valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate") or 0
+
+    return float(valuation_rate or 0)
+
+def calculate_bundle_valuation(doc, method):
+    """
+    On validate of Product Bundle, calculate valuation_rate, valuation_amount for items,
+    and set total_valuation_amount on the doc.
+    """
+    total_valuation = 0
+    for item in getattr(doc, "items", []):
+        # Pass warehouse if you have it per item: item.warehouse
+        valuation_rate = get_item_valuation_rate(item.item_code)
+        item.custom_valuation_rate = valuation_rate
+        item.custom_total = (valuation_rate or 0) * (item.qty or 0)
+        total_valuation += item.custom_total
+
+    doc.custom_total = total_valuation
+@frappe.whitelist()
+def get_template_items(template_name):
+    if not template_name:
+        return []
+    # You can add permission checks here if needed
+    items = frappe.get_all(
+        "Quotation Templet Item",
+        filters={"parent": template_name},
+        fields=["item"]
+    )
+    return items
+def _reorder_item():
+    material_requests = {"Purchase": {}, "Transfer": {}, "Material Issue": {}, "Manufacture": {}}
+    warehouse_company = frappe._dict(
+        frappe.db.sql(
+            """select name, company from `tabWarehouse`
+            where disabled=0"""
+        )
+    )
+    default_company = (
+        erpnext.get_default_company() or frappe.db.sql("""select name from tabCompany limit 1""")[0][0]
+    )
+
+    items_to_consider = get_items_for_reorder()
+    if not items_to_consider:
+        return
+
+    item_warehouse_projected_qty = get_item_warehouse_projected_qty(items_to_consider)
+
+    def add_to_material_request(**kwargs):
+        if isinstance(kwargs, dict):
+            kwargs = frappe._dict(kwargs)
+
+        if kwargs.warehouse not in warehouse_company:
+            return
+
+        reorder_level = flt(kwargs.reorder_level)
+        reorder_qty = flt(kwargs.reorder_qty)
+
+        if kwargs.warehouse_group:
+            projected_qty = flt(
+                item_warehouse_projected_qty.get(kwargs.item_code, {}).get(kwargs.warehouse_group)
+            )
+        else:
+            projected_qty = flt(item_warehouse_projected_qty.get(kwargs.item_code, {}).get(kwargs.warehouse))
+
+        if (reorder_level or reorder_qty) and projected_qty <= reorder_level:
+            deficiency = reorder_level - projected_qty
+            if deficiency > reorder_qty:
+                reorder_qty = deficiency
+
+            company = warehouse_company.get(kwargs.warehouse) or default_company
+
+            mr_item = {
+                "item_code": kwargs.item_code,
+                "warehouse": kwargs.warehouse,
+                "reorder_qty": reorder_qty,
+                "item_details": kwargs.item_details,
+            }
+
+            if kwargs.material_request_type == "Transfer":
+                try:
+                    wh_doc = frappe.get_doc("Warehouse", kwargs.warehouse)
+                    default_source = wh_doc.get("custom_default_source_warehouse")
+                    if default_source:
+                        mr_item["from_warehouse"] = default_source
+                except Exception as e:
+                    frappe.log_error(f"Error fetching custom source warehouse for {kwargs.warehouse}: {e}")
+
+            material_requests[kwargs.material_request_type].setdefault(company, []).append(mr_item)
+
+    for item_code, reorder_levels in items_to_consider.items():
+        for d in reorder_levels:
+            if d.has_variants:
+                continue
+
+            add_to_material_request(
+                item_code=item_code,
+                warehouse=d.warehouse,
+                reorder_level=d.warehouse_reorder_level,
+                reorder_qty=d.warehouse_reorder_qty,
+                material_request_type=d.material_request_type,
+                warehouse_group=d.warehouse_group,
+                item_details=frappe._dict(
+                    {
+                        "item_code": item_code,
+                        "name": item_code,
+                        "item_name": d.item_name,
+                        "item_group": d.item_group,
+                        "brand": d.brand,
+                        "description": d.description,
+                        "stock_uom": d.stock_uom,
+                        "purchase_uom": d.purchase_uom,
+                        "lead_time_days": d.lead_time_days,
+                    }
+                ),
+            )
+
+    if material_requests:
+        return create_material_request(material_requests)
+
+def monkey_patch_reorder_item():
+    import erpnext.stock.reorder_item
+    erpnext.stock.reorder_item._reorder_item = _reorder_item

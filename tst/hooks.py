@@ -7,7 +7,15 @@ app_license = "mit"
 
 # Apps
 # ------------------
+from tst.override import monkey_patch_reorder_item
 
+monkey_patch_reorder_item()
+
+doc_events = {
+    "Product Bundle": {
+        "validate": "tst.override.calculate_bundle_valuation"
+    }
+}
 # required_apps = []
 
 # Each item in the list will be shown as an app in the apps page
