@@ -7,7 +7,7 @@ from frappe import _
 
 def validate_item_status_for_quotation(doc, method):
     for row in doc.items:
-        item_status = frappe.db.get_value("Item", row.item_code, "item_status")
+        item_status = frappe.db.get_value("Item", row.item_code, "custom_item_status")
         if item_status and item_status != "Saleable":
             frappe.throw(
                 _("Item {0} cannot be quoted because its status is {1}.")
@@ -29,10 +29,10 @@ def update_item_status_from_doc(doc, method):
 
     for row in items_table:
         item_code = row.item_code
-        item_status = row.get("item_status")
-        if item_code and item_status:
+        custom_item_status = row.get("custom_item_status")
+        if item_code and custom_item_status:
             # Update the status in Item master
-            frappe.db.set_value("Item", item_code, "item_status", item_status)
+            frappe.db.set_value("Item", item_code, "custom_item_status", custom_item_status)
 
 
 def get_item_valuation_rate(item_code, warehouse=None):
