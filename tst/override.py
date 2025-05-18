@@ -28,12 +28,14 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+
 def monkey_patch_reorder_item():
     import erpnext.stock.reorder_item
     import frappe.model.workflow
 
     frappe.model.workflow.apply_workflow = apply_workflow
     erpnext.stock.reorder_item._reorder_item = _reorder_item
+
 
 import frappe
 from frappe.utils import flt
@@ -222,6 +224,7 @@ def _reorder_item():
                 ),
             )
 
+
 def set_department_from_employee(doc, method):
     """
     Sets the 'department' field on a Material Request document before insert,
@@ -321,6 +324,7 @@ def set_main_warehouse_qty(doc, method):
     except Exception:
         frappe.log_error(frappe.get_traceback(), "set_main_warehouse_qty Error")
 
+
 @frappe.whitelist()
 def apply_workflow(doc, action):
     """Allow workflow action on the current doc"""
@@ -404,7 +408,9 @@ class ValidateReportsTo:
                 if reports_to.user_id:
                     allowed_users_to_approve.append(reports_to.user_id)
                 if reports_to.reports_to:
-                    allowed_users_to_approve.extend(get_allowed_users_to_approve(reports_to))
+                    allowed_users_to_approve.extend(
+                        get_allowed_users_to_approve(reports_to)
+                    )
             return allowed_users_to_approve
 
         allowed_users_to_approve = get_allowed_users_to_approve(employee_doc)
@@ -420,9 +426,9 @@ class ValidateReportsTo:
                 )
             else:
                 frappe.throw(
-                    _("You are not allowed to approve this document. Please contact your manager. User to approve: {0}").format(
-                        frappe.bold(employee_doc.reports_to)
-                    ),
+                    _(
+                        "You are not allowed to approve this document. Please contact your manager. User to approve: {0}"
+                    ).format(frappe.bold(employee_doc.reports_to)),
                     title=_("Permission Error"),
                 )
 
@@ -444,7 +450,9 @@ def alert_supervisor_on_item_shortfall(doc, method):
         if not emp or not emp.get("reports_to"):
             return
 
-        supervisor_user_id = frappe.db.get_value("Employee", emp["reports_to"], "user_id")
+        supervisor_user_id = frappe.db.get_value(
+            "Employee", emp["reports_to"], "user_id"
+        )
         if not supervisor_user_id:
             return
 
@@ -479,7 +487,9 @@ def alert_supervisor_on_item_shortfall(doc, method):
             _("Item Code") if user_lang != "ar" else "كود المنتج",
             _("Item Name") if user_lang != "ar" else "اسم المنتج",
             _("Requested Quantity") if user_lang != "ar" else "الكمية المطلوبة",
-            _("Available in Main Warehouse") if user_lang != "ar" else "المتوفر في المستودع الرئيسي",
+            _("Available in Main Warehouse")
+            if user_lang != "ar"
+            else "المتوفر في المستودع الرئيسي",
         )
         for r in shortfall_rows:
             item_table += f"""
@@ -499,7 +509,7 @@ def alert_supervisor_on_item_shortfall(doc, method):
             <p>العناصر التالية في عرض السعر <b>{doc.name}</b> الذي تم إنشاؤه بواسطة الموظف التابع لك (<b>{creator}</b>)
             تتجاوز المخزون المتوفر في المستودع الرئيسي ({len(shortfall_rows)} عنصر):</p>
             {item_table}
-            <p>عرض السعر: <a href="{frappe.utils.get_url_to_form('Quotation', doc.name)}">{doc.name}</a></p>
+            <p>عرض السعر: <a href="{frappe.utils.get_url_to_form("Quotation", doc.name)}">{doc.name}</a></p>
             <p>يرجى المراجعة واتخاذ الإجراءات اللازمة.</p>
             """
         else:
@@ -509,7 +519,7 @@ def alert_supervisor_on_item_shortfall(doc, method):
             <p>The following items in Quotation <b>{doc.name}</b> created by your reportee (<b>{creator}</b>)
             exceed the available stock in their main warehouse ({len(shortfall_rows)} item(s)):</p>
             {item_table}
-            <p>Quotation: <a href="{frappe.utils.get_url_to_form('Quotation', doc.name)}">{doc.name}</a></p>
+            <p>Quotation: <a href="{frappe.utils.get_url_to_form("Quotation", doc.name)}">{doc.name}</a></p>
             <p>Please review and take necessary action.</p>
             """
 
@@ -519,7 +529,9 @@ def alert_supervisor_on_item_shortfall(doc, method):
             message=message,
         )
     except Exception:
-        frappe.log_error(frappe.get_traceback(), _("Error in alert_supervisor_on_item_shortfall"))
+        frappe.log_error(
+            frappe.get_traceback(), _("Error in alert_supervisor_on_item_shortfall")
+        )
 
 
 def validate_items_are_saleable(self, method):
@@ -544,6 +556,7 @@ def validate_items_are_saleable(self, method):
                     ),
                     title=_("Invalid Item Status"),
                 )
+
 
 def calculate_bundle_valuation(doc, method):
     """
@@ -581,5 +594,3 @@ def update_item_status_from_doc(doc, method):
             frappe.db.set_value(
                 "Item", item_code, "custom_item_status", custom_item_status
             )
-
-

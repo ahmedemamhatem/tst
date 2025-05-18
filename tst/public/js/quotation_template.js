@@ -1,5 +1,5 @@
 frappe.ui.form.on('Quotation', {
-    custom_quotation_templet: function(frm) {
+    custom_quotation_templet: function (frm) {
         // Clear the items table whenever the template is (re)selected
         frm.clear_table('items');
         frm.refresh_field('items');
@@ -14,7 +14,7 @@ frappe.ui.form.on('Quotation', {
                 },
                 fields: ["item_code", "item_name", "uom"] // Fetch all needed fields
             },
-            callback: function(r) {
+            callback: function (r) {
                 // Log the full return data for debugging
                 console.log('Quotation Templet Items return:', r);
 
@@ -23,8 +23,8 @@ frappe.ui.form.on('Quotation', {
                     return;
                 }
                 if (r.message && Array.isArray(r.message) && r.message.length > 0) {
-                    r.message.forEach(function(item){
-                        if(item.item_code) {
+                    r.message.forEach(function (item) {
+                        if (item.item_code) {
                             let child = frm.add_child("items");
                             child.item_code = item.item_code;
                             child.item_name = item.item_name;
@@ -36,7 +36,7 @@ frappe.ui.form.on('Quotation', {
                     frappe.msgprint(__('No items found in the selected quotation template.'));
                 }
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 frappe.msgprint(__('Could not fetch template items. Please check your permissions or network connection.'));
             }
         });

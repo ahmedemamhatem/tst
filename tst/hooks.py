@@ -91,8 +91,12 @@ fixtures = [
 # ------------------
 # (Other sections are commented for future use)
 # ------------------
+from tst.override import monkey_patch_reorder_item
 
-# # required_apps = []
+monkey_patch_reorder_item()
+
+doc_events = {"Product Bundle": {"validate": "tst.override.calculate_bundle_valuation"}}
+# required_apps = []
 
 # # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
@@ -127,8 +131,10 @@ fixtures = [
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Lead" : "triggers/crm/lead/lead.js",
-              "Quotation": "triggers/selling/quotation/quotation.js"}
+doctype_js = {
+    "Lead": "triggers/crm/lead/lead.js",
+    "Quotation": "triggers/selling/quotation/quotation.js",
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}

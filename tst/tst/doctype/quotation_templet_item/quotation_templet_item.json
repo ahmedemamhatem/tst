@@ -1,85 +1,85 @@
 {
- "actions": [],
- "allow_rename": 1,
- "creation": "2025-05-18 21:47:32.806857",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "item_code",
-  "item_name",
-  "uom",
-  "user_discount",
-  "supervisor_discount"
- ],
- "fields": [
-  {
-   "fetch_from": "item_code.item_name",
-   "fieldname": "item_name",
-   "fieldtype": "Data",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Item Name",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "item_code.stock_uom",
-   "fieldname": "uom",
-   "fieldtype": "Data",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "UOM",
-   "read_only": 1
-  },
-  {
-   "fieldname": "item_code",
-   "fieldtype": "Link",
-   "in_filter": 1,
-   "in_global_search": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Item",
-   "options": "Item",
-   "reqd": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "user_discount",
-   "fieldtype": "Percent",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "User Discount"
-  },
-  {
-   "default": "0",
-   "fieldname": "supervisor_discount",
-   "fieldtype": "Percent",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Supervisor Discount"
-  }
- ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
- "istable": 1,
- "links": [],
- "modified": "2025-06-15 23:37:12.487251",
- "modified_by": "Administrator",
- "module": "Tst",
- "name": "Quotation Templet Item",
- "owner": "Administrator",
- "permissions": [],
- "row_format": "Dynamic",
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+   "actions": [],
+   "allow_rename": 1,
+   "creation": "2025-05-18 21:47:32.806857",
+   "doctype": "DocType",
+   "editable_grid": 1,
+   "engine": "InnoDB",
+   "field_order": [
+      "item_code",
+      "item_name",
+      "uom",
+      "user_discount",
+      "supervisor_discount"
+   ],
+   "fields": [
+      {
+         "fetch_from": "item_code.item_name",
+         "fieldname": "item_name",
+         "fieldtype": "Data",
+         "in_filter": 1,
+         "in_list_view": 1,
+         "in_preview": 1,
+         "in_standard_filter": 1,
+         "label": "Item Name",
+         "read_only": 1
+      },
+      {
+         "fetch_from": "item_code.stock_uom",
+         "fieldname": "uom",
+         "fieldtype": "Data",
+         "in_filter": 1,
+         "in_list_view": 1,
+         "in_preview": 1,
+         "in_standard_filter": 1,
+         "label": "UOM",
+         "read_only": 1
+      },
+      {
+         "fieldname": "item_code",
+         "fieldtype": "Link",
+         "in_filter": 1,
+         "in_global_search": 1,
+         "in_list_view": 1,
+         "in_preview": 1,
+         "in_standard_filter": 1,
+         "label": "Item",
+         "options": "Item",
+         "reqd": 1
+      },
+      {
+         "default": "0",
+         "fieldname": "user_discount",
+         "fieldtype": "Percent",
+         "in_filter": 1,
+         "in_list_view": 1,
+         "in_preview": 1,
+         "in_standard_filter": 1,
+         "label": "User Discount"
+      },
+      {
+         "default": "0",
+         "fieldname": "supervisor_discount",
+         "fieldtype": "Percent",
+         "in_filter": 1,
+         "in_list_view": 1,
+         "in_preview": 1,
+         "in_standard_filter": 1,
+         "label": "Supervisor Discount"
+      }
+   ],
+   "grid_page_length": 50,
+   "index_web_pages_for_search": 1,
+   "istable": 1,
+   "links": [],
+   "modified": "2025-06-15 23:37:12.487251",
+   "modified_by": "Administrator",
+   "module": "Tst",
+   "name": "Quotation Templet Item",
+   "owner": "Administrator",
+   "permissions": [],
+   "row_format": "Dynamic",
+   "sort_field": "modified",
+   "sort_order": "DESC",
+   "states": []
 }
