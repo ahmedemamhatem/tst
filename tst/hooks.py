@@ -14,8 +14,22 @@ monkey_patch_reorder_item()
 doc_events = {
     "Product Bundle": {
         "validate": "tst.override.calculate_bundle_valuation"
+    },
+    "Purchase Receipt": {
+        "on_submit": "tst.override.update_item_status_from_doc"
+    },
+    "Stock Entry": {
+        "on_submit": "tst.override.update_item_status_from_doc"
+    },
+    "Quotation": {
+        "validate": "tst.override.validate_items_are_saleable"
+    },
+    "Sales Order": {
+        "validate": "tst.override.validate_items_are_saleable"
     }
 }
+
+
 # required_apps = []
 
 # Each item in the list will be shown as an app in the apps page
