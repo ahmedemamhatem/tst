@@ -13,10 +13,10 @@ class CustomLead(ErpnextLead):
         if self.email_id:
             # Fetch an existing lead with the same email ID
             existing_lead = frappe.db.get_value(
-                'Lead',
-                {'email_id': self.email_id, 'name': ['!=', self.name]},
-                ['name', 'owner'],  # Fetch both the lead name and its owner/creator
-                as_dict=True
+                "Lead",
+                {"email_id": self.email_id, "name": ["!=", self.name]},
+                ["name", "owner"],  # Fetch both the lead name and its owner/creator
+                as_dict=True,
             )
 
             if existing_lead:
@@ -26,7 +26,9 @@ class CustomLead(ErpnextLead):
                     pass
                 else:
                     # If the owner is different, fetch the creator's name
-                    creator = frappe.db.get_value('User', existing_lead.owner, 'full_name')
+                    creator = frappe.db.get_value(
+                        "User", existing_lead.owner, "full_name"
+                    )
 
                     # Throw a translatable error message with the lead name and creator's name
                     if user_lang == "ar":
@@ -34,14 +36,14 @@ class CustomLead(ErpnextLead):
                             "يوجد عميل بنفس البريد الإلكتروني: {0} (تم إنشاؤه بواسطة: {1})".format(
                                 existing_lead.name, creator
                             ),
-                            title="تكرار في البريد الإلكتروني"
+                            title="تكرار في البريد الإلكتروني",
                         )
                     else:
                         frappe.throw(
                             "A Lead with this email ID already exists: {0} (Created by: {1})".format(
                                 existing_lead.name, creator
                             ),
-                            title="Duplicate Email ID"
+                            title="Duplicate Email ID",
                         )
             else:
                 # Optionally display a success message if no duplicate is found
@@ -49,6 +51,7 @@ class CustomLead(ErpnextLead):
                     frappe.msgprint("البريد الإلكتروني فريد!")
                 else:
                     frappe.msgprint("Email ID is unique!")
+
 
 def set_custom_address(doc, method=None):
     """Set the custom address fields based on latitude and longitude."""
@@ -61,18 +64,20 @@ def set_custom_address(doc, method=None):
             geolocator = Nominatim(user_agent="frappe_map")
 
             # Reverse geocode to get location details in Arabic
-            location = geolocator.reverse(f"{doc.custom_latitude}, {doc.custom_longitude}", language='ar')
-            addr = getattr(location, "raw", {}).get('address', {}) if location else {}
+            location = geolocator.reverse(
+                f"{doc.custom_latitude}, {doc.custom_longitude}", language="ar"
+            )
+            addr = getattr(location, "raw", {}).get("address", {}) if location else {}
 
             # Extract address components in Arabic
-            road = addr.get('road') or ""
-            city = addr.get('city') or addr.get('state') or ""
-            state = addr.get('state') or ""
-            country = addr.get('country') or ""
-            postcode = addr.get('postcode') or ""
-            neighborhood = addr.get('neighbourhood') or ""
-            suburb = addr.get('suburb') or ""
-            municipality = addr.get('municipality') or ""
+            road = addr.get("road") or ""
+            city = addr.get("city") or addr.get("state") or ""
+            state = addr.get("state") or ""
+            country = addr.get("country") or ""
+            postcode = addr.get("postcode") or ""
+            neighborhood = addr.get("neighbourhood") or ""
+            suburb = addr.get("suburb") or ""
+            municipality = addr.get("municipality") or ""
 
             # Save detailed fields to the document
             doc.custom_location_city = doc.custom_location_city or city
@@ -80,21 +85,34 @@ def set_custom_address(doc, method=None):
             doc.custom_postal_code = doc.custom_postal_code or postcode
             doc.custom_location_suburb = doc.custom_location_suburb or suburb
             doc.custom_location_country = doc.custom_location_country or country
-            doc.custom_location_municipality = doc.custom_location_municipality or municipality
-            doc.custom_address_line = doc.custom_address_line or (location.address if location else "")
+            doc.custom_location_municipality = (
+                doc.custom_location_municipality or municipality
+            )
+            doc.custom_address_line = doc.custom_address_line or (
+                location.address if location else ""
+            )
 
             # Format a compact, prioritized address string
             address_parts = [road, neighborhood, suburb, city, state, postcode, country]
-            formatted = ', '.join([p for p in address_parts if p])
-            doc.custom_address = doc.custom_address or formatted[:140]  # Truncate if needed
+            formatted = ", ".join([p for p in address_parts if p])
+            doc.custom_address = (
+                doc.custom_address or formatted[:140]
+            )  # Truncate if needed
 
         except Exception as e:
             # Log error and notify the user
-            frappe.log_error(message=f"Failed to fetch Arabic address: {str(e)}", title="Geolocation Error")
+            frappe.log_error(
+                message=f"Failed to fetch Arabic address: {str(e)}",
+                title="Geolocation Error",
+            )
             if user_lang == "ar":
-                frappe.throw("تعذر استرجاع العنوان بالعربية. يرجى التحقق من السجلات لمزيد من التفاصيل.")
+                frappe.throw(
+                    "تعذر استرجاع العنوان بالعربية. يرجى التحقق من السجلات لمزيد من التفاصيل."
+                )
             else:
-                frappe.throw("Unable to fetch Arabic address. Please check the logs for more details.")
+                frappe.throw(
+                    "Unable to fetch Arabic address. Please check the logs for more details."
+                )
 
 
 def validate(doc, method=None):
@@ -152,7 +170,9 @@ def validate_no_of_cars(doc, user_lang):
             else:
                 frappe.throw(
                     "Total quantity of cars ({0}) does not match the declared number of cars ({1}). "
-                    "Please make sure these values are consistent.".format(total_no_of_cars, doc.custom_number_of_cars)
+                    "Please make sure these values are consistent.".format(
+                        total_no_of_cars, doc.custom_number_of_cars
+                    )
                 )
 
 
@@ -202,6 +222,7 @@ def check_duplicate_tax_or_national_id(doc, user_lang):
                         lead_name, owner
                     )
                 )
+
 
 def check_duplicate_mobile_or_email(doc, user_lang):
     """
