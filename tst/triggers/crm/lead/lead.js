@@ -1,64 +1,71 @@
 frappe.ui.form.on('Lead', {
     custom_city1: function(frm){ 
-        apply_filter_to_field_neighborhood(frm)
+        apply_filter_to_field_district(frm)
     },
-    // This function is executed when the form is loaded
+    mobile_no:function(frm){
+        is_valid_mobile_no(frm)
+    },
     onload: function(frm) {
         // Hide Tab 2 and Tab 3 
         frm.$wrapper.find("[data-fieldname='custom_tab_6']").hide();
         frm.$wrapper.find("[data-fieldname='custom_tab_7']").hide();
     },
-
-    // This function is executed when the form is refreshed
     refresh: function(frm) {
         // If the document is not new, check whether the tabs should be revealed based on completion
-        if (!frm.is_new()) {
-            // Check if Tab 1 is completed and if so, show Tab 2
-            if (isTabCompleted(frm, "Company Information")) {
-                frm.$wrapper.find("[data-fieldname='custom_tab_6']").show();  // Show Tab 2
-            }
-            // Check if Tab 2 is completed and if so, show Tab 3
-            if (isTabCompleted(frm, "Customer Analysis")) {
-                if (frm.doc.type == "Company"){
-                    frm.set_df_property("custom_tax_id","reqd",1)
-                }
-                if (frm.doc.type == "Individual"){
-                    frm.set_df_property("custom_national_id","reqd",1)
-                }
-                frm.$wrapper.find("[data-fieldname='custom_tab_7']").show();   // Show Tab 3
-            }
-        }
-    },
+        show_tabs_based_on_completion(frm)
+        setTimeout(()=>{
 
-    // This function is executed after the form is saved
+            show_action_button(frm)
+        },500)
+    },
     after_save: function(frm) {
-        // Check whether Tab 1 is completed after save, then reveal Tab 2
-        if (isTabCompleted(frm, "Company Information")) {
-           frm.$wrapper.find("[data-fieldname='custom_tab_6']").show();  // Show Tab 2
-        }
-        // Check whether Tab 2 is completed after save, then reveal Tab 3
-        if (isTabCompleted(frm, "Customer Analysis")) {
-            if (frm.doc.type == "Company"){
-                frm.set_df_property("custom_tax_id","reqd",1)
-            }
-            if (frm.doc.type == "Individual"){
-                frm.set_df_property("custom_national_id","reqd",1)
-            }
-            
-            frm.$wrapper.find("[data-fieldname='custom_tab_7']").show();   // Show Tab 3
-        }
+        // Reload the form after save to get the latest doc state
+        frm.reload_doc()
     }
 });
+function show_action_button(frm) {
+    if (!isTabCompleted(frm, "Customer Information")) {
+        frm.$wrapper.find("[data-label='Action']").hide()
+        frm.$wrapper.find("[data-label='Create'").hide()
+    }
+    else{
+        frm.$wrapper.find("[data-label = 'Action']").show()
+        frm.$wrapper.find("[data-label = 'Create']").show()
+    }
+}
+
+function show_tabs_based_on_completion(frm) {
+    if (!frm.is_new()) {
+        // Check if Tab 1 is completed and show Tab 2
+        if (isTabCompleted(frm, "Company Information")) {
+            frm.$wrapper.find("[data-fieldname='custom_tab_6']").show();
+        }
+
+        // Check if Tab 2 is completed and show Tab 3
+        if (isTabCompleted(frm, "Customer Analysis")) {
+            if (frm.doc.type === "Company") {
+                frm.set_df_property("custom_tax_id", "reqd", 1);
+                frm.set_df_property("custom_national_id", "reqd", 0);
+            } else if (frm.doc.type === "Individual") {
+                frm.set_df_property("custom_national_id", "reqd", 1);
+                frm.set_df_property("custom_tax_id", "reqd", 0);
+            }
+
+            frm.$wrapper.find("[data-fieldname='custom_tab_7']").show();
+        }
+    }
+}
 
 // Utility function to check if all fields in a specific tab are filled
 function isTabCompleted(frm, tabName) {
     // Get all fields associated with the specified tab
     let tabFields = getTabFields(frm, tabName);
+    let optional_fields = ["email_id","custom_competitor_company_name","custom_tax_certificate","custom_national_address","custom_tax_registration","custom_tax_id","custom_national_id"]
     
     // Iterate over all the fields in the tab and check if they are filled
     for (let fieldname of tabFields) {
-        if (!frm.doc[fieldname] || (fieldname == "custom_car_details" && frm.doc[fieldname].length == 0)) {
-            console.log(fieldname,frm.doc[fieldname])
+        if ((!frm.doc[fieldname] || (fieldname == "custom_car_details" && frm.doc[fieldname].length == 0)) && (!optional_fields.includes(fieldname))){
+            
             return false; // Return false if any field is empty
         }
     }
@@ -98,11 +105,29 @@ function getTabFields(frm, tabLabel) {
 }
 
 
-function apply_filter_to_field_neighborhood(frm) {
-    // get Neighborhood of selected city
-    frm.fields_dict["custom_neighborhood"].get_query = function (doc) {
+function apply_filter_to_field_district(frm) {
+    // get district of selected city
+    frm.fields_dict["custom_district"].get_query = function (doc) {
         return {
-            filters: [["Neighborhood", "city", "=", frm.doc.custom_city1]],
+            filters: [["District", "city", "=", frm.doc.custom_city1]],
         };
     };
+}
+
+
+function is_valid_mobile_no(frm){
+    const mobile = frm.doc.mobile_no?.trim() || "";
+    const field = frm.fields_dict.mobile_no.$wrapper.find('input');
+
+    // Validation
+    const isDigitsOnly = /^\d+$/.test(mobile);
+    const isTenDigits = mobile.length === 10;
+
+    if (isDigitsOnly && isTenDigits) {
+        // Valid: green border
+        field.css('border-color', 'green');
+    } else {
+        // Invalid: red border
+        field.css('border-color', 'red');
+    }
 }

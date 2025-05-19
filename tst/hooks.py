@@ -146,13 +146,13 @@ doctype_js = {"Lead" : "triggers/crm/lead/lead.js",
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Lead": {
+		"validate": "tst.triggers.crm.lead.lead.validate",
+		# "on_cancel": "method",
+		# "on_trash": "method"
+	}
+}
 fixtures = [
     {
         "dt": "Custom Field",
