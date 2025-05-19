@@ -134,6 +134,8 @@ doc_events = {"Product Bundle": {"validate": "tst.override.calculate_bundle_valu
 doctype_js = {
     "Lead": "triggers/crm/lead/lead.js",
     "Quotation": "triggers/selling/quotation/quotation.js",
+    "Purchase Receipt": "public/js/upload_serials.js",
+    "Employee": "public/js/employee.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
