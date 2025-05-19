@@ -1,8 +1,26 @@
-// Copyright (c) 2025, Ahmed Emam and contributors
-// For license information, please see license.txt
-
 frappe.query_reports["Serials In Warehouse"] = {
-	"filters": [
-
-	]
+    filters: [
+        {
+            fieldname: "item_code",
+            label: __("Item"),
+            fieldtype: "Link",
+            options: "Item"
+        },
+        {
+            fieldname: "warehouse",
+            label: __("Warehouse"),
+            fieldtype: "Link",
+            options: "Warehouse"
+        },
+        {
+            fieldname: "from_date",
+            label: __("Purchase Date From"),
+            fieldtype: "Date"
+        },
+        {
+            fieldname: "to_date",
+            label: __("Purchase Date To"),
+            fieldtype: "Date"
+        }
+    ]
 };
