@@ -67,7 +67,6 @@ class ValidateReportsTo:
                 , WorkflowPermissionError)
             
 
-=======
 def validate_item_status_for_quotation(doc, method):
     for row in doc.items:
         item_status = frappe.db.get_value("Item", row.item_code, "custom_item_status")
