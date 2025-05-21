@@ -67,6 +67,35 @@ class ValidateReportsTo:
                 , WorkflowPermissionError)
             
 
+=======
+def validate_item_status_for_quotation(doc, method):
+    for row in doc.items:
+        item_status = frappe.db.get_value("Item", row.item_code, "custom_item_status")
+        if item_status and item_status != "Saleable":
+            frappe.throw(
+                _("Item {0} cannot be quoted because its status is {1}.")
+                .format(row.item_code, item_status)
+            )
+
+
+def update_item_status_from_doc(doc, method):
+    """
+    On submit of Purchase Receipt or Stock Entry, update Item.item_status
+    for each item's selected status in the child table.
+    """
+    # Identify the child table
+    items_table = []
+    if doc.doctype == "Purchase Receipt":
+        items_table = doc.items
+    elif doc.doctype == "Stock Entry":
+        items_table = doc.items
+
+    for row in items_table:
+        item_code = row.item_code
+        custom_item_status = row.get("custom_item_status")
+        if item_code and custom_item_status:
+            # Update the status in Item master
+            frappe.db.set_value("Item", item_code, "custom_item_status", custom_item_status)
 
 
 def get_item_valuation_rate(item_code, warehouse=None):

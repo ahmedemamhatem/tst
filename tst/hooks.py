@@ -12,6 +12,25 @@ from tst.override import monkey_patch_reorder_item
 monkey_patch_reorder_item()
 
 
+doc_events = {
+    "Product Bundle": {
+        "validate": "tst.override.calculate_bundle_valuation"
+    },
+    "Purchase Receipt": {
+        "on_submit": "tst.override.update_item_status_from_doc"
+    },
+    "Stock Entry": {
+        "on_submit": "tst.override.update_item_status_from_doc"
+    },
+    "Quotation": {
+        "validate": "tst.override.validate_items_are_saleable"
+    },
+    "Sales Order": {
+        "validate": "tst.override.validate_items_are_saleable"
+    }
+}
+
+
 # required_apps = []
 
 # Each item in the list will be shown as an app in the apps page
@@ -47,8 +66,11 @@ monkey_patch_reorder_item()
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Lead" : "triggers/crm/lead/lead.js",
-              "Quotation": "triggers/selling/quotation/quotation.js"}
+doctype_js = {"Lead":"triggers/crm/lead/lead.js",
+              "Quotation":"triggers/selling/quotation/quotation.js",
+              "Purchase Receipt":"public/js/upload_serials.js",
+              "Employee":"public/js/employee.js"
+              }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
