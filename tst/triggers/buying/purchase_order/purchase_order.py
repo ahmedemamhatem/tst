@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
 
+
 @frappe.whitelist()
 def validate(doc, method):
     """
@@ -10,7 +11,9 @@ def validate(doc, method):
     user_lang = frappe.db.get_value("User", frappe.session.user, "language")
 
     # Value check for استهلاكية
-    if doc.grand_total > 1000 and (doc.custom_po_types == "مشتريات استهلاكية" or not doc.custom_po_types):
+    if doc.grand_total > 1000 and (
+        doc.custom_po_types == "مشتريات استهلاكية" or not doc.custom_po_types
+    ):
         if user_lang == "ar":
             frappe.throw(
                 "يجب أن تكون قيمة الشراء أقل من 1000 لتعتبر كاستهلاكية ويجب إنشاء عرض سعر أو اختيار نوع شراء آخر."
@@ -28,7 +31,9 @@ def validate(doc, method):
             for item in doc.items:
                 if not item.supplier_quotation:
                     if user_lang == "ar":
-                        frappe.throw("يرجى التأكد من أن كل صف في العناصر يحتوي على عرض سعر محدد لأمر الشراء هذا.")
+                        frappe.throw(
+                            "يرجى التأكد من أن كل صف في العناصر يحتوي على عرض سعر محدد لأمر الشراء هذا."
+                        )
                     else:
                         frappe.throw(
                             "Please ensure every item row has a Quotation specified for this Purchase Order."
@@ -41,15 +46,23 @@ def validate(doc, method):
 
         if supplier_doc.country == "Saudi Arabia" and po_type_doc.is_internal == 0:
             if user_lang == "ar":
-                frappe.throw("بالنسبة للموردين داخل السعودية، يجب أن يكون نوع أمر الشراء محدداً كداخلي.")
+                frappe.throw(
+                    "بالنسبة للموردين داخل السعودية، يجب أن يكون نوع أمر الشراء محدداً كداخلي."
+                )
             else:
-                frappe.throw("For suppliers in Saudi Arabia, PO Type must be marked as Internal.")
+                frappe.throw(
+                    "For suppliers in Saudi Arabia, PO Type must be marked as Internal."
+                )
 
         if po_type_doc.is_internal == 1 and supplier_doc.country != "Saudi Arabia":
             if user_lang == "ar":
-                frappe.throw("بالنسبة للموردين خارج السعودية، لا يمكن أن يكون نوع أمر الشراء داخلياً.")
+                frappe.throw(
+                    "بالنسبة للموردين خارج السعودية، لا يمكن أن يكون نوع أمر الشراء داخلياً."
+                )
             else:
-                frappe.throw("For suppliers outside Saudi Arabia, PO Type cannot be marked as Internal.")
+                frappe.throw(
+                    "For suppliers outside Saudi Arabia, PO Type cannot be marked as Internal."
+                )
 
 
 @frappe.whitelist()
@@ -97,8 +110,14 @@ def send_invoices_email(doc):
                 else "تم إرسال البريد الإلكتروني بنجاح!"
             )
         except Exception as e:
-            frappe.log_error(message=f"Failed to send email: {str(e)}", title="Email Error")
+            frappe.log_error(
+                message=f"Failed to send email: {str(e)}", title="Email Error"
+            )
             if user_lang == "ar":
-                frappe.throw("حدث خطأ أثناء إرسال البريد الإلكتروني. يرجى التحقق من السجلات.")
+                frappe.throw(
+                    "حدث خطأ أثناء إرسال البريد الإلكتروني. يرجى التحقق من السجلات."
+                )
             else:
-                frappe.throw("An error occurred while sending the email. Please check the logs.")
+                frappe.throw(
+                    "An error occurred while sending the email. Please check the logs."
+                )

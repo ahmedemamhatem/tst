@@ -229,12 +229,18 @@ doctype_js = {
 # Hook on document methods and events
 
 doc_events = {
-	"Lead": {
-		"validate": "tst.triggers.crm.lead.lead.validate",
-		# "on_cancel": "method",
-		# "on_trash": "method"
-	}
+    "Lead": {
+        "validate": "tst.triggers.crm.lead.lead.validate",
+        # "on_cancel": "method",
+        # "on_trash": "method"
+    },
+    "Product Bundle": {"validate": "tst.override.calculate_bundle_valuation"},
+    "Purchase Order": {
+        "validate": "tst.triggers.buying.purchase_order.purchase_order.validate",
+        "on_update_after_submit": "tst.triggers.buying.purchase_order.purchase_order.on_update_after_submit",
+    },
 }
+
 fixtures = [
     {"dt": "Custom Field", "filters": [["module", "=", "Tst"]]},
     {"dt": "Property Setter", "filters": [["module", "=", "Tst"]]},
