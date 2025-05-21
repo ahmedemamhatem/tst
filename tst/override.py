@@ -5,6 +5,69 @@ from frappe import _
 
 
 
+import json
+from collections import defaultdict
+from typing import TYPE_CHECKING, Union
+
+from frappe.model.docstatus import DocStatus
+from frappe.utils import cint
+
+if TYPE_CHECKING:
+	from frappe.model.document import Document
+	from frappe.workflow.doctype.workflow.workflow import Workflow
+
+from frappe.model.workflow import (
+	get_workflow,
+	get_transitions,
+	has_approval_access,
+	is_transition_condition_satisfied,
+	send_email_alert,
+)
+
+
+class WorkflowStateError(frappe.ValidationError):
+	pass
+
+
+class WorkflowTransitionError(frappe.ValidationError):
+	pass
+
+
+class WorkflowPermissionError(frappe.ValidationError):
+	pass
+
+class ValidateReportsTo:
+    def __init__(self, doc):
+        self.doc = doc
+
+    def validate_reports_to(self):
+        employee = frappe.db.exists("Employee", {"user_id":self.doc.owner})
+        if not employee:
+            return
+        
+        employee_doc = frappe.get_doc("Employee", employee)
+        if not employee_doc.reports_to:
+            return
+        if employee_doc.reports_to:
+            def get_allowed_users_to_approve(employee_doc):
+                allowed_users_to_approve = []
+                if employee_doc.reports_to:
+                    reports_to = frappe.get_doc("Employee", employee_doc.reports_to)
+                    if reports_to.user_id:
+                        allowed_users_to_approve.append(reports_to.user_id)
+                    if reports_to.reports_to:
+                        allowed_users_to_approve.extend(get_allowed_users_to_approve(reports_to))
+                return allowed_users_to_approve
+            allowed_users_to_approve = get_allowed_users_to_approve(employee_doc)
+            if not allowed_users_to_approve:
+                return
+            if frappe.session.user not in allowed_users_to_approve:
+                frappe.throw(
+                    _("You are not allowed to approve this document. Please contact your manager, user to approve{0}").format(employee_doc.reports_to)
+                , WorkflowPermissionError)
+            
+
+=======
 def validate_item_status_for_quotation(doc, method):
     for row in doc.items:
         item_status = frappe.db.get_value("Item", row.item_code, "custom_item_status")
@@ -176,6 +239,65 @@ def _reorder_item():
     if material_requests:
         return create_material_request(material_requests)
 
+@frappe.whitelist()
+def apply_workflow(doc, action):
+    """Allow workflow action on the current doc"""
+    frappe.msgprint(_("Applying Workflow Action"), alert=True)
+    doc = frappe.get_doc(frappe.parse_json(doc))
+    doc.load_from_db()
+    workflow = get_workflow(doc.doctype)
+    transitions = get_transitions(doc, workflow)
+    user = frappe.session.user
+
+    # find the transition
+    transition = None
+    for t in transitions:
+        if t.action == action:
+            transition = t
+
+    if not transition:
+        frappe.throw(_("Not a valid Workflow Action"), WorkflowTransitionError)
+
+    if not has_approval_access(user, doc, transition):
+        frappe.throw(_("Self approval is not allowed"))
+
+    # update workflow state field
+    doc.set(workflow.workflow_state_field, transition.next_state)
+
+    # find settings for the next state
+    next_state = next(d for d in workflow.states if d.state == transition.next_state)
+
+    reports_to = ValidateReportsTo(doc)
+    reports_to.validate_reports_to()
+    # update any additional field
+    if next_state.update_field:
+        doc.set(next_state.update_field, next_state.update_value)
+
+    new_docstatus = DocStatus(next_state.doc_status or 0)
+    if doc.docstatus.is_draft() and new_docstatus.is_draft():
+        doc.save()
+    elif doc.docstatus.is_draft() and new_docstatus.is_submitted():
+        from frappe.core.doctype.submission_queue.submission_queue import queue_submission
+        from frappe.utils.scheduler import is_scheduler_inactive
+
+        if doc.meta.queue_in_background and not is_scheduler_inactive():
+            queue_submission(doc, "Submit")
+            return
+
+        doc.submit()
+    elif doc.docstatus.is_submitted() and new_docstatus.is_submitted():
+        doc.save()
+    elif doc.docstatus.is_submitted() and new_docstatus.is_cancelled():
+        doc.cancel()
+    else:
+        frappe.throw(_("Illegal Document Status for {0}").format(next_state.state))
+
+    doc.add_comment("Workflow", _(next_state.state))
+
+    return doc
+
 def monkey_patch_reorder_item():
     import erpnext.stock.reorder_item
+    import frappe.model.workflow
+    frappe.model.workflow.apply_workflow = apply_workflow
     erpnext.stock.reorder_item._reorder_item = _reorder_item

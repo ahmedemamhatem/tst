@@ -11,6 +11,7 @@ from tst.override import monkey_patch_reorder_item
 
 monkey_patch_reorder_item()
 
+
 doc_events = {
     "Product Bundle": {
         "validate": "tst.override.calculate_bundle_valuation"
@@ -168,8 +169,16 @@ doc_events = {
 		"validate": "tst.triggers.crm.lead.lead.validate",
 		# "on_cancel": "method",
 		# "on_trash": "method"
-	}
+	},
+    "Product Bundle": {
+        "validate": "tst.override.calculate_bundle_valuation"
+    },
+    "Purchase Order": {
+		"validate": "tst.triggers.buying.purchase_order.purchase_order.validate",
+		"on_update_after_submit": "tst.triggers.buying.purchase_order.purchase_order.on_update_after_submit",
+    },
 }
+
 fixtures = [
     {
         "dt": "Custom Field",
