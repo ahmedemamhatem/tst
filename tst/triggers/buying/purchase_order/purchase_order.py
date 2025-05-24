@@ -8,8 +8,9 @@ def validate(doc, method):
     """
     if doc.grand_total <= 1000:
         doc.custom_po_types = "مشتريات استهلاكية"
-    elif doc.grand_total > 1000 and doc.custom_po_types == "مشتريات استهلاكية":
-        frappe.throw(_("Purchase Value must be less than 1000 to be considered as استهلاكية and have to create quotation" ))
+    elif doc.grand_total > 1000 and (doc.custom_po_types == "مشتريات استهلاكية" or not doc.custom_po_types):
+        frappe.throw(_("Purchase Value must be less than 1000 to be considered as استهلاكية and have to create quotation\
+                       or choose another purchase Type" ))
 
     if doc.custom_po_types in ["مشتريات دولية", "مشتريات محلية"] and not doc.custom_quotation:
         frappe.throw(_("Please create a quotation for this Purchase Order"))

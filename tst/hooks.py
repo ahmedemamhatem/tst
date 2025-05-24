@@ -27,7 +27,23 @@ doc_events = {
     },
     "Sales Order": {
         "validate": "tst.override.validate_items_are_saleable"
-    }
+    },
+    	"Lead": {
+		"validate": "tst.triggers.crm.lead.lead.validate",
+		# "on_cancel": "method",
+		# "on_trash": "method"
+	},
+    "Product Bundle": {
+        "validate": "tst.override.calculate_bundle_valuation"
+    },
+    "Purchase Order": {
+		"validate": "tst.triggers.buying.purchase_order.purchase_order.validate",
+		"on_update_after_submit": "tst.triggers.buying.purchase_order.purchase_order.on_update_after_submit",
+    },
+    "Purchase Invoice": {
+        "validate": "tst.triggers.buying.purchase_invoice.purchase_invoice.validate",
+        "on_submit": "tst.triggers.buying.purchase_invoice.purchase_invoice.on_submit"
+    },
 }
 
 
@@ -66,10 +82,13 @@ doc_events = {
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Lead":"triggers/crm/lead/lead.js",
-              "Quotation":"triggers/selling/quotation/quotation.js",
-              "Purchase Receipt":"public/js/upload_serials.js",
-              "Employee":"public/js/employee.js"
+# \\academy.psc-s.com\sharing\frappe15\apps\tst\tst\triggers\buying\purchase_invoice\purchase_invoice.js
+doctype_js = {
+    "Lead":"triggers/crm/lead/lead.js",
+    "Quotation":"triggers/selling/quotation/quotation.js",
+    "Purchase Invoice":"triggers/buying/purchase_invoice/purchase_invoice.js",
+    "Purchase Receipt":"public/js/upload_serials.js",
+    "Employee":"public/js/employee.js"
               }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -164,20 +183,7 @@ doctype_js = {"Lead":"triggers/crm/lead/lead.js",
 # ---------------
 # Hook on document methods and events
 
-doc_events = {
-	"Lead": {
-		"validate": "tst.triggers.crm.lead.lead.validate",
-		# "on_cancel": "method",
-		# "on_trash": "method"
-	},
-    "Product Bundle": {
-        "validate": "tst.override.calculate_bundle_valuation"
-    },
-    "Purchase Order": {
-		"validate": "tst.triggers.buying.purchase_order.purchase_order.validate",
-		"on_update_after_submit": "tst.triggers.buying.purchase_order.purchase_order.on_update_after_submit",
-    },
-}
+
 
 fixtures = [
     {
@@ -191,6 +197,9 @@ fixtures = [
         "filters": [
             ["module", "=", "Tst"]
         ]
+    },
+    {
+        "dt": "PO Types",
     }
 ]
 
