@@ -6,9 +6,7 @@ frappe.ui.form.on('Purchase Invoice', {
                     __('Create Landed Cost Voucher'),
                     function() {
                         frm.events.create_landed_cost_voucher(frm);
-                    },
-                    __('Create')
-                );
+                    });
             }else if (frm.doc.custom_landed_cost === 0) {
                 frappe.confirm(
                                     __(
