@@ -88,7 +88,8 @@ doctype_js = {
     "Quotation":"triggers/selling/quotation/quotation.js",
     "Purchase Invoice":"triggers/buying/purchase_invoice/purchase_invoice.js",
     "Purchase Receipt":"public/js/upload_serials.js",
-    "Employee":"public/js/employee.js"
+    "Employee":"public/js/employee.js",
+    "Sales Order":"triggers/selling/sales_order/sales_order.js"
               }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
