@@ -131,9 +131,11 @@ doc_events = {"Product Bundle": {"validate": "tst.override.calculate_bundle_valu
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
+# \\academy.psc-s.com\sharing\frappe15\apps\tst\tst\triggers\buying\purchase_invoice\purchase_invoice.js
 doctype_js = {
     "Lead": "triggers/crm/lead/lead.js",
     "Quotation": "triggers/selling/quotation/quotation.js",
+    "Purchase Invoice": "triggers/buying/purchase_invoice/purchase_invoice.js",
     "Purchase Receipt": "public/js/upload_serials.js",
     "Employee": "public/js/employee.js",
 }
@@ -230,22 +232,13 @@ doctype_js = {
 # ---------------
 # Hook on document methods and events
 
-doc_events = {
-    "Lead": {
-        "validate": "tst.triggers.crm.lead.lead.validate",
-        # "on_cancel": "method",
-        # "on_trash": "method"
-    },
-    "Product Bundle": {"validate": "tst.override.calculate_bundle_valuation"},
-    "Purchase Order": {
-        "validate": "tst.triggers.buying.purchase_order.purchase_order.validate",
-        "on_update_after_submit": "tst.triggers.buying.purchase_order.purchase_order.on_update_after_submit",
-    },
-}
 
 fixtures = [
     {"dt": "Custom Field", "filters": [["module", "=", "Tst"]]},
     {"dt": "Property Setter", "filters": [["module", "=", "Tst"]]},
+    {
+        "dt": "PO Types",
+    },
 ]
 
 # Scheduled Tasks

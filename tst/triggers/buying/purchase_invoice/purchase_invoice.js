@@ -1,11 +1,11 @@
 frappe.ui.form.on('Purchase Invoice', {
-    refresh: function(frm) {
+    refresh: function (frm) {
         // Only show the dialog if needed
-        if (frm.doc.docstatus === 1){
+        if (frm.doc.docstatus === 1) {
             if (frm.doc.custom_landed_cost === 1) {
                 frm.add_custom_button(
                     __('Create Landed Cost Voucher'),
-                    function() {
+                    function () {
                         frm.events.create_landed_cost_voucher(frm);
                     }
                 );
@@ -24,7 +24,7 @@ frappe.ui.form.on('Purchase Invoice', {
                             }
                         ],
                         primary_action_label: __("Yes"),
-                        primary_action: function() {
+                        primary_action: function () {
                             action_taken = true;
                             d.hide();
                             frappe.call({
@@ -35,10 +35,10 @@ frappe.ui.form.on('Purchase Invoice', {
                                     fieldname: 'custom_landed_cost',
                                     value: 1
                                 },
-                                callback: function(r) {
+                                callback: function (r) {
                                     if (!r.exc) {
                                         frm.reload_doc();
-                                        frappe.show_alert({message: __('Updated'), indicator:'green'});
+                                        frappe.show_alert({ message: __('Updated'), indicator: 'green' });
                                     }
                                 }
                             });
@@ -52,11 +52,11 @@ frappe.ui.form.on('Purchase Invoice', {
                     var $modal = d.$wrapper.closest('.modal');
                     $modal.attr('data-backdrop', 'static');
                     $modal.attr('data-keyboard', 'false');
-                    $modal.modal({backdrop: 'static', keyboard: false});
+                    $modal.modal({ backdrop: 'static', keyboard: false });
 
                     // If dialog is closed by any means except "Yes", re-show it
-                    $modal.on('hide.bs.modal', function(e) {
-                        setTimeout(function() {
+                    $modal.on('hide.bs.modal', function (e) {
+                        setTimeout(function () {
                             if (!action_taken) show_yes_only_dialog();
                         }, 200);
                     });
@@ -69,7 +69,7 @@ frappe.ui.form.on('Purchase Invoice', {
             }
         }
     },
-    create_landed_cost_voucher: function(frm) {
+    create_landed_cost_voucher: function (frm) {
         frappe.call({
             method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_lcv",
             args: {
