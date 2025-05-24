@@ -3,6 +3,7 @@ from frappe import _
 from frappe.utils import nowdate, get_link_to_form
 
 
+
 @frappe.whitelist()
 def after_insert(doc, method=None):
     check_required_items(doc)
@@ -286,6 +287,7 @@ def copy_attachment_to_serial_no(attachment_url, serial_no_doc):
 
     # Commit to ensure the file is saved before proceeding
     frappe.db.commit()
+
 
 
 @frappe.whitelist()
