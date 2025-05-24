@@ -31,7 +31,11 @@ frappe.ui.form.on('Quotation', {
                             child.uom = item.uom;
                         }
                     });
-                    frm.refresh_field('items');
+
+                    // Wait for all item details to be fetched before refreshing field
+                    Promise.all(item_promises).then(function () {
+                        frm.refresh_field('items');
+                    });
                 } else {
                     frappe.msgprint(__('No items found in the selected quotation template.'));
                 }
