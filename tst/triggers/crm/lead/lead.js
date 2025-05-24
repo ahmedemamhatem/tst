@@ -1,7 +1,7 @@
 frappe.ui.form.on('Lead', {
     validate: function(frm) {
         // Only validate if Customer Analysis tab is completed
-        if (isTabCompleted(frm, "Customer Analysis")) {
+        if (isTabCompleted(frm, "Customer Information")) {
             // Validate custom_tax_id only if Lead Type is "Company" AND value is entered
             if (frm.doc.type === "Company" ) {
                 if (!/^\d{15}$/.test(frm.doc.custom_tax_id)) {

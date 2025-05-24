@@ -57,7 +57,7 @@ def check_duplicate_tax_or_national_id(doc):
         # Check for existing Lead with the same custom_tax_id
         if frappe.db.exists("Lead", {"custom_tax_id": doc.custom_tax_id}):
             owner = frappe.get_value("Lead", {"custom_tax_id": doc.custom_tax_id}, "owner")
-            frappe.msgprint(_(
+            frappe.throw(_(
                 f"A Lead already exists with the same Tax ID, created by user: {owner}."
                 " Please verify to avoid duplicate entries."
             ))
@@ -66,7 +66,7 @@ def check_duplicate_tax_or_national_id(doc):
         # Check for existing Lead with the same custom_national_id
         if frappe.db.exists("Lead", {"custom_national_id": doc.custom_national_id}):
             owner = frappe.get_value("Lead", {"custom_national_id": doc.custom_national_id}, "owner")
-            frappe.msgprint(_(
+            frappe.throw(_(
                 f"A Lead already exists with the same National ID, created by user: {owner}."
                 " Please verify to avoid duplicate entries."
             ))
