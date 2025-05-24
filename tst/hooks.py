@@ -28,8 +28,13 @@ doc_events = {
     "Sales Order": {
         "validate": "tst.override.validate_items_are_saleable"
     },
-    	"Lead": {
+    "Lead": {
 		"validate": "tst.triggers.crm.lead.lead.validate",
+		# "on_cancel": "method",
+		# "on_trash": "method"
+	},
+    "Appointment": {
+		"after_insert": "tst.triggers.crm.appointment.appointment.after_insert",
 		# "on_cancel": "method",
 		# "on_trash": "method"
 	},
@@ -85,6 +90,7 @@ doc_events = {
 # \\academy.psc-s.com\sharing\frappe15\apps\tst\tst\triggers\buying\purchase_invoice\purchase_invoice.js
 doctype_js = {
     "Lead":"triggers/crm/lead/lead.js",
+    "Appointment":"triggers/crm/appointment/appointment.js",
     "Quotation":"triggers/selling/quotation/quotation.js",
     "Purchase Invoice":"triggers/buying/purchase_invoice/purchase_invoice.js",
     "Purchase Receipt":"public/js/upload_serials.js",

@@ -31,10 +31,12 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Item Name"
+   "label": "Item Name",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -43,15 +45,19 @@
    "label": "Description"
   },
   {
+   "fetch_from": "item_code.description",
    "fieldname": "description",
    "fieldtype": "Text Editor",
-   "label": "Description"
+   "label": "Description",
+   "read_only": 1
   },
   {
+   "fetch_from": "item_code.item_group",
    "fieldname": "item_group",
    "fieldtype": "Link",
    "label": "Item Group",
-   "options": "Item Group"
+   "options": "Item Group",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_swty",
@@ -80,7 +86,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-05-24 21:18:21.433968",
+ "modified": "2025-05-25 02:41:19.098871",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Installation Order Item",
