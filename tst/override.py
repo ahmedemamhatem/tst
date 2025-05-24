@@ -67,7 +67,7 @@ class ValidateReportsTo:
                 , WorkflowPermissionError)
             
 
-def validate_items_are_saleable(self):
+def validate_items_are_saleable(self, method):
     for d in self.get("items"):
         # Fetch the custom_item_status from the Item master
         item_status = frappe.db.get_value("Item", d.item_code, "custom_item_status")
@@ -78,7 +78,7 @@ def validate_items_are_saleable(self):
                 ),
                 title=_("Invalid Item Status")
             )
-            
+
 def validate_item_status_for_quotation(doc, method):
     for row in doc.items:
         item_status = frappe.db.get_value("Item", row.item_code, "custom_item_status")
