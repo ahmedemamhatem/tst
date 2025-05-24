@@ -12,34 +12,26 @@ frappe.ui.form.on('Quotation', {
                 filters: {
                     parent: frm.doc.custom_quotation_templet
                 },
-                fields: ["item_code"]
+                fields: ["item_code", "item_name", "uom"] // Fetch all needed fields
             },
             callback: function(r) {
+                // Log the full return data for debugging
+                console.log('Quotation Templet Items return:', r);
+
                 if (r.exc) {
                     frappe.msgprint(__('Could not fetch template items. Permission denied or server error.'));
                     return;
                 }
                 if (r.message && Array.isArray(r.message) && r.message.length > 0) {
-                    // For each item, fetch name and uom and set in child table
-                    let item_promises = r.message.map(function(item) {
-                        if (item.item_code) {
-                            return frappe.db.get_value('Item', item.item_code, ['item_name', 'stock_uom']).then(function(item_details) {
-                                let child = frm.add_child("items");
-                                child.item_code = item.item_code;
-                                if(item_details && item_details.message) {
-                                    child.item_name = item_details.message.item_name;
-                                    child.uom = item_details.message.stock_uom;
-                                }
-                            });
-                        } else {
-                            return Promise.resolve();
+                    r.message.forEach(function(item){
+                        if(item.item_code) {
+                            let child = frm.add_child("items");
+                            child.item_code = item.item_code;
+                            child.item_name = item.item_name;
+                            child.uom = item.uom;
                         }
                     });
-
-                    // Wait for all item details to be fetched before refreshing field
-                    Promise.all(item_promises).then(function() {
-                        frm.refresh_field('items');
-                    });
+                    frm.refresh_field('items');
                 } else {
                     frappe.msgprint(__('No items found in the selected quotation template.'));
                 }
