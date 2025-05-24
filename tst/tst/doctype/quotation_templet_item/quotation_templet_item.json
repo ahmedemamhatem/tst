@@ -12,7 +12,7 @@
  ],
  "fields": [
   {
-   "fetch_from": "item.item_name",
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_filter": 1,
@@ -23,7 +23,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "item.stock_uom",
+   "fetch_from": "item_code.stock_uom",
    "fieldname": "uom",
    "fieldtype": "Data",
    "in_filter": 1,
@@ -50,7 +50,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-05-24 15:27:39.568206",
+ "modified": "2025-05-24 15:47:33.335698",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Quotation Templet Item",
