@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:technician_name",
  "creation": "2025-05-24 19:54:32.869026",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -83,10 +84,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-24 19:58:09.467976",
+ "modified": "2025-05-24 20:03:56.000248",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Technician",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
