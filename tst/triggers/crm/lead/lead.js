@@ -1,4 +1,63 @@
 frappe.ui.form.on('Lead', {
+    refresh: function(frm) {
+        // Remove all custom buttons except "Customer" and "Quotation"
+        setTimeout(function() {
+            // Remove unwanted buttons after ERPNext adds them
+            frm.remove_custom_button(__('Opportunity'), __('Create'));
+            frm.remove_custom_button(__('Prospect'), __('Create'));
+            frm.remove_custom_button(__('Add to Prospect'), __('Action'));
+
+            // Optionally, re-add only the two you want,
+            // in case ERPNext's logic doesn't show them in some cases:
+            if (!frm.is_new() && frm.doc.__onload && !frm.doc.__onload.is_customer) {
+                // Remove first to avoid duplicates
+                frm.remove_custom_button(__('Customer'), __('Create'));
+                frm.remove_custom_button(__('Quotation'), __('Create'));
+
+                frm.add_custom_button(__('Customer'), function() {
+                    frappe.model.open_mapped_doc({
+                        method: "erpnext.crm.doctype.lead.lead.make_customer",
+                        frm: frm
+                    });
+                }, __('Create'));
+
+                frm.add_custom_button(__('Quotation'), function() {
+                    frappe.model.open_mapped_doc({
+                        method: "erpnext.crm.doctype.lead.lead.make_quotation",
+                        frm: frm
+                    });
+                }, __('Create'));
+            }
+        }, 250); // Wait 250ms for ERPNext to add its buttons
+    }
+});
+
+
+
+
+frappe.ui.form.on('Lead', {
+    validate: function(frm) {
+        // Only validate if Customer Analysis tab is completed
+        if (isTabCompleted(frm, "Customer Information")) {
+            // Validate custom_tax_id only if Lead Type is "Company" AND value is entered
+            if (frm.doc.type === "Company" ) {
+                if (!/^\d{15}$/.test(frm.doc.custom_tax_id)) {
+                    frappe.throw(__('Custom Tax ID must be exactly 15 digits for Company Leads.'));
+                }
+            }
+            // Validate custom_national_id only if Lead Type is "Individual" AND value is entered
+            if (frm.doc.type === "Individual" ) {
+                if (!/^\d{10}$/.test(frm.doc.custom_national_id)) {
+                    frappe.throw(__('Custom National ID must be exactly 10 digits for Individual Leads.'));
+                }
+            }
+        }
+    }
+});
+
+// Make sure isTabCompleted is globally defined or included above this block.
+
+frappe.ui.form.on('Lead', {
     custom_city1: function(frm){ 
         apply_filter_to_field_district(frm)
     },
@@ -10,14 +69,7 @@ frappe.ui.form.on('Lead', {
         frm.$wrapper.find("[data-fieldname='custom_tab_6']").hide();
         frm.$wrapper.find("[data-fieldname='custom_tab_7']").hide();
     },
-    refresh: function(frm) {
-        // If the document is not new, check whether the tabs should be revealed based on completion
-        show_tabs_based_on_completion(frm)
-        setTimeout(()=>{
 
-            show_action_button(frm)
-        },500)
-    },
     after_save: function(frm) {
         // Reload the form after save to get the latest doc state
         frm.reload_doc()
