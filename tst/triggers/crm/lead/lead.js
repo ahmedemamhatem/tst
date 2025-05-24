@@ -1,20 +1,24 @@
 frappe.ui.form.on('Lead', {
     validate: function(frm) {
-        // Validate custom_tax_id only if Lead Type is "Company"
-        if (frm.doc.type === "Company") {
-            if (!frm.doc.custom_tax_id || !/^\d{15}$/.test(frm.doc.custom_tax_id)) {
-                frappe.throw(__('Custom Tax ID must be exactly 15 digits for Company Leads.'));
+        // Only validate if Customer Analysis tab is completed
+        if (isTabCompleted(frm, "Customer Analysis")) {
+            // Validate custom_tax_id only if Lead Type is "Company" AND value is entered
+            if (frm.doc.type === "Company" ) {
+                if (!/^\d{15}$/.test(frm.doc.custom_tax_id)) {
+                    frappe.throw(__('Custom Tax ID must be exactly 15 digits for Company Leads.'));
+                }
             }
-        }
-
-        // Validate custom_national_id only if Lead Type is "Individual"
-        if (frm.doc.type === "Individual") {
-            if (!frm.doc.custom_national_id || !/^\d{10}$/.test(frm.doc.custom_national_id)) {
-                frappe.throw(__('Custom National ID must be exactly 10 digits for Individual Leads.'));
+            // Validate custom_national_id only if Lead Type is "Individual" AND value is entered
+            if (frm.doc.type === "Individual" ) {
+                if (!/^\d{10}$/.test(frm.doc.custom_national_id)) {
+                    frappe.throw(__('Custom National ID must be exactly 10 digits for Individual Leads.'));
+                }
             }
         }
     }
 });
+
+// Make sure isTabCompleted is globally defined or included above this block.
 
 frappe.ui.form.on('Lead', {
     custom_city1: function(frm){ 
