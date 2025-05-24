@@ -32,14 +32,7 @@ frappe.ui.form.on('Lead', {
         frm.$wrapper.find("[data-fieldname='custom_tab_6']").hide();
         frm.$wrapper.find("[data-fieldname='custom_tab_7']").hide();
     },
-    refresh: function(frm) {
-        // If the document is not new, check whether the tabs should be revealed based on completion
-        show_tabs_based_on_completion(frm)
-        setTimeout(()=>{
 
-            show_action_button(frm)
-        },500)
-    },
     after_save: function(frm) {
         // Reload the form after save to get the latest doc state
         frm.reload_doc()

@@ -11,7 +11,7 @@ frappe.ui.form.on('Quotation', {
         if (!frm.doc.custom_quotation_templet) return;
 
         frappe.call({
-            method: "tst.triggers.selling.quotation.quotation_api.get_quotation_template_items",
+            method: "tst.triggers.selling.quotation.quotation.get_quotation_template_items",
             args: {
                 template_name: frm.doc.custom_quotation_templet
             },
