@@ -35,6 +35,8 @@ doc_events = {
 	},
     "Appointment": {
 		"after_insert": "tst.triggers.crm.appointment.appointment.after_insert",
+		"validate": "tst.triggers.crm.appointment.appointment.validate",
+        "on_submit": "tst.triggers.crm.appointment.appointment.on_submit",
 		# "on_cancel": "method",
 		# "on_trash": "method"
 	},
@@ -49,7 +51,18 @@ doc_events = {
         "validate": "tst.triggers.buying.purchase_invoice.purchase_invoice.validate",
         "on_submit": "tst.triggers.buying.purchase_invoice.purchase_invoice.on_submit"
     },
-}
+    "Material Request": {
+        "after_insert": "tst.triggers.stock.material_request.material_request.after_insert",
+        "validate": "tst.triggers.stock.material_request.material_request.validate",
+        "on_submit": "tst.triggers.stock.material_request.material_request.on_submit"
+    },
+    "Stock Entry": {
+        "after_insert": "tst.triggers.stock.stock_entry.stock_entry.after_insert",
+        "validate": "tst.triggers.stock.stock_entry.stock_entry.validate",
+        "on_submit": "tst.triggers.stock.stock_entry.stock_entry.on_submit"
+    },
+        
+    }
 
 
 # required_apps = []
@@ -95,8 +108,9 @@ doctype_js = {
     "Purchase Invoice":"triggers/buying/purchase_invoice/purchase_invoice.js",
     "Purchase Receipt":"public/js/upload_serials.js",
     "Employee":"public/js/employee.js",
-    "Sales Order":"triggers/selling/sales_order/sales_order.js"
-              }
+    "Sales Order":"triggers/selling/sales_order/sales_order.js",
+    "Stock Entry": "triggers/stock/stock_entry/stock_entry.js"
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}

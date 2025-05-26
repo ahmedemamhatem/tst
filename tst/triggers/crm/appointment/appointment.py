@@ -6,9 +6,14 @@ def after_insert(doc,method= None):
     check_required_items(doc)
 
 def check_required_items(doc):
+    if doc.custom_is_sub_technician:
+        return
     material_requests = {}
-
-    installation_order_items, technician_warehouse, assistant_technicians = get_items_from_installation_order(doc.custom_installation_order)
+    installation_order = frappe.get_cached_doc("Installation Order", doc.custom_installation_order)
+    technician = frappe.get_cached_doc("Technician", doc.custom_technician)
+    installation_order_items = installation_order.items
+    technician_warehouse = technician.warehouse
+    assistant_technicians = installation_order.sub_installation_order_technician
 
     if installation_order_items:
         for item in installation_order_items:
@@ -45,16 +50,8 @@ def check_required_items(doc):
     if material_requests:
         for source_warehouse, items in material_requests.items():
             create_material_request(items, technician_warehouse,source_warehouse,doc.custom_technician,doc.name)
-
+        doc.custom_appointment_status = "Out of Stock"
             
-def get_items_from_installation_order(installation_order):
-    """
-    fetches all items from its Installation Order , 
-    """
-    
-    installation_order = frappe.get_cached_doc("Installation Order", installation_order)
-
-    return installation_order.get("items") or [] , installation_order.warehouse , installation_order.get("technicians") or []
 
 def get_default_warehouse(item_code):
     default_warehouse = frappe.get_cached_value("Item Default",{"parent":item_code},"default_warehouse")
@@ -170,3 +167,21 @@ def create_whatsapp_message_for_material_request(material_request_name,warehouse
         whatsapp_doc.insert(ignore_permissions=True)
 
     frappe.db.commit()
+
+
+@frappe.whitelist()
+def validate(doc, method=None):
+    set_custom_appointment_status(doc)
+
+
+def set_custom_appointment_status(doc):
+    mr = frappe.db.exists("Material Request", {"custom_reference_doctype": "Appointment", 
+                                               "custom_reference_link": doc.name})
+    if mr:
+        mr_doc = frappe.get_cached_doc("Material Request", mr)
+        if mr_doc.status != "Transferred":
+            doc.custom_appointment_status = "Out of Stock"
+
+@frappe.whitelist()
+def on_submit(doc, method=None):
+    pass
