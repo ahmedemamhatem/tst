@@ -11,7 +11,8 @@ def make_installation_order(source_name, target_doc=None):
                 "doctype": "Installation Order",
                 "field_map": {
                     "customer": "customer",
-                    "name": "sales_order"
+                    "name": "sales_order",
+                    "delivery_date":"installation_date",
                 }
             },
             "Sales Order Item": {

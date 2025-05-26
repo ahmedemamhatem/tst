@@ -19,17 +19,14 @@
   "column_break_xqdm",
   "customer_address",
   "contact_person",
-  "technician_data_section",
-  "technician",
-  "warehouse",
-  "column_break_nxga",
-  "user",
+  "customer_email",
   "reference_section",
   "sales_order",
   "section_break_woob",
   "items",
   "section_break_papx",
-  "technicians"
+  "technicians",
+  "sub_installation_order_technician"
  ],
  "fields": [
   {
@@ -61,33 +58,31 @@
    "options": "Customer"
   },
   {
+   "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
-   "label": "Customer Name"
+   "label": "Customer Name",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_xqdm",
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "customer.customer_primary_address",
    "fieldname": "customer_address",
    "fieldtype": "Link",
    "label": "Customer Address",
-   "options": "Address"
+   "options": "Address",
+   "read_only": 1
   },
   {
+   "fetch_from": "customer.customer_primary_contact",
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "label": "Contact Person",
-   "options": "Contact"
-  },
-  {
-   "fieldname": "technician",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Technician",
-   "options": "Technician"
+   "options": "Contact",
+   "read_only": 1
   },
   {
    "fieldname": "sales_order",
@@ -116,38 +111,15 @@
    "fieldname": "technicians",
    "fieldtype": "Table",
    "label": "Technicians",
-   "options": "Installation Order Technician"
+   "options": "Installation Order Technician",
+   "reqd": 1
   },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Naming Series",
    "options": "Inst -"
-  },
-  {
-   "fieldname": "technician_data_section",
-   "fieldtype": "Section Break",
-   "label": "Technician Data"
-  },
-  {
-   "fetch_from": "technician.warehouse",
-   "fieldname": "warehouse",
-   "fieldtype": "Link",
-   "label": "Warehouse",
-   "options": "Warehouse",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_nxga",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "technician.user",
-   "fieldname": "user",
-   "fieldtype": "Link",
-   "label": "User",
-   "options": "User",
-   "read_only": 1
   },
   {
    "fieldname": "reference_section",
@@ -174,13 +146,33 @@
    "fieldname": "installation_date",
    "fieldtype": "Date",
    "label": "Installation Date"
+  },
+  {
+   "fieldname": "sub_installation_order_technician",
+   "fieldtype": "Table",
+   "label": "Sub Installation Order Technician",
+   "options": "Installation Order Technician"
+  },
+  {
+   "fetch_from": "customer.email_id",
+   "fetch_if_empty": 1,
+   "fieldname": "customer_email",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Customer Email",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2025-05-24 20:56:11.226286",
+ "links": [
+  {
+   "link_doctype": "Appointment",
+   "link_fieldname": "custom_installation_order"
+  }
+ ],
+ "modified": "2025-05-26 13:50:01.630147",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Installation Order",
@@ -226,6 +218,7 @@
    "write": 1
   }
  ],
+ "search_fields": "customer_name",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

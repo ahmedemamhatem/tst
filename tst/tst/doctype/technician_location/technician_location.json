@@ -1,0 +1,63 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-05-26 18:28:22.060207",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "long",
+  "lat",
+  "time",
+  "status",
+  "show_location"
+ ],
+ "fields": [
+  {
+   "fieldname": "long",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "long"
+  },
+  {
+   "fieldname": "lat",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "lat"
+  },
+  {
+   "fieldname": "time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Status",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "show_location",
+   "fieldtype": "Button",
+   "in_list_view": 1,
+   "label": "Show Location"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-05-26 19:14:59.626528",
+ "modified_by": "Administrator",
+ "module": "Tst",
+ "name": "Technician Location",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -307,6 +307,20 @@ def apply_workflow(doc, action):
 
     return doc
 
+@frappe.whitelist()
+def validate_items_are_saleable(doc, method):
+    """
+    Validate that all items in the document are saleable.
+    If any item is not saleable, raise an error.
+    """
+    for item in doc.items:
+        item_status = frappe.db.get_value("Item", item.item_code, "custom_item_status")
+        if item_status and item_status != "Saleable":
+            frappe.throw(
+                _("Item {0} cannot be processed because its status is {1}.")
+                .format(item.item_code, item_status)
+            )
+
 def monkey_patch_reorder_item():
     import erpnext.stock.reorder_item
     import frappe.model.workflow
