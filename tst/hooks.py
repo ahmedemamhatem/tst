@@ -60,6 +60,16 @@ doc_events = {
         ],
         "on_submit": "tst.triggers.stock.material_request.material_request.on_submit",
     },
+    "Material Request": {
+        "after_insert": "tst.triggers.stock.material_request.material_request.after_insert",
+        "validate": "tst.triggers.stock.material_request.material_request.validate",
+        "on_submit": "tst.triggers.stock.material_request.material_request.on_submit",
+    },
+    "Stock Entry": {
+        "after_insert": "tst.triggers.stock.stock_entry.stock_entry.after_insert",
+        "validate": "tst.triggers.stock.stock_entry.stock_entry.validate",
+        "on_submit": "tst.triggers.stock.stock_entry.stock_entry.on_submit",
+    },
 }
 
 # ------------------
