@@ -6,7 +6,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "po_type"
+  "po_type",
+  "supplier_quotation_mandatory",
+  "is_internal"
  ],
  "fields": [
   {
@@ -18,12 +20,24 @@
    "label": "PO Type",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "supplier_quotation_mandatory",
+   "fieldtype": "Check",
+   "label": "Supplier Quotation Mandatory"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_internal",
+   "fieldtype": "Check",
+   "label": "Is Internal"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-20 11:52:29.842858",
+ "modified": "2025-05-30 01:47:07.671289",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "PO Types",
