@@ -64,6 +64,32 @@ def validate(doc, method):
                     "For suppliers outside Saudi Arabia, PO Type cannot be marked as Internal."
                 )
 
+        if po_type_doc.supplier_quotation_mandatory == 1:
+            for item in doc.items:
+                if not item.supplier_quotation:
+                    frappe.throw(
+                        _(
+                            "Please ensure every item row has a Quotation specified for this Purchase Order."
+                        )
+                    )
+
+    # supplier country and internal PO type check
+
+    if doc.supplier and doc.custom_po_types:
+        o_type_doc = frappe.get_doc("PO Types", doc.custom_po_types)
+        supplier_doc = frappe.get_doc("Supplier", doc.supplier)
+
+        if supplier_doc.country == "Saudi Arabia" and po_type_doc.is_internal == 0:
+            frappe.throw(
+                _("For suppliers in Saudi Arabia, PO Type must be marked as Internal.")
+            )
+        if po_type_doc.is_internal == 1 and supplier_doc.country != "Saudi Arabia":
+            frappe.throw(
+                _(
+                    "For suppliers outside Saudi Arabia, PO Type must be marked as Internal."
+                )
+            )
+
 
 @frappe.whitelist()
 def on_update_after_submit(doc, method):
