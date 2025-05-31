@@ -3,36 +3,55 @@ import frappe
 import pandas as pd
 import io
 
-import json
-from collections import OrderedDict, defaultdict
-
-import frappe
-from frappe import qb, scrub
-from frappe.desk.reportview import get_filters_cond, get_match_cond
-from frappe.utils import cint, nowdate, today, unique
-
-
-
 @frappe.whitelist()
 def upload_serials_from_file(file_url, docname, row_idx, doctype):
+    """
+    Reads an uploaded CSV/XLSX file, extracts the 'serial' column,
+    and returns the serials as a \n-separated string for the correct child row.
+    """
+    if not file_url:
+        frappe.throw("File URL is required.")
+
     # Step 1: Resolve file path
     rel_path = file_url.lstrip('/')
     abs_path = os.path.join(frappe.get_site_path(), rel_path)
     if not os.path.isfile(abs_path):
         frappe.throw(f"File not found at resolved path: {abs_path}")
 
-    # Step 2: Read file as Excel or CSV
+    # Step 2: Read file as Excel or CSV (by extension, fallback by content)
+    ext = abs_path.split('.')[-1].lower()
+    filecontent = None
     with open(abs_path, "rb") as f:
         filecontent = f.read()
-    try:
-        df = pd.read_excel(io.BytesIO(filecontent))
-    except Exception:
-        df = pd.read_csv(io.BytesIO(filecontent))
+    df = None
 
-    # Step 3: Get serials
-    if 'serial' not in df.columns:
-        frappe.throw('No column named "serial" found in the uploaded file.')
-    serials = df['serial'].dropna().astype(str).tolist()
+    if ext in ("xlsx", "xls"):
+        try:
+            df = pd.read_excel(io.BytesIO(filecontent))
+        except Exception as e:
+            frappe.throw(f"Unable to read Excel file: {e}")
+    elif ext == "csv":
+        try:
+            df = pd.read_csv(io.BytesIO(filecontent))
+        except Exception as e:
+            frappe.throw(f"Unable to read CSV file: {e}")
+    else:
+        # Try reading as Excel, then as CSV
+        try:
+            df = pd.read_excel(io.BytesIO(filecontent))
+        except Exception:
+            try:
+                df = pd.read_csv(io.BytesIO(filecontent))
+            except Exception:
+                frappe.throw("File must be an Excel (.xlsx) or CSV (.csv) file.")
+
+    # Step 3: Ensure 'serial' column exists
+    if 'serial' not in (c.lower() for c in df.columns):
+        frappe.throw('No column named "serial" found in the uploaded file. (Case-insensitive match expected)')
+    # Find the actual column name for robust case-insensitivity
+    serial_col = next(col for col in df.columns if col.lower() == "serial")
+    serials = df[serial_col].dropna().astype(str).map(str.strip).tolist()
+    serials = [s for s in serials if s]
 
     # Step 4: Get the qty from the correct child row
     doc = frappe.get_doc(doctype, docname)
@@ -47,7 +66,7 @@ def upload_serials_from_file(file_url, docname, row_idx, doctype):
     serials_count = len(serials)
 
     # Step 5: Validate qty vs serials count
-    if serials_count != int(qty):
+    if int(qty) != serials_count:
         frappe.throw(
             f"Serials count ({serials_count}) does not match row quantity ({int(qty)}). "
             "Please upload the correct number of serial numbers."
