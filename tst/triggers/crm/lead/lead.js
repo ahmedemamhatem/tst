@@ -1,164 +1,58 @@
-frappe.ui.form.on('Lead', {
-    refresh: function(frm) {
-        // Remove all custom buttons except "Customer" and "Quotation"
-        setTimeout(function() {
-            // Remove unwanted buttons after ERPNext adds them
-            frm.remove_custom_button(__('Opportunity'), __('Create'));
-            frm.remove_custom_button(__('Prospect'), __('Create'));
-            frm.remove_custom_button(__('Add to Prospect'), __('Action'));
-
-            // Optionally, re-add only the two you want,
-            // in case ERPNext's logic doesn't show them in some cases:
-            if (!frm.is_new() && frm.doc.__onload && !frm.doc.__onload.is_customer) {
-                // Remove first to avoid duplicates
-                frm.remove_custom_button(__('Customer'), __('Create'));
-                frm.remove_custom_button(__('Quotation'), __('Create'));
-
-                frm.add_custom_button(__('Customer'), function() {
-                    frappe.model.open_mapped_doc({
-                        method: "erpnext.crm.doctype.lead.lead.make_customer",
-                        frm: frm
-                    });
-                }, __('Create'));
-
-                frm.add_custom_button(__('Quotation'), function() {
-                    frappe.model.open_mapped_doc({
-                        method: "erpnext.crm.doctype.lead.lead.make_quotation",
-                        frm: frm
-                    });
-                }, __('Create'));
-            }
-        }, 250); // Wait 250ms for ERPNext to add its buttons
-    }
-});
-
-
-
-
-frappe.ui.form.on('Lead', {
-    validate: function(frm) {
-        // Only validate if Customer Analysis tab is completed
-        if (isTabCompleted(frm, "Customer Information")) {
-            // Validate custom_tax_id only if Lead Type is "Company" AND value is entered
-            if (frm.doc.type === "Company" ) {
-                if (!/^\d{15}$/.test(frm.doc.custom_tax_id)) {
-                    frappe.throw(__('Custom Tax ID must be exactly 15 digits for Company Leads.'));
-                }
-            }
-            // Validate custom_national_id only if Lead Type is "Individual" AND value is entered
-            if (frm.doc.type === "Individual" ) {
-                if (!/^\d{10}$/.test(frm.doc.custom_national_id)) {
-                    frappe.throw(__('Custom National ID must be exactly 10 digits for Individual Leads.'));
-                }
-            }
-        }
-    }
-});
-
-// Make sure isTabCompleted is globally defined or included above this block.
-
-frappe.ui.form.on('Lead', {
-    custom_city1: function(frm){ 
-        apply_filter_to_field_district(frm)
-    },
-    mobile_no:function(frm){
-        is_valid_mobile_no(frm)
-    },
-    onload: function(frm) {
-        // Hide Tab 2 and Tab 3 
-        frm.$wrapper.find("[data-fieldname='custom_tab_6']").hide();
-        frm.$wrapper.find("[data-fieldname='custom_tab_7']").hide();
-    },
-
-    after_save: function(frm) {
-        // Reload the form after save to get the latest doc state
-        frm.reload_doc()
-    }
-});
-function show_action_button(frm) {
-    if (!isTabCompleted(frm, "Customer Information")) {
-        frm.$wrapper.find("[data-label='Action']").hide()
-        frm.$wrapper.find("[data-label='Create'").hide()
-    }
-    else{
-        frm.$wrapper.find("[data-label = 'Action']").show()
-        frm.$wrapper.find("[data-label = 'Create']").show()
-    }
+// === Utility: Hide Tab by fieldname ===
+function hide_tab(frm, tab_fieldname) {
+    frm.$wrapper.find(`[data-fieldname='${tab_fieldname}']`).hide();
 }
 
-function show_tabs_based_on_completion(frm) {
-    if (!frm.is_new()) {
-        // Check if Tab 1 is completed and show Tab 2
-        if (isTabCompleted(frm, "Company Information")) {
-            frm.$wrapper.find("[data-fieldname='custom_tab_6']").show();
-        }
-
-        // Check if Tab 2 is completed and show Tab 3
-        if (isTabCompleted(frm, "Customer Analysis")) {
-            if (frm.doc.type === "Company") {
-                frm.set_df_property("custom_tax_id", "reqd", 1);
-                frm.set_df_property("custom_national_id", "reqd", 0);
-            } else if (frm.doc.type === "Individual") {
-                frm.set_df_property("custom_national_id", "reqd", 1);
-                frm.set_df_property("custom_tax_id", "reqd", 0);
-            }
-
-            frm.$wrapper.find("[data-fieldname='custom_tab_7']").show();
-        }
-    }
+// === Utility: Show Tab by fieldname ===
+function show_tab(frm, tab_fieldname) {
+    frm.$wrapper.find(`[data-fieldname='${tab_fieldname}']`).show();
 }
 
-// Utility function to check if all fields in a specific tab are filled
-function isTabCompleted(frm, tabName) {
-    // Get all fields associated with the specified tab
-    let tabFields = getTabFields(frm, tabName);
-    let optional_fields = ["email_id","custom_competitor_company_name","custom_tax_certificate","custom_national_address","custom_tax_registration","custom_tax_id","custom_national_id"]
-    
-    // Iterate over all the fields in the tab and check if they are filled
+// === Utility: Returns TRUE if all (non-optional) fields in a tab are filled ===
+function isTabCompleted(frm, tabLabel) {
+    let tabFields = getTabFields(frm, tabLabel);
+    let optional_fields = [
+        "email_id",
+        "custom_competitor_company_name",
+        "custom_tax_certificate",
+        "custom_national_address",
+        "custom_tax_registration",
+        "custom_tax_id",
+        "custom_national_id"
+    ];
     for (let fieldname of tabFields) {
-        if ((!frm.doc[fieldname] || (fieldname == "custom_car_details" && frm.doc[fieldname].length == 0)) && (!optional_fields.includes(fieldname))){
-            
-            return false; // Return false if any field is empty
+        if (optional_fields.includes(fieldname)) continue;
+        let field = frm.fields_dict[fieldname];
+        if (field && field.df.fieldtype === "Table") {
+            if (!frm.doc[fieldname] || frm.doc[fieldname].length === 0) return false;
+        } else {
+            if (!frm.doc[fieldname] || frm.doc[fieldname] === "") return false;
         }
     }
-    return true; // Return true if all fields in the tab are filled
+    return true;
 }
 
-// Function to dynamically retrieve all fields in a specified tab
+// === Utility: Get all fieldnames (excluding layout-only) under a given tab by label ===
 function getTabFields(frm, tabLabel) {
     let fields = [];
     let meta = frappe.get_meta(frm.doc.doctype);
     let found = false;
-
-    for (let i = 0; i < meta.fields.length; i++) {
-        let field = meta.fields[i];
-
-        // Look for the Section Break with the given label (i.e., tab name)
+    for (let field of meta.fields) {
         if (field.fieldtype === "Tab Break" && field.label === tabLabel) {
             found = true;
             continue;
         }
-
-        // If we've found the tab, collect all fields until the next Section Break
         if (found) {
-
-            if (field.fieldtype === "Tab Break") {
-                break;  // Stop at the next section/tab
-            }
-            // Skip layout-only fields like Column Break and Section Break
-            if (["Column Break", "Section Break"].includes(field.fieldtype)) {
-                continue;
-            }
-            fields.push(field.fieldname);  // Collect fieldname
+            if (field.fieldtype === "Tab Break") break;
+            if (["Column Break", "Section Break"].includes(field.fieldtype)) continue;
+            fields.push(field.fieldname);
         }
     }
-
     return fields;
 }
 
-
+// === Utility: Apply filter to district based on selected city ===
 function apply_filter_to_field_district(frm) {
-    // get district of selected city
     frm.fields_dict["custom_district"].get_query = function (doc) {
         return {
             filters: [["District", "city", "=", frm.doc.custom_city1]],
@@ -166,20 +60,144 @@ function apply_filter_to_field_district(frm) {
     };
 }
 
-
-function is_valid_mobile_no(frm){
+// === Utility: Validate mobile number and color input border ===
+function is_valid_mobile_no(frm) {
     const mobile = frm.doc.mobile_no?.trim() || "";
     const field = frm.fields_dict.mobile_no.$wrapper.find('input');
-
-    // Validation
     const isDigitsOnly = /^\d+$/.test(mobile);
     const isTenDigits = mobile.length === 10;
-
     if (isDigitsOnly && isTenDigits) {
-        // Valid: green border
         field.css('border-color', 'green');
     } else {
-        // Invalid: red border
         field.css('border-color', 'red');
     }
 }
+
+// === Utility: Remove unwanted custom buttons and keep only Customer & Quotation ===
+function clean_custom_buttons(frm) {
+    setTimeout(function () {
+        frm.remove_custom_button(__('Opportunity'), __('Create'));
+        frm.remove_custom_button(__('Prospect'), __('Create'));
+        frm.remove_custom_button(__('Add to Prospect'), __('Action'));
+        if (!frm.is_new() && frm.doc.__onload && !frm.doc.__onload.is_customer) {
+            frm.remove_custom_button(__('Customer'), __('Create'));
+            frm.remove_custom_button(__('Quotation'), __('Create'));
+            frm.add_custom_button(__('Customer'), function () {
+                frappe.model.open_mapped_doc({
+                    method: "erpnext.crm.doctype.lead.lead.make_customer",
+                    frm: frm
+                });
+            }, __('Create'));
+            frm.add_custom_button(__('Quotation'), function () {
+                frappe.model.open_mapped_doc({
+                    method: "erpnext.crm.doctype.lead.lead.make_quotation",
+                    frm: frm
+                });
+            }, __('Create'));
+        }
+    }, 250);
+}
+
+// === Main tab logic: Show/hide tabs progressively ===
+function handle_tab_visibility(frm) {
+    // 1. Show Customer Analysis tab when Company Information is complete
+    if (isTabCompleted(frm, "Company Information")) {
+        show_tab(frm, 'custom_tab_6');
+    } else {
+        hide_tab(frm, 'custom_tab_6');
+        hide_tab(frm, 'custom_tab_7');
+        return;
+    }
+    // 2. Show Customer Information tab when Customer Analysis is complete
+    if (isTabCompleted(frm, "Customer Analysis")) {
+        if (frm.doc.type === "Company") {
+            frm.set_df_property("custom_tax_id", "reqd", 1);
+            frm.set_df_property("custom_national_id", "reqd", 0);
+        } else if (frm.doc.type === "Individual") {
+            frm.set_df_property("custom_national_id", "reqd", 1);
+            frm.set_df_property("custom_tax_id", "reqd", 0);
+        }
+        show_tab(frm, 'custom_tab_7');
+    } else {
+        hide_tab(frm, 'custom_tab_7');
+    }
+}
+
+// === OPTIONAL: Hide Action/Create buttons if Customer Information is incomplete ===
+function show_action_button(frm) {
+    if (!isTabCompleted(frm, "Customer Information")) {
+        frm.$wrapper.find("[data-label='Action']").hide();
+        frm.$wrapper.find("[data-label='Create']").hide();
+    } else {
+        frm.$wrapper.find("[data-label='Action']").show();
+        frm.$wrapper.find("[data-label='Create']").show();
+    }
+}
+
+// === Main Form Events ===
+frappe.ui.form.on('Lead', {
+    // --- On form load ---
+    onload: function(frm) {
+        hide_tab(frm, 'custom_tab_6');
+        hide_tab(frm, 'custom_tab_7');
+    },
+
+    // --- On form refresh ---
+    refresh: function(frm) {
+        clean_custom_buttons(frm);
+        handle_tab_visibility(frm);
+        show_action_button(frm);
+    },
+
+    // --- On form save ---
+    after_save: function(frm) {
+        frm.reload_doc();
+    },
+
+    // --- On form validate ---
+    validate: function(frm) {
+        // Only validate if Customer Information tab is completed
+        if (isTabCompleted(frm, "Customer Information")) {
+            if (frm.doc.type === "Company") {
+                if (!/^\d{15}$/.test(frm.doc.custom_tax_id)) {
+                    frappe.throw(__('Custom Tax ID must be exactly 15 digits for Company Leads.'));
+                }
+            }
+            if (frm.doc.type === "Individual") {
+                if (!/^\d{10}$/.test(frm.doc.custom_national_id)) {
+                    frappe.throw(__('Custom National ID must be exactly 10 digits for Individual Leads.'));
+                }
+            }
+        }
+    },
+
+    // --- Field triggers for progressive tabs and validation (Company Information tab fields) ---
+    custom_customer_name: handle_tab_visibility,
+    type: handle_tab_visibility,
+    custom_city1: function(frm) { 
+        apply_filter_to_field_district(frm);
+        handle_tab_visibility(frm);
+    },
+    custom_district: handle_tab_visibility,
+    custom_company_activity: handle_tab_visibility,
+    custom_business_activity: handle_tab_visibility,
+    first_name: handle_tab_visibility,
+    mobile_no: function(frm) {
+        is_valid_mobile_no(frm);
+        handle_tab_visibility(frm);
+    },
+    email_id: handle_tab_visibility,
+    job_title: handle_tab_visibility,
+    custom_is_the_customer_contracted_with_another_company: handle_tab_visibility,
+    custom_number_of_cars: handle_tab_visibility,
+    custom_car_details: handle_tab_visibility,        // Child table
+    custom_car_details_add: handle_tab_visibility,    // Table row added
+    custom_car_details_remove: handle_tab_visibility, // Table row removed
+    custom_car_details_move: handle_tab_visibility,   // Table row moved
+
+    // --- Field triggers for Customer Analysis tab (add your actual fieldnames here) ---
+    custom_analysis_score: handle_tab_visibility,
+    custom_analysis_comments: handle_tab_visibility,
+    custom_competitor_company_name: handle_tab_visibility,
+    // ...add more Customer Analysis fields as needed...
+});
