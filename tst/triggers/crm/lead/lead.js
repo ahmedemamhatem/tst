@@ -1,3 +1,65 @@
+
+frappe.ui.form.on('Lead', {
+    refresh: function(frm) {
+        // Add a custom button "Create Lead Visit"
+        frm.add_custom_button(__('Create Lead Visit'), function() {
+            // Open a dialog to ask for the Visit Type
+            const dialog = new frappe.ui.Dialog({
+                title: __('Select Visit Type'),
+                fields: [
+                    {
+                        label: __('Visit Type'),
+                        fieldname: 'visit_type',
+                        fieldtype: 'Select',
+                        options: ["", __('On Location'), __('Phone')], // Translatable options
+                        reqd: 1 // Make it mandatory
+                    }
+                ],
+                primary_action_label: __('Create'),
+                primary_action(values) {
+                    // Close the dialog
+                    dialog.hide();
+
+                    if (navigator.geolocation) {
+                        // Get the current location
+                        navigator.geolocation.getCurrentPosition(function(position) {
+                            const latitude = position.coords.latitude;
+                            const longitude = position.coords.longitude;
+
+                            // Reverse-geocode to get the location (optional; placeholder here)
+                            const geolocation = `${latitude}, ${longitude}`;
+
+                            // Create a new Lead Visit record
+                            frappe.db.insert({
+                                doctype: 'Lead Visit',
+                                lead: frm.doc.name,
+                                visit_type: values.visit_type, // Set the selected visit_type
+                                visit_date: frappe.datetime.now_date(),
+                                geolocation_xuqf: geolocation,
+                                latitude: latitude,
+                                longitude: longitude,
+                                address: `Lat: ${latitude}, Long: ${longitude}` // Replace this with reverse-geocoded address if needed
+                            }).then((doc) => {
+                                frappe.msgprint(__('Lead Visit created successfully!'));
+                                frappe.set_route('Form', 'Lead Visit', doc.name);
+                            });
+                        }, function(error) {
+                            frappe.msgprint(__('Unable to fetch location. Please enable location access in your browser.'));
+                        });
+                    } else {
+                        frappe.msgprint(__('Geolocation is not supported by this browser.'));
+                    }
+                }
+            });
+
+            // Show the dialog
+            dialog.show();
+        });
+    }
+});
+
+
+
 // === Utility: Hide Tab by fieldname ===
 function hide_tab(frm, tab_fieldname) {
     frm.$wrapper.find(`[data-fieldname='${tab_fieldname}']`).hide();
