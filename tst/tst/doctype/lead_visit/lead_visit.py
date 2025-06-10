@@ -23,17 +23,19 @@ class LeadVisit(Document):
                 )
 
                 # Extract address components in Arabic
-                road = addr.get("road") or ""  # Default: Unknown in Arabic
+                road = addr.get("road") or "غير معروف"  # Default: Unknown in Arabic
                 city = (
-                    addr.get("city") or addr.get("state") or ""  # Default: Unknown
+                    addr.get("city")
+                    or addr.get("state")
+                    or "غير معروف"  # Default: Unknown
                 )
-                state = addr.get("state") or ""
-                country = addr.get("country") or ""
-                postcode = addr.get("postcode") or ""
-                neighborhood = addr.get("neighbourhood") or ""
-                suburb = addr.get("suburb") or ""
-                county = addr.get("county") or ""
-                municipality = addr.get("municipality") or ""
+                state = addr.get("state") or "غير معروف"
+                country = addr.get("country") or "غير معروف"
+                postcode = addr.get("postcode") or "غير معروف"
+                neighborhood = addr.get("neighbourhood") or "غير معروف"
+                suburb = addr.get("suburb") or "غير معروف"
+                county = addr.get("county") or "غير معروف"
+                municipality = addr.get("municipality") or "غير معروف"
 
                 # Save detailed fields to the document
                 self.city = self.city or city
@@ -46,7 +48,7 @@ class LeadVisit(Document):
                 self.county = self.county or county
                 self.municipality = self.municipality or municipality
                 self.address_line = self.address_line or (
-                    location.address if location else ""
+                    location.address if location else "غير معروف"
                 )
 
                 # Format a compact, prioritized address string (Arabic)

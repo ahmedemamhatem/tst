@@ -1,63 +1,9 @@
 import frappe
 from frappe import _
 from geopy.geocoders import Nominatim
-from erpnext.crm.doctype.lead.lead import Lead as ErpnextLead
-
-
-class CustomLead(ErpnextLead):
-    def check_email_id_is_unique(self):
-        """Override the check_email_id_is_unique method to check for duplicate email IDs."""
-        # Fetch the current user's language
-        user_lang = frappe.db.get_value("User", frappe.session.user, "language")
-
-        if self.email_id:
-            # Fetch an existing lead with the same email ID
-            existing_lead = frappe.db.get_value(
-                "Lead",
-                {"email_id": self.email_id, "name": ["!=", self.name]},
-                ["name", "owner"],  # Fetch both the lead name and its owner/creator
-                as_dict=True,
-            )
-
-            if existing_lead:
-                # Check if the owner of the existing lead is the same as the current lead's owner
-                if existing_lead.owner == frappe.session.user:
-                    # If the owner is the same, no issue, continue
-                    pass
-                else:
-                    # If the owner is different, fetch the creator's name
-                    creator = frappe.db.get_value(
-                        "User", existing_lead.owner, "full_name"
-                    )
-
-                    # Throw a translatable error message with the lead name and creator's name
-                    if user_lang == "ar":
-                        frappe.throw(
-                            "يوجد عميل بنفس البريد الإلكتروني: {0} (تم إنشاؤه بواسطة: {1})".format(
-                                existing_lead.name, creator
-                            ),
-                            title="تكرار في البريد الإلكتروني",
-                        )
-                    else:
-                        frappe.throw(
-                            "A Lead with this email ID already exists: {0} (Created by: {1})".format(
-                                existing_lead.name, creator
-                            ),
-                            title="Duplicate Email ID",
-                        )
-            else:
-                # Optionally display a success message if no duplicate is found
-                if user_lang == "ar":
-                    frappe.msgprint("البريد الإلكتروني فريد!")
-                else:
-                    frappe.msgprint("Email ID is unique!")
 
 
 def set_custom_address(doc, method=None):
-    """Set the custom address fields based on latitude and longitude."""
-    # Fetch the current user's language
-    user_lang = frappe.db.get_value("User", frappe.session.user, "language")
-
     if doc.custom_longitude and doc.custom_latitude:
         try:
             # Initialize geolocator with user agent
@@ -70,29 +16,35 @@ def set_custom_address(doc, method=None):
             addr = getattr(location, "raw", {}).get("address", {}) if location else {}
 
             # Extract address components in Arabic
-            road = addr.get("road") or ""
-            city = addr.get("city") or addr.get("state") or ""
-            state = addr.get("state") or ""
-            country = addr.get("country") or ""
-            postcode = addr.get("postcode") or ""
-            neighborhood = addr.get("neighbourhood") or ""
-            suburb = addr.get("suburb") or ""
-            municipality = addr.get("municipality") or ""
+            road = addr.get("road") or "غير معروف"  # Default: Unknown in Arabic
+            city = (
+                addr.get("city") or addr.get("state") or "غير معروف"  # Default: Unknown
+            )
+            state = addr.get("state") or "غير معروف"
+            country = addr.get("country") or "غير معروف"
+            postcode = addr.get("postcode") or "غير معروف"
+            neighborhood = addr.get("neighbourhood") or "غير معروف"
+            suburb = addr.get("suburb") or "غير معروف"
+            county = addr.get("county") or "غير معروف"
+            municipality = addr.get("municipality") or "غير معروف"
 
             # Save detailed fields to the document
             doc.custom_location_city = doc.custom_location_city or city
             doc.custom_location_state = doc.custom_location_state or state
+            doc.custom_location_state = doc.custom_location_state or country
             doc.custom_postal_code = doc.custom_postal_code or postcode
+            doc.custom_location_state = doc.custom_location_state or road
+            doc.custom_postal_code = doc.custom_postal_code or neighborhood
             doc.custom_location_suburb = doc.custom_location_suburb or suburb
-            doc.custom_location_country = doc.custom_location_country or country
+            doc.custom_location_country = doc.custom_location_country or county
             doc.custom_location_municipality = (
                 doc.custom_location_municipality or municipality
             )
             doc.custom_address_line = doc.custom_address_line or (
-                location.address if location else ""
+                location.address if location else "غير معروف"
             )
 
-            # Format a compact, prioritized address string
+            # Format a compact, prioritized address string (Arabic)
             address_parts = [road, neighborhood, suburb, city, state, postcode, country]
             formatted = ", ".join([p for p in address_parts if p])
             doc.custom_address = (
@@ -105,20 +57,19 @@ def set_custom_address(doc, method=None):
                 message=f"Failed to fetch Arabic address: {str(e)}",
                 title="Geolocation Error",
             )
-            if user_lang == "ar":
-                frappe.throw(
-                    "تعذر استرجاع العنوان بالعربية. يرجى التحقق من السجلات لمزيد من التفاصيل."
-                )
-            else:
-                frappe.throw(
+            frappe.throw(
+                _(
                     "Unable to fetch Arabic address. Please check the logs for more details."
                 )
+            )
 
 
 def validate(doc, method=None):
-    """Validate the Lead document."""
-    # Fetch the current user's language
-    user_lang = frappe.db.get_value("User", frappe.session.user, "language")
+    is_valid_number(doc.mobile_no)
+    validate_no_of_cars(doc)
+    check_duplicate_tax_or_national_id(doc)
+    check_duplicate_mobile_or_email(doc)
+    set_custom_address(doc)
 
     if not doc.custom_creation_time and doc.creation:
         doc.custom_creation_time = doc.creation
