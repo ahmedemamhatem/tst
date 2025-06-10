@@ -6,6 +6,7 @@ from frappe.model.document import Document
 from geopy.geocoders import Nominatim
 from frappe import _
 
+
 class LeadVisit(Document):
     def before_save(self):
         if self.latitude and self.longitude:
@@ -14,23 +15,25 @@ class LeadVisit(Document):
                 geolocator = Nominatim(user_agent="frappe_map")
 
                 # Reverse geocode to get location details in Arabic
-                location = geolocator.reverse(f"{self.latitude}, {self.longitude}", language='ar')
-                addr = getattr(location, "raw", {}).get('address', {}) if location else {}
+                location = geolocator.reverse(
+                    f"{self.latitude}, {self.longitude}", language="ar"
+                )
+                addr = (
+                    getattr(location, "raw", {}).get("address", {}) if location else {}
+                )
 
                 # Extract address components in Arabic
-                road = addr.get('road') or ""  # Default: Unknown in Arabic
+                road = addr.get("road") or ""  # Default: Unknown in Arabic
                 city = (
-                    addr.get('city') or
-                    addr.get('state') or
-                    ""  # Default: Unknown
+                    addr.get("city") or addr.get("state") or ""  # Default: Unknown
                 )
-                state = addr.get('state') or ""
-                country = addr.get('country') or ""
-                postcode = addr.get('postcode') or ""
-                neighborhood = addr.get('neighbourhood') or ""
-                suburb = addr.get('suburb') or ""
-                county = addr.get('county') or ""
-                municipality = addr.get('municipality') or ""
+                state = addr.get("state") or ""
+                country = addr.get("country") or ""
+                postcode = addr.get("postcode") or ""
+                neighborhood = addr.get("neighbourhood") or ""
+                suburb = addr.get("suburb") or ""
+                county = addr.get("county") or ""
+                municipality = addr.get("municipality") or ""
 
                 # Save detailed fields to the document
                 self.city = self.city or city
@@ -42,14 +45,31 @@ class LeadVisit(Document):
                 self.suburb = self.suburb or suburb
                 self.county = self.county or county
                 self.municipality = self.municipality or municipality
-                self.address_line = self.address_line or (location.address if location else "")
+                self.address_line = self.address_line or (
+                    location.address if location else ""
+                )
 
                 # Format a compact, prioritized address string (Arabic)
-                address_parts = [road, neighborhood, suburb, city, state, postcode, country]
-                formatted = ', '.join([p for p in address_parts if p])
+                address_parts = [
+                    road,
+                    neighborhood,
+                    suburb,
+                    city,
+                    state,
+                    postcode,
+                    country,
+                ]
+                formatted = ", ".join([p for p in address_parts if p])
                 self.address = self.address or formatted[:140]  # Truncate if needed
 
             except Exception as e:
                 # Log error and notify the user
-                frappe.log_error(message=f"Failed to fetch Arabic address: {str(e)}", title="Geolocation Error")
-                frappe.throw(_("Unable to fetch Arabic address. Please check the logs for more details."))
+                frappe.log_error(
+                    message=f"Failed to fetch Arabic address: {str(e)}",
+                    title="Geolocation Error",
+                )
+                frappe.throw(
+                    _(
+                        "Unable to fetch Arabic address. Please check the logs for more details."
+                    )
+                )
