@@ -23,6 +23,7 @@
   "column_break_ixtz",
   "postal_code",
   "country",
+  "county",
   "city",
   "state",
   "road",
@@ -190,13 +191,19 @@
    "fieldtype": "Small Text",
    "label": "Address line",
    "read_only": 1
+  },
+  {
+   "fieldname": "county",
+   "fieldtype": "Data",
+   "label": "County",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-10 22:21:07.721213",
+ "modified": "2025-06-10 22:56:33.149513",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Lead Visit",

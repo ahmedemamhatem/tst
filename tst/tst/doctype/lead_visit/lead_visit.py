@@ -1,9 +1,10 @@
 # Copyright (c) 2025, Ahmed Emam and contributors
 # For license information, please see license.txt
 
-# import frappe
+import frappe
 from frappe.model.document import Document
 from geopy.geocoders import Nominatim
+from frappe import _
 
 class LeadVisit(Document):
     def before_save(self):
@@ -17,19 +18,19 @@ class LeadVisit(Document):
                 addr = getattr(location, "raw", {}).get('address', {}) if location else {}
 
                 # Extract address components in Arabic
-                road = addr.get('road') or "غير معروف"  # Default: Unknown in Arabic
+                road = addr.get('road') or ""  # Default: Unknown in Arabic
                 city = (
                     addr.get('city') or
                     addr.get('state') or
-                    "غير معروف"  # Default: Unknown
+                    ""  # Default: Unknown
                 )
-                state = addr.get('state') or "غير معروف"
-                country = addr.get('country') or "غير معروف"
-                postcode = addr.get('postcode') or "غير معروف"
-                neighborhood = addr.get('neighbourhood') or "غير معروف"
-                suburb = addr.get('suburb') or "غير معروف"
-                county = addr.get('county') or "غير معروف"
-                municipality = addr.get('municipality') or "غير معروف"
+                state = addr.get('state') or ""
+                country = addr.get('country') or ""
+                postcode = addr.get('postcode') or ""
+                neighborhood = addr.get('neighbourhood') or ""
+                suburb = addr.get('suburb') or ""
+                county = addr.get('county') or ""
+                municipality = addr.get('municipality') or ""
 
                 # Save detailed fields to the document
                 self.city = self.city or city
@@ -41,7 +42,7 @@ class LeadVisit(Document):
                 self.suburb = self.suburb or suburb
                 self.county = self.county or county
                 self.municipality = self.municipality or municipality
-                self.address_line = self.address_line or (location.address if location else "غير معروف")
+                self.address_line = self.address_line or (location.address if location else "")
 
                 # Format a compact, prioritized address string (Arabic)
                 address_parts = [road, neighborhood, suburb, city, state, postcode, country]

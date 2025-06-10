@@ -12,31 +12,30 @@ def set_custom_address(doc, method=None):
             addr = getattr(location, "raw", {}).get('address', {}) if location else {}
 
             # Extract address components in Arabic
-            road = addr.get('road') or "غير معروف"  # Default: Unknown in Arabic
+            road = addr.get('road') or ""  # Default: Unknown in Arabic
             city = (
                 addr.get('city') or
                 addr.get('state') or
-                "غير معروف"  # Default: Unknown
+                ""  # Default: Unknown
             )
-            state = addr.get('state') or "غير معروف"
-            country = addr.get('country') or "غير معروف"
-            postcode = addr.get('postcode') or "غير معروف"
-            neighborhood = addr.get('neighbourhood') or "غير معروف"
-            suburb = addr.get('suburb') or "غير معروف"
-            county = addr.get('county') or "غير معروف"
-            municipality = addr.get('municipality') or "غير معروف"
+            state = addr.get('state') or ""
+            country = addr.get('country') or ""
+            postcode = addr.get('postcode') or ""
+            neighborhood = addr.get('neighbourhood') or ""
+            suburb = addr.get('suburb') or ""
+            county = addr.get('county') or ""
+            municipality = addr.get('municipality') or ""
 
             # Save detailed fields to the document
             doc.custom_location_city = doc.custom_location_city or city
             doc.custom_location_state = doc.custom_location_state or state
-            doc.custom_location_state = doc.custom_location_state or country
             doc.custom_postal_code = doc.custom_postal_code or postcode
             doc.custom_location_state = doc.custom_location_state or road
             doc.custom_postal_code = doc.custom_postal_code or neighborhood
             doc.custom_location_suburb = doc.custom_location_suburb or suburb
-            doc.custom_location_country = doc.custom_location_country or county
+            doc.custom_location_country = doc.custom_location_country or country
             doc.custom_location_municipality = doc.custom_location_municipality or municipality
-            doc.custom_address_line = doc.custom_address_line or (location.address if location else "غير معروف")
+            doc.custom_address_line = doc.custom_address_line or (location.address if location else "")
 
             # Format a compact, prioritized address string (Arabic)
             address_parts = [road, neighborhood, suburb, city, state, postcode, country]
