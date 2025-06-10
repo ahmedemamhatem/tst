@@ -110,10 +110,10 @@ function handle_tab_visibility(frm) {
     }
     // 2. Show Customer Information tab when Customer Analysis is complete
     if (isTabCompleted(frm, "Customer Analysis")) {
-        if (frm.doc.type === "Company") {
+        if (frm.doc.type === "Company" && !frm.is_new()) {
             frm.set_df_property("custom_tax_id", "reqd", 1);
             frm.set_df_property("custom_national_id", "reqd", 0);
-        } else if (frm.doc.type === "Individual") {
+        } else if (frm.doc.type === "Individual" && !frm.is_new()) {
             frm.set_df_property("custom_national_id", "reqd", 1);
             frm.set_df_property("custom_tax_id", "reqd", 0);
         }
