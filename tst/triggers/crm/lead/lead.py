@@ -1,11 +1,59 @@
 import frappe
 from frappe import _
+from geopy.geocoders import Nominatim
+def set_custom_address(doc, method=None):
+    if doc.custom_longitude and doc.custom_latitude:
+        try:
+            # Initialize geolocator with user agent
+            geolocator = Nominatim(user_agent="frappe_map")
+
+            # Reverse geocode to get location details in Arabic
+            location = geolocator.reverse(f"{doc.custom_latitude}, {doc.custom_longitude}", language='ar')
+            addr = getattr(location, "raw", {}).get('address', {}) if location else {}
+
+            # Extract address components in Arabic
+            road = addr.get('road') or "غير معروف"  # Default: Unknown in Arabic
+            city = (
+                addr.get('city') or
+                addr.get('state') or
+                "غير معروف"  # Default: Unknown
+            )
+            state = addr.get('state') or "غير معروف"
+            country = addr.get('country') or "غير معروف"
+            postcode = addr.get('postcode') or "غير معروف"
+            neighborhood = addr.get('neighbourhood') or "غير معروف"
+            suburb = addr.get('suburb') or "غير معروف"
+            county = addr.get('county') or "غير معروف"
+            municipality = addr.get('municipality') or "غير معروف"
+
+            # Save detailed fields to the document
+            doc.custom_location_city = doc.custom_location_city or city
+            doc.custom_location_state = doc.custom_location_state or state
+            doc.custom_location_state = doc.custom_location_state or country
+            doc.custom_postal_code = doc.custom_postal_code or postcode
+            doc.custom_location_state = doc.custom_location_state or road
+            doc.custom_postal_code = doc.custom_postal_code or neighborhood
+            doc.custom_location_suburb = doc.custom_location_suburb or suburb
+            doc.custom_location_country = doc.custom_location_country or county
+            doc.custom_location_municipality = doc.custom_location_municipality or municipality
+            doc.custom_address_line = doc.custom_address_line or (location.address if location else "غير معروف")
+
+            # Format a compact, prioritized address string (Arabic)
+            address_parts = [road, neighborhood, suburb, city, state, postcode, country]
+            formatted = ', '.join([p for p in address_parts if p])
+            doc.custom_address = doc.custom_address or formatted[:140]  # Truncate if needed
+
+        except Exception as e:
+            # Log error and notify the user
+            frappe.log_error(message=f"Failed to fetch Arabic address: {str(e)}", title="Geolocation Error")
+            frappe.throw(_("Unable to fetch Arabic address. Please check the logs for more details."))
 
 def validate(doc, method=None):
     is_valid_number(doc.mobile_no)
     validate_no_of_cars(doc)
     check_duplicate_tax_or_national_id(doc)
     check_duplicate_mobile_or_email(doc)
+    set_custom_address(doc)
 
 def is_valid_number(Number):
     """

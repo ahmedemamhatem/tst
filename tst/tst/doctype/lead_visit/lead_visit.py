@@ -17,42 +17,38 @@ class LeadVisit(Document):
                 addr = getattr(location, "raw", {}).get('address', {}) if location else {}
 
                 # Extract address components in Arabic
-                road = addr.get('road') or ''
+                road = addr.get('road') or "غير معروف"  # Default: Unknown in Arabic
                 city = (
                     addr.get('city') or
-                    addr.get('town') or
-                    addr.get('village') or
-                    addr.get('municipality') or
-                    addr.get('hamlet') or
-                    addr.get('county') or
                     addr.get('state') or
-                    "غير معروف"  # Arabic fallback for "Unknown"
+                    "غير معروف"  # Default: Unknown
                 )
-                state = addr.get('state') or ''
-                country = addr.get('country') or ''
-                postcode = addr.get('postcode') or ''
-                neighborhood = addr.get('neighbourhood') or ''
-                suburb = addr.get('suburb') or ''
-                county = addr.get('county') or ''
-                municipality = addr.get('municipality') or ''
+                state = addr.get('state') or "غير معروف"
+                country = addr.get('country') or "غير معروف"
+                postcode = addr.get('postcode') or "غير معروف"
+                neighborhood = addr.get('neighbourhood') or "غير معروف"
+                suburb = addr.get('suburb') or "غير معروف"
+                county = addr.get('county') or "غير معروف"
+                municipality = addr.get('municipality') or "غير معروف"
 
                 # Save detailed fields to the document
-                self.city = city
-                self.state = state
-                self.country = country
-                self.postal_code = postcode
-                self.road = road
-                self.neighborhood = neighborhood
-                self.suburb = suburb
-                self.county = county
-                self.municipality = municipality
-                self.address_line = location.address if location else ""
+                self.city = self.city or city
+                self.state = self.state or state
+                self.country = self.country or country
+                self.postal_code = self.postal_code or postcode
+                self.road = self.road or road
+                self.neighborhood = self.neighborhood or neighborhood
+                self.suburb = self.suburb or suburb
+                self.county = self.county or county
+                self.municipality = self.municipality or municipality
+                self.address_line = self.address_line or (location.address if location else "غير معروف")
 
                 # Format a compact, prioritized address string (Arabic)
                 address_parts = [road, neighborhood, suburb, city, state, postcode, country]
                 formatted = ', '.join([p for p in address_parts if p])
-                self.address = formatted[:140]  # Truncate if needed
+                self.address = self.address or formatted[:140]  # Truncate if needed
 
             except Exception as e:
+                # Log error and notify the user
                 frappe.log_error(message=f"Failed to fetch Arabic address: {str(e)}", title="Geolocation Error")
                 frappe.throw(_("Unable to fetch Arabic address. Please check the logs for more details."))

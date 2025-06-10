@@ -23,8 +23,8 @@
   "column_break_ixtz",
   "postal_code",
   "country",
-  "state",
   "city",
+  "state",
   "road",
   "neighborhood",
   "suburb",
@@ -140,55 +140,55 @@
   {
    "fieldname": "postal_code",
    "fieldtype": "Data",
-   "label": "postal_code",
+   "label": "Postal Code",
    "read_only": 1
   },
   {
    "fieldname": "country",
    "fieldtype": "Data",
-   "label": "country",
+   "label": "Country",
    "read_only": 1
   },
   {
    "fieldname": "state",
    "fieldtype": "Data",
-   "label": "state",
+   "label": "State",
    "read_only": 1
   },
   {
    "fieldname": "city",
    "fieldtype": "Data",
-   "label": "city",
+   "label": "City",
    "read_only": 1
   },
   {
    "fieldname": "road",
    "fieldtype": "Data",
-   "label": "road",
+   "label": "Road",
    "read_only": 1
   },
   {
    "fieldname": "neighborhood",
    "fieldtype": "Data",
-   "label": "neighborhood",
+   "label": "Neighborhood",
    "read_only": 1
   },
   {
    "fieldname": "suburb",
    "fieldtype": "Data",
-   "label": "suburb",
+   "label": "Suburb",
    "read_only": 1
   },
   {
    "fieldname": "municipality",
    "fieldtype": "Data",
-   "label": "municipality",
+   "label": "Municipality",
    "read_only": 1
   },
   {
    "fieldname": "address_line",
    "fieldtype": "Small Text",
-   "label": "address_line",
+   "label": "Address line",
    "read_only": 1
   }
  ],
@@ -196,7 +196,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-10 20:27:40.839685",
+ "modified": "2025-06-10 22:21:07.721213",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Lead Visit",
