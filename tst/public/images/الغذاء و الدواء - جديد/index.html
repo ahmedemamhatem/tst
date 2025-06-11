@@ -12,10 +12,17 @@
     />
     <style>
       .print-format {
-        padding: 0px !;
+        padding: 0px !important;
+        font-size: 16px !important;
       }
       table {
+        font-size: 26px !important;
         font-weight: bold !important;
+      }
+
+      table tr th {
+        font-weight: bold !important;
+        color: #000 !important;
       }
 
       table tr th,
@@ -26,12 +33,23 @@
     </style>
   </head>
   <body>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
     <main>
       <header>
-        <img src=" /quotation_cover_5.jpeg" alt="logo" width="100%" />
+        <img
+          src="/assets/tst/images/quotation_cover_5.jpeg"
+          alt="logo"
+          width="100%"
+        />
       </header>
       <div class="page-break"></div>
       <section style="padding: 20px 20px 0 0">
+        <img src="/assets/tst/images/quotation_proposal.jpeg" width="100%" />
         <div
           style="
             border: 1px solid #ffc000;
@@ -45,7 +63,6 @@
             <h3 style="font-weight: bold">Customer Name:</h3>
             <span> {{doc.customer_name or doc.customer}}</span>
           </div>
-          <h3 style="font-weight: bold">NEEDED</h3>
         </div>
         <div
           style="
@@ -59,7 +76,7 @@
             <h3 style="font-weight: bold">Contact Person:</h3>
             <span> {{doc.contact_person or ""}}</span>
           </div>
-          <h3 style="font-weight: bold">{}</h3>
+          <h3 style="font-weight: bold"></h3>
         </div>
         <div
           style="
@@ -74,7 +91,7 @@
             <h3 style="font-weight: bold">Mobile Number:</h3>
             <span>{{doc.contact_mobile or ""}}</span>
           </div>
-          <h3 style="font-weight: bold">{}</h3>
+          <h3 style="font-weight: bold"></h3>
         </div>
         <div
           style="
@@ -84,15 +101,21 @@
             justify-content: space-between;
           "
         >
-          {% set contact = frappe.db.get_doc("Contact", doc.contact_person) %}
-          <div>
-            <h3 style="font-weight: bold">Email:</h3>
-            <span>
-              {{ (contact.email_ids | selectattr("is_primary") |
-              map(attribute="email_id") | first) if contact.email_ids else ""
-              }}</span
-            >
-          </div>
+          {% if doc.contact_person %}
+              {% set contact = frappe.get_doc("Contact", doc.contact_person) %}
+              <div>
+                <h3 style="font-weight: bold">Email:</h3>
+                <span>
+                  {{ (contact.email_ids | selectattr("is_primary") |
+                  map(attribute="email_id") | first) if contact.email_ids else "" }}
+                </span>
+              </div>
+          {% else %}
+              <div>
+                <h3 style="font-weight: bold">Email:</h3>
+                <span></span>
+              </div>
+          {% endif %}
           <h3 style="font-weight: bold">{}</h3>
         </div>
         <div
@@ -106,9 +129,9 @@
         >
           <div>
             <h3 style="font-weight: bold">Offer For Vehicle:</h3>
-            <span>{}</span>
+            <span></span>
           </div>
-          <h3 style="font-weight: bold">{}</h3>
+          <h3 style="font-weight: bold"></h3>
         </div>
         <div
           style="
@@ -120,9 +143,9 @@
         >
           <div>
             <h3 style="font-weight: bold">Number of Vehicle:</h3>
-            <span>{}</span>
+            <span></span>
           </div>
-          <h3 style="font-weight: bold">{}</h3>
+          <h3 style="font-weight: bold"></h3>
         </div>
         <div
           style="
@@ -135,9 +158,9 @@
         >
           <div>
             <h3 style="font-weight: bold">Sales Consultant:</h3>
-            <span>{}</span>
+            <span></span>
           </div>
-          <h3 style="font-weight: bold">{}</h3>
+          <h3 style="font-weight: bold"></h3>
         </div>
         <div
           style="
@@ -149,9 +172,9 @@
         >
           <div>
             <h3 style="font-weight: bold">Mobile Number:</h3>
-            <span>{}</span>
+            <span></span>
           </div>
-          <h3 style="font-weight: bold">{}</h3>
+          <h3 style="font-weight: bold"></h3>
         </div>
         <div
           style="
@@ -166,35 +189,39 @@
             <h3 style="font-weight: bold">Date:</h3>
             <span>{{doc.transaction_date}}</span>
           </div>
-          <h3 style="font-weight: bold">{}</h3>
+          <h3 style="font-weight: bold"></h3>
         </div>
       </section>
       <div class="page-break"></div>
       <section>
-        <img src=" /quotation_intro.jpeg" width="100%" />
+        <img src="/assets/tst/images/quotation_intro.jpeg" width="100%" />
       </section>
       <div class="page-break"></div>
       <section>
-        <img src=" /quotation_why.jpeg" width="100%" />
+        <img src="/assets/tst/images/quotation_why.jpeg" width="100%" />
       </section>
       <div class="page-break"></div>
       <section>
-        <img src=" /quotation_services.png" width="100%" />
+        <img src="/assets/tst/images/quotation_services.png" width="100%" />
       </section>
       <div class="page-break"></div>
       <section>
-        <img src=" /products_5.jpeg" width="100%" />
+        <img src="/assets/tst/images/products_5.jpeg" width="100%" />
       </section>
       <div class="page-break"></div>
       <section>
-        <img src=" /quotation_benefits.jpeg" width="100%" />
+        <img src="/assets/tst/images/quotation_benefits.jpeg" width="100%" />
       </section>
       <div class="page-break"></div>
       <section>
-        <img src=" /quotation_financial_customers.jpeg" width="100%" />
+        <img
+          src="/assets/tst/images/quotation_financial_customers.jpeg"
+          width="100%"
+        />
       </section>
       <div class="page-break"></div>
       <section dir="rtl">
+        <img src="/assets/tst/images/offer.png" width="150" />
         <table class="table text-center border broder-black">
           <thead>
             <tr>
@@ -214,7 +241,7 @@
               <td>{{item.qty}}</td>
               <td>{{item.amount}}</td>
             </tr>
-            {% enfor %}
+            {% endfor %}
             <tr>
               <td colspan="2">المجموع</td>
               <td rowspan="3" colspan="2">{{doc.in_words or ""}}</td>
@@ -235,19 +262,8 @@
           </tbody>
         </table>
       </section>
-      <div class="page-break"></div>
-      <section dir="rtl">
-        <div>
-          <img src=" /tst_logo.png" width="300" />
-          {% set customer = frappe.get_doc("Customer", doc.customer) %}
-          <h6
-            class="d-block p-3 fs-5 text-white fw-bold"
-            style="background-color: #ffb719; width: fit-content"
-          >
-            الرقم الضريبي : ({{customer.tax_id or ""}})
-          </h6>
-          {{doc.terms or ""}}
-        </div>
+      <section>
+        <img src="/assets/tst/images/terms_and_conditions.jpeg" width="100%" />
       </section>
     </main>
   </body>
