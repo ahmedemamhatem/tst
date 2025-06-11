@@ -67,6 +67,188 @@ class ValidateReportsTo:
                 , WorkflowPermissionError)
             
 
+def alert_supervisor_on_item_shortfall(doc, method):
+    """
+    If any item in the Quotation has qty > custom_main_warehouse_qty (and custom_main_warehouse_qty > 0),
+    send a single email to the employee's supervisor (reports_to.user_id) listing all such items.
+    Skips if supervisor or user_id not set. Logs errors.
+    """
+    try:
+        creator = doc.owner
+
+        # Fetch Employee with supervisor (reports_to)
+        emp = frappe.db.get_value(
+            "Employee",
+            {"user_id": creator},
+            ["name", "reports_to"],
+            as_dict=True
+        )
+        if not emp or not emp.get("reports_to"):
+            return
+
+        supervisor_user_id = frappe.db.get_value(
+            "Employee",
+            emp["reports_to"],
+            "user_id"
+        )
+        if not supervisor_user_id:
+            return
+
+        # Gather all applicable items
+        shortfall_rows = []
+        for row in doc.items:
+            try:
+                req_qty = float(row.qty or 0)
+                avail_qty = float(row.custom_main_warehouse_qty or 0)
+            except Exception:
+                continue  # skip invalid rows
+
+            if req_qty > avail_qty and avail_qty > 0:
+                shortfall_rows.append({
+                    "item_code": row.item_code,
+                    "item_name": getattr(row, "item_name", ""),
+                    "qty": req_qty,
+                    "available": avail_qty,
+                })
+
+        if not shortfall_rows:
+            return
+
+        # Build HTML table for email
+        item_table = """
+        <table border="1" cellpadding="4" cellspacing="0">
+            <tr>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th>Requested Quantity</th>
+                <th>Available in Main Warehouse</th>
+            </tr>
+        """
+        for r in shortfall_rows:
+            item_table += f"""
+                <tr>
+                    <td>{frappe.utils.escape_html(r['item_code'])}</td>
+                    <td>{frappe.utils.escape_html(r['item_name'])}</td>
+                    <td>{r['qty']}</td>
+                    <td>{r['available']}</td>
+                </tr>
+            """
+        item_table += "</table>"
+
+        subject = f"Quotation Item Shortfall Alert: {doc.name}"
+        message = f"""
+        <p>Dear Supervisor,</p>
+        <p>The following items in Quotation <b>{doc.name}</b> created by your reportee (<b>{creator}</b>)
+        exceed the available stock in their main warehouse ({len(shortfall_rows)} item(s)):</p>
+        {item_table}
+        <p>Quotation: <a href="{frappe.utils.get_url_to_form('Quotation', doc.name)}">{doc.name}</a></p>
+        <p>Please review and take necessary action.</p>
+        """
+
+        frappe.sendmail(
+            recipients=[supervisor_user_id],
+            subject=subject,
+            message=message
+        )
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "alert_supervisor_on_item_shortfall Error")
+
+        
+def set_main_warehouse_qty(doc, method):
+    """
+    On Quotation validate, for each item in the items table, set
+    'custom_main_warehouse_qty' with the qty of the item in the employee's
+    'custom_main_warehouse'. The employee is matched where user_id = creator (doc.owner).
+    If any value (employee, custom_main_warehouse, or item code) is missing, the row is skipped.
+
+    Args:
+        doc: The Quotation document being validated.
+        method: The event method name (required by Frappe's doc event signature).
+
+    Logs:
+        Any exceptions are logged to Frappe's error log, but do not stop validation.
+    """
+    try:
+        # Get the creator of the Quotation
+        creator = doc.owner
+
+        # Fetch Employee and custom_main_warehouse using SQL
+        emp_result = frappe.db.sql(
+            """
+            SELECT name, `custom_main_warehouse`
+            FROM `tabEmployee`
+            WHERE user_id = %s
+            LIMIT 1
+            """,
+            (creator,),
+            as_dict=True
+        )
+        if not emp_result or not emp_result[0].get("custom_main_warehouse"):
+            # No employee or no custom_main_warehouse, skip all rows
+            return
+
+        custom_main_warehouse = emp_result[0]["custom_main_warehouse"]
+
+        for row in doc.items:
+            item_code = row.item_code
+            if not item_code or not custom_main_warehouse:
+                continue  # skip if missing
+
+            # Get actual qty from Bin using SQL
+            bin_result = frappe.db.sql(
+                """
+                SELECT actual_qty
+                FROM `tabBin`
+                WHERE item_code = %s AND warehouse = %s
+                LIMIT 1
+                """,
+                (item_code, custom_main_warehouse),
+                as_dict=True
+            )
+            qty = bin_result[0]["actual_qty"] if bin_result and bin_result[0].get("actual_qty") is not None else 0
+            row.custom_main_warehouse_qty = qty
+
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "set_main_warehouse_qty Error")
+
+
+def set_department_from_employee(doc, method):
+    """
+    Sets the 'department' field on a Material Request document before insert,
+    based on the department of the Employee record linked to the current user.
+    
+    Uses raw SQL for fetching the department and includes error handling.
+    
+    Args:
+        doc: The Material Request document being inserted.
+        method: The event method name (not used here, but required by Frappe's doc event signature).
+    
+    Logs:
+        Any exceptions encountered during execution will be logged to Frappe's error log.
+    """
+    try:
+        current_user = frappe.session.user
+
+        # Fetch the department from Employee using SQL
+        result = frappe.db.sql(
+            """
+            SELECT department
+            FROM `tabEmployee`
+            WHERE user_id = %s
+            LIMIT 1
+            """,
+            (current_user,),
+            as_dict=True
+        )
+
+        # Set department on the Material Request doc if found
+        if result and result[0].get("department") and hasattr(doc, "department"):
+            doc.department = result[0]["department"]
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "set_department_from_employee Error")
+
+
 def validate_items_are_saleable(self, method):
     for d in self.get("items"):
         # Fetch the custom_item_status from the Item master

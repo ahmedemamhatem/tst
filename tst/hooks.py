@@ -23,7 +23,11 @@ doc_events = {
         "on_submit": "tst.override.update_item_status_from_doc"
     },
     "Quotation": {
-        "validate": "tst.override.validate_items_are_saleable"
+        "validate": [
+            "tst.override.set_main_warehouse_qty",
+            "tst.override.validate_items_are_saleable",
+            "tst.override.alert_supervisor_on_item_shortfall"
+        ]
     },
     "Sales Order": {
         "validate": "tst.override.validate_items_are_saleable"
@@ -60,6 +64,9 @@ doc_events = {
         "after_insert": "tst.triggers.stock.stock_entry.stock_entry.after_insert",
         "validate": "tst.triggers.stock.stock_entry.stock_entry.validate"
     },
+    "Material Request": {
+        "before_insert": "tst.override.set_department_from_employee"
+    }
         
     }
 
