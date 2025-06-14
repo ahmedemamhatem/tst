@@ -211,6 +211,79 @@ def set_main_warehouse_qty(doc, method):
     except Exception:
         frappe.log_error(frappe.get_traceback(), "set_main_warehouse_qty Error")
 
+import frappe
+
+def validate_quotation_discount_limits(doc, method=None):
+    template_name = doc.custom_quotation_templet
+    if not template_name:
+        return
+
+    # Fetch discount limits from template
+    template = frappe.db.get_value(
+        "Quotation Template",
+        template_name,
+        ["user_discount", "manager_discount"],
+        as_dict=True
+    )
+    if not template:
+        frappe.throw(f"Quotation Template '{template_name}' not found.")
+
+    user_discount_limit = template.get("user_discount")
+    manager_discount_limit = template.get("manager_discount")
+
+    user_limit_set = user_discount_limit is not None and float(user_discount_limit) > 0
+    manager_limit_set = manager_discount_limit is not None and float(manager_discount_limit) > 0
+
+    # Get roles from custom settings
+    settings = frappe.get_single("TST Selling Settings")
+    user_discount_role = settings.user_discount_role
+    manager_discount_role = settings.manager_discount_role
+
+    roles_set = user_discount_role and manager_discount_role
+
+    user_roles = frappe.get_roles(frappe.session.user)
+
+    for item in doc.items:
+        discount = float(item.discount_percentage or 0)
+        if discount > 0:
+            # Ensure roles are set in settings
+            if not roles_set:
+                frappe.throw(
+                    "Please set <b>User Discount Role</b> and <b>Manager Discount Role</b> in <b>TST Selling Settings</b>.<br>"
+                    "Contact your administrator."
+                )
+
+            # Ensure discount limits are set in template
+            if not (user_limit_set or manager_limit_set):
+                frappe.throw(
+                    f"Please set <b>User Discount</b> and <b>Manager Discount</b> in <b>Quotation Template '{template_name}'</b>.<br>"
+                    "Contact your administrator."
+                )
+
+            # 1. If manager limit is set and discount > manager limit, always error
+            if manager_limit_set and discount > float(manager_discount_limit):
+                frappe.throw(
+                    f"Row {item.idx}: Discount {discount}% exceeds the maximum manager limit ({manager_discount_limit}%)."
+                )
+            # 2. If user limit is set and discount > user limit, must be manager
+            elif user_limit_set and discount > float(user_discount_limit):
+                if manager_discount_role not in user_roles:
+                    frappe.throw(
+                        f"Row {item.idx}: Discount {discount}% is above user limit ({user_discount_limit}%) "
+                        f"and requires the <b>{manager_discount_role}</b> role."
+                    )
+            # 3. If discount is within user limit, must have user or manager role
+            elif user_limit_set and discount <= float(user_discount_limit):
+                if (user_discount_role not in user_roles) and (manager_discount_role not in user_roles):
+                    frappe.throw(
+                        f"Row {item.idx}: Discount {discount}% requires <b>{user_discount_role}</b> or <b>{manager_discount_role}</b> role."
+                    )
+            # 4. If only manager limit is set (no user limit), all discounts <= manager_limit require manager role
+            elif not user_limit_set and manager_limit_set:
+                if manager_discount_role not in user_roles:
+                    frappe.throw(
+                        f"Row {item.idx}: Discount {discount}% requires the <b>{manager_discount_role}</b> role."
+                    )
 
 
 def validate_items_are_saleable(self, method):

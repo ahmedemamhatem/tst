@@ -1,0 +1,50 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-06-14 18:46:10.626626",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "user_discount_role",
+  "manager_discount_role"
+ ],
+ "fields": [
+  {
+   "fieldname": "user_discount_role",
+   "fieldtype": "Link",
+   "label": "User Discount Role",
+   "options": "Role"
+  },
+  {
+   "fieldname": "manager_discount_role",
+   "fieldtype": "Link",
+   "label": "Manager Discount Role",
+   "options": "Role"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-06-14 18:47:00.467503",
+ "modified_by": "Administrator",
+ "module": "Tst",
+ "name": "TST Selling Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

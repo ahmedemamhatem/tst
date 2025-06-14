@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class QuotationTemplet(Document):
+class TSTSellingSettings(Document):
 	pass

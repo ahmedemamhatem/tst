@@ -7,6 +7,9 @@
  "engine": "InnoDB",
  "field_order": [
   "templet_name",
+  "column_break_hrta",
+  "user_discount",
+  "manager_discount",
   "section_break_hzmq",
   "table_eyzj"
  ],
@@ -26,15 +29,29 @@
    "fieldtype": "Table",
    "options": "Quotation Templet Item",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_hrta",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "user_discount",
+   "fieldtype": "Percent",
+   "label": "User Discount"
+  },
+  {
+   "fieldname": "manager_discount",
+   "fieldtype": "Percent",
+   "label": "Manager Discount"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-24 15:21:22.222911",
+ "modified": "2025-06-14 18:40:49.797194",
  "modified_by": "Administrator",
  "module": "Tst",
- "name": "Quotation Templet",
+ "name": "Quotation Template",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
