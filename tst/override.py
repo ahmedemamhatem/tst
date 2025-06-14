@@ -212,42 +212,6 @@ def set_main_warehouse_qty(doc, method):
         frappe.log_error(frappe.get_traceback(), "set_main_warehouse_qty Error")
 
 
-def set_department_from_employee(doc, method):
-    """
-    Sets the 'department' field on a Material Request document before insert,
-    based on the department of the Employee record linked to the current user.
-    
-    Uses raw SQL for fetching the department and includes error handling.
-    
-    Args:
-        doc: The Material Request document being inserted.
-        method: The event method name (not used here, but required by Frappe's doc event signature).
-    
-    Logs:
-        Any exceptions encountered during execution will be logged to Frappe's error log.
-    """
-    try:
-        current_user = frappe.session.user
-
-        # Fetch the department from Employee using SQL
-        result = frappe.db.sql(
-            """
-            SELECT department
-            FROM `tabEmployee`
-            WHERE user_id = %s
-            LIMIT 1
-            """,
-            (current_user,),
-            as_dict=True
-        )
-
-        # Set department on the Material Request doc if found
-        if result and result[0].get("department") and hasattr(doc, "department"):
-            doc.department = result[0]["department"]
-
-    except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "set_department_from_employee Error")
-
 
 def validate_items_are_saleable(self, method):
     for d in self.get("items"):
