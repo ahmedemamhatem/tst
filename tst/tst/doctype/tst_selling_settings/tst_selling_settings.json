@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "user_discount_role",
+  "supervisor_discount_role",
   "manager_discount_role"
  ],
  "fields": [
@@ -20,13 +21,19 @@
    "fieldtype": "Link",
    "label": "Manager Discount Role",
    "options": "Role"
+  },
+  {
+   "fieldname": "supervisor_discount_role",
+   "fieldtype": "Link",
+   "label": "Supervisor Discount Role",
+   "options": "Role"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-06-14 18:47:00.467503",
+ "modified": "2025-06-15 20:02:09.130097",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "TST Selling Settings",

@@ -9,7 +9,7 @@
   "templet_name",
   "column_break_hrta",
   "user_discount",
-  "manager_discount",
+  "supervisor_discount",
   "section_break_hzmq",
   "table_eyzj"
  ],
@@ -40,15 +40,15 @@
    "label": "User Discount"
   },
   {
-   "fieldname": "manager_discount",
+   "fieldname": "supervisor_discount",
    "fieldtype": "Percent",
-   "label": "Manager Discount"
+   "label": "Supervisor Discount"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-14 18:40:49.797194",
+ "modified": "2025-06-15 20:11:56.173773",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Quotation Template",
