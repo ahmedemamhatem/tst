@@ -8,8 +8,6 @@
  "field_order": [
   "templet_name",
   "column_break_hrta",
-  "user_discount",
-  "supervisor_discount",
   "section_break_hzmq",
   "table_eyzj"
  ],
@@ -33,22 +31,12 @@
   {
    "fieldname": "column_break_hrta",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "user_discount",
-   "fieldtype": "Percent",
-   "label": "User Discount"
-  },
-  {
-   "fieldname": "supervisor_discount",
-   "fieldtype": "Percent",
-   "label": "Supervisor Discount"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-15 20:11:56.173773",
+ "modified": "2025-06-15 23:32:28.273494",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Quotation Template",
