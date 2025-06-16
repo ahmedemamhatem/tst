@@ -15,7 +15,7 @@ from tst.override import monkey_patch_reorder_item
 monkey_patch_reorder_item()
 
 override_doctype_class = {
-    "Lead": "tst.triggers.crm.lead.CustomLead"
+    "Lead": "tst.triggers.crm.lead.lead.CustomLead"
 }
 # ------------------
 # Document Events (doc_events)
