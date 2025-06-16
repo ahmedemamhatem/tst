@@ -1,6 +1,36 @@
 import frappe
 from frappe import _
 from geopy.geocoders import Nominatim
+import frappe
+from erpnext.crm.doctype.lead.lead import Lead as ErpnextLead
+
+class CustomLead(ErpnextLead):
+    def check_email_id_is_unique(self):
+        """Override the check_email_id_is_unique method to check for duplicate email IDs."""
+        if self.email_id:
+            # Fetch an existing lead with the same email ID
+            existing_lead = frappe.db.get_value(
+                'Lead', 
+                {'email_id': self.email_id, 'name': ['!=', self.name]}, 
+                ['name', 'owner'],  # Fetch both the lead name and its owner/creator
+                as_dict=True
+            )
+            
+            if existing_lead:
+                # If a duplicate is found, fetch the creator's name
+                creator = frappe.db.get_value('User', existing_lead.owner, 'full_name')
+
+                # Throw a translatable error message with the lead name and creator's name
+                frappe.throw(
+                    frappe._("A Lead with this email ID already exists: {0} (Created by: {1})").format(
+                        existing_lead.name, creator
+                    )
+                )
+            else:
+                # Optionally display a success message if no duplicate is found
+                frappe.msgprint(frappe._("Email ID is unique!"))
+
+                
 def set_custom_address(doc, method=None):
     if doc.custom_longitude and doc.custom_latitude:
         try:
