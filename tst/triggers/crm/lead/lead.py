@@ -1,8 +1,8 @@
 import frappe
 from frappe import _
 from geopy.geocoders import Nominatim
-import frappe
 from erpnext.crm.doctype.lead.lead import Lead as ErpnextLead
+
 
 class CustomLead(ErpnextLead):
     def check_email_id_is_unique(self):
@@ -10,8 +10,8 @@ class CustomLead(ErpnextLead):
         if self.email_id:
             # Fetch an existing lead with the same email ID
             existing_lead = frappe.db.get_value(
-                'Lead', 
-                {'email_id': self.email_id, 'name': ['!=', self.name]}, 
+                'Lead',
+                {'email_id': self.email_id, 'name': ['!=', self.name]},
                 ['name', 'owner'],  # Fetch both the lead name and its owner/creator
                 as_dict=True
             )
@@ -22,16 +22,17 @@ class CustomLead(ErpnextLead):
 
                 # Throw a translatable error message with the lead name and creator's name
                 frappe.throw(
-                    frappe._("A Lead with this email ID already exists: {0} (Created by: {1})").format(
+                    _("A Lead with this email ID already exists: {0} (Created by: {1})").format(
                         existing_lead.name, creator
                     )
                 )
             else:
                 # Optionally display a success message if no duplicate is found
-                frappe.msgprint(frappe._("Email ID is unique!"))
+                frappe.msgprint(_("Email ID is unique!"))
 
-                
+
 def set_custom_address(doc, method=None):
+    """Set the custom address fields based on latitude and longitude."""
     if doc.custom_longitude and doc.custom_latitude:
         try:
             # Initialize geolocator with user agent
@@ -42,32 +43,25 @@ def set_custom_address(doc, method=None):
             addr = getattr(location, "raw", {}).get('address', {}) if location else {}
 
             # Extract address components in Arabic
-            road = addr.get('road') or ""  # Default: Unknown in Arabic
-            city = (
-                addr.get('city') or
-                addr.get('state') or
-                ""  # Default: Unknown
-            )
+            road = addr.get('road') or ""
+            city = addr.get('city') or addr.get('state') or ""
             state = addr.get('state') or ""
             country = addr.get('country') or ""
             postcode = addr.get('postcode') or ""
             neighborhood = addr.get('neighbourhood') or ""
             suburb = addr.get('suburb') or ""
-            county = addr.get('county') or ""
             municipality = addr.get('municipality') or ""
 
             # Save detailed fields to the document
             doc.custom_location_city = doc.custom_location_city or city
             doc.custom_location_state = doc.custom_location_state or state
             doc.custom_postal_code = doc.custom_postal_code or postcode
-            doc.custom_location_state = doc.custom_location_state or road
-            doc.custom_postal_code = doc.custom_postal_code or neighborhood
             doc.custom_location_suburb = doc.custom_location_suburb or suburb
             doc.custom_location_country = doc.custom_location_country or country
             doc.custom_location_municipality = doc.custom_location_municipality or municipality
             doc.custom_address_line = doc.custom_address_line or (location.address if location else "")
 
-            # Format a compact, prioritized address string (Arabic)
+            # Format a compact, prioritized address string
             address_parts = [road, neighborhood, suburb, city, state, postcode, country]
             formatted = ', '.join([p for p in address_parts if p])
             doc.custom_address = doc.custom_address or formatted[:140]  # Truncate if needed
@@ -77,7 +71,9 @@ def set_custom_address(doc, method=None):
             frappe.log_error(message=f"Failed to fetch Arabic address: {str(e)}", title="Geolocation Error")
             frappe.throw(_("Unable to fetch Arabic address. Please check the logs for more details."))
 
+
 def validate(doc, method=None):
+    """Validate the Lead document."""
     if not doc.custom_creation_time and doc.creation:
         doc.custom_creation_time = doc.creation
     is_valid_number(doc.mobile_no)
@@ -86,22 +82,22 @@ def validate(doc, method=None):
     check_duplicate_mobile_or_email(doc)
     set_custom_address(doc)
 
-def is_valid_number(Number):
+
+def is_valid_number(number):
     """
-    Validates that the provided mobile number consists only of digits
-    and is exactly 10 characters long. Raises an error if validation fails.
+    Validate that the provided mobile number consists only of digits
+    and is exactly 10 characters long.
     """
-    if Number:
-        if not Number.isdigit():
+    if number:
+        if not number.isdigit():
             frappe.throw(_("Mobile number must contain digits only (0-9)."))
-        elif len(Number) != 10:
+        elif len(number) != 10:
             frappe.throw(_("Mobile number must be exactly 10 digits."))
+
 
 def validate_no_of_cars(doc):
     """
-    Validates that the total quantity of cars listed in custom_car_details
-    matches the custom_number_of_cars field. If custom_number_of_cars is not set,
-    it will be automatically updated with the total quantity from the car details.
+    Validate that the total quantity of cars matches the custom_number_of_cars field.
     """
     total_no_of_cars = 0.0
     if doc.custom_car_details:
@@ -111,81 +107,65 @@ def validate_no_of_cars(doc):
     if doc.custom_number_of_cars:
         if total_no_of_cars != doc.custom_number_of_cars:
             frappe.throw(_(
-                f"Total quantity of cars ({total_no_of_cars}) "
-                f"does not match the declared number of cars ({doc.custom_number_of_cars}). "
+                "Total quantity of cars ({0}) does not match the declared number of cars ({1}). "
                 "Please make sure these values are consistent."
-            ))
+            ).format(total_no_of_cars, doc.custom_number_of_cars))
     elif doc.custom_car_details and not doc.custom_number_of_cars:
         doc.custom_number_of_cars = total_no_of_cars
 
+
 def check_duplicate_tax_or_national_id(doc):
     """
-    Checks if there is an existing Lead with the same Tax ID (for Company)
-    or National ID (for Individual), excluding the current doc.
-    If found, shows a message indicating which user created the existing Lead to prevent duplicates.
+    Check for duplicate Tax ID or National ID, depending on the Lead type.
     """
     if doc.type == "Company" and doc.custom_tax_id:
         existing = frappe.db.get_value(
             "Lead",
-            {
-                "custom_tax_id": doc.custom_tax_id,
-                "name": ["!=", doc.name]
-            },
+            {"custom_tax_id": doc.custom_tax_id, "name": ["!=", doc.name]},
             ["name", "owner"]
         )
         if existing:
             lead_name, owner = existing
             frappe.throw(_(
-                f"A Lead ({lead_name}) already exists with the same Tax ID, created by user: {owner}."
-                " Please verify to avoid duplicate entries."
-            ))
+                "A Lead ({0}) already exists with the same Tax ID, created by user: {1}."
+            ).format(lead_name, owner))
     elif doc.type == "Individual" and doc.custom_national_id:
         existing = frappe.db.get_value(
             "Lead",
-            {
-                "custom_national_id": doc.custom_national_id,
-                "name": ["!=", doc.name]
-            },
+            {"custom_national_id": doc.custom_national_id, "name": ["!=", doc.name]},
             ["name", "owner"]
         )
         if existing:
             lead_name, owner = existing
             frappe.throw(_(
-                f"A Lead ({lead_name}) already exists with the same National ID, created by user: {owner}."
-                " Please verify to avoid duplicate entries."
-            ))
+                "A Lead ({0}) already exists with the same National ID, created by user: {1}."
+            ).format(lead_name, owner))
+
 
 def check_duplicate_mobile_or_email(doc):
     """
-    Checks if another Lead exists with the same mobile number or email id (excluding current doc).
-    If found, throws an error with existing lead name and creator.
+    Check for duplicate mobile numbers or email IDs.
     """
     if doc.mobile_no:
         existing = frappe.db.get_value(
             "Lead",
-            {
-                "mobile_no": doc.mobile_no,
-                "name": ["!=", doc.name]
-            },
+            {"mobile_no": doc.mobile_no, "name": ["!=", doc.name]},
             ["name", "owner"]
         )
         if existing:
             lead_name, owner = existing
             frappe.throw(_(
-                f"Mobile Number already exists in Lead: {lead_name} (Created by: {owner})"
-            ))
+                "Mobile number already exists in Lead: {0} (Created by: {1})"
+            ).format(lead_name, owner))
 
     if doc.email_id:
         existing = frappe.db.get_value(
             "Lead",
-            {
-                "email_id": doc.email_id,
-                "name": ["!=", doc.name]
-            },
+            {"email_id": doc.email_id, "name": ["!=", doc.name]},
             ["name", "owner"]
         )
         if existing:
             lead_name, owner = existing
             frappe.throw(_(
-                f"Email ID already exists in Lead: {lead_name} (Created by: {owner})"
-            ))
+                "Email ID already exists in Lead: {0} (Created by: {1})"
+            ).format(lead_name, owner))
