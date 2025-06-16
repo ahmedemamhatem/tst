@@ -3,6 +3,54 @@ function hide_tab(frm, tab_fieldname) {
     frm.$wrapper.find(`[data-fieldname='${tab_fieldname}']`).hide();
 }
 
+// Utility: Add "Create Lead Visit" button
+function add_create_lead_visit_button(frm) {
+    // Add a custom button with translation
+    frm.add_custom_button(__('Create Visit'), function () {
+        const dialog = new frappe.ui.Dialog({
+            title: __('Select Visit Type'),
+            fields: [
+                {
+                    label: __('Visit Type'),
+                    fieldname: 'visit_type',
+                    fieldtype: 'Select',
+                    options: ["", __('On Location'), __('Phone')],
+                    reqd: 1
+                }
+            ],
+            primary_action_label: __('Create'),
+            primary_action(values) {
+                dialog.hide();
+
+                // Check if Geolocation is supported
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        frappe.db.insert({
+                            doctype: 'Lead Visit',
+                            lead: frm.doc.name,
+                            visit_type: values.visit_type,
+                            visit_date: frappe.datetime.now_date(),
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            address: __('Lat: {0}, Long: {1}', [position.coords.latitude, position.coords.longitude])
+                        }).then((doc) => {
+                            frappe.msgprint(__('Lead Visit created successfully!'));
+                            frappe.set_route('Form', 'Lead Visit', doc.name);
+                        });
+                    }, function () {
+                        frappe.msgprint(__('Unable to fetch location. Please enable location access in your browser.'));
+                    });
+                } else {
+                    frappe.msgprint(__('Geolocation is not supported by this browser.'));
+                }
+            }
+        });
+
+        // Show the dialog
+        dialog.show();
+    });
+}
+
 // === Utility: Show Tab by fieldname ===
 function show_tab(frm, tab_fieldname) {
     frm.$wrapper.find(`[data-fieldname='${tab_fieldname}']`).show();
@@ -79,22 +127,25 @@ function clean_custom_buttons(frm) {
         frm.remove_custom_button(__('Opportunity'), __('Create'));
         frm.remove_custom_button(__('Prospect'), __('Create'));
         frm.remove_custom_button(__('Add to Prospect'), __('Action'));
-        if (!frm.is_new() && frm.doc.__onload && !frm.doc.__onload.is_customer) {
-            frm.remove_custom_button(__('Customer'), __('Create'));
-            frm.remove_custom_button(__('Quotation'), __('Create'));
-            frm.add_custom_button(__('Customer'), function () {
-                frappe.model.open_mapped_doc({
-                    method: "erpnext.crm.doctype.lead.lead.make_customer",
-                    frm: frm
-                });
-            }, __('Create'));
-            frm.add_custom_button(__('Quotation'), function () {
-                frappe.model.open_mapped_doc({
-                    method: "erpnext.crm.doctype.lead.lead.make_quotation",
-                    frm: frm
-                });
-            }, __('Create'));
-        }
+        // Remove BOTH English and Arabic Customer buttons
+        frm.remove_custom_button(__('Customer'), __('Create'));
+        frm.remove_custom_button('العميل', __('Create'));
+
+
+        // if (!frm.is_new() && frm.doc.__onload && !frm.doc.__onload.is_customer) {
+        //     frm.add_custom_button(__('Customer'), function () {
+        //         frappe.model.open_mapped_doc({
+        //             method: "erpnext.crm.doctype.lead.lead.make_customer",
+        //             frm: frm
+        //         });
+        //     }, __('Create'));
+        //     frm.add_custom_button(__('Quotation'), function () {
+        //         frappe.model.open_mapped_doc({
+        //             method: "erpnext.crm.doctype.lead.lead.make_quotation",
+        //             frm: frm
+        //         });
+        //     }, __('Create'));
+        // }
     }, 250);
 }
 
@@ -112,6 +163,8 @@ function handle_tab_visibility(frm) {
     if (isTabCompleted(frm, "Customer Analysis")) {
         if (frm.doc.type === "Company" && !frm.is_new()) {
             frm.set_df_property("custom_tax_id", "reqd", 1);
+            frm.set_df_property("custom_cr_number", "reqd", 1);
+            frm.set_df_property("company_name", "reqd", 1);
             frm.set_df_property("custom_national_id", "reqd", 0);
         } else if (frm.doc.type === "Individual" && !frm.is_new()) {
             frm.set_df_property("custom_national_id", "reqd", 1);
@@ -137,17 +190,19 @@ function show_action_button(frm) {
 // === Main Form Events ===
 frappe.ui.form.on('Lead', {
     // --- On form load ---
-    onload: function (frm) {
+    onload: function(frm) {
         hide_tab(frm, 'custom_tab_6');
         hide_tab(frm, 'custom_tab_7');
         fetch_and_set_location(frm);
+        add_create_lead_visit_button(frm);
     },
 
     // --- On form refresh ---
-    refresh: function (frm) {
+    refresh: function(frm) {
         clean_custom_buttons(frm);
         handle_tab_visibility(frm);
         show_action_button(frm);
+        add_create_lead_visit_button(frm);
         // Update the map if latitude and longitude are set
         if (frm.doc.custom_latitude && frm.doc.custom_longitude) {
             update_map(frm, frm.doc.custom_latitude, frm.doc.custom_longitude);
@@ -155,12 +210,12 @@ frappe.ui.form.on('Lead', {
     },
 
     // --- On form save ---
-    after_save: function (frm) {
+    after_save: function(frm) {
         frm.reload_doc();
     },
 
     // --- On form validate ---
-    validate: function (frm) {
+    validate: function(frm) {
         // Only validate if Customer Information tab is completed
         if (isTabCompleted(frm, "Customer Information")) {
             if (frm.doc.type === "Company") {
@@ -179,7 +234,7 @@ frappe.ui.form.on('Lead', {
     // --- Field triggers for progressive tabs and validation (Company Information tab fields) ---
     custom_customer_name: handle_tab_visibility,
     type: handle_tab_visibility,
-    custom_city1: function (frm) {
+    custom_city1: function(frm) { 
         apply_filter_to_field_district(frm);
         handle_tab_visibility(frm);
     },
@@ -187,7 +242,7 @@ frappe.ui.form.on('Lead', {
     custom_company_activity: handle_tab_visibility,
     custom_business_activity: handle_tab_visibility,
     first_name: handle_tab_visibility,
-    mobile_no: function (frm) {
+    mobile_no: function(frm) {
         is_valid_mobile_no(frm);
         handle_tab_visibility(frm);
     },
@@ -248,7 +303,7 @@ function fetch_and_set_location(frm) {
                 // Update the map
                 update_map(frm, latitude, longitude);
 
-
+                
             },
             function (error) {
                 // Handle errors from Geolocation API

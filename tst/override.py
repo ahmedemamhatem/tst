@@ -35,7 +35,6 @@ class WorkflowTransitionError(frappe.ValidationError):
 class WorkflowPermissionError(frappe.ValidationError):
     pass
 
-
 class ValidateReportsTo:
     def __init__(self, doc):
         self.doc = doc
@@ -49,7 +48,6 @@ class ValidateReportsTo:
         if not employee_doc.reports_to:
             return
         if employee_doc.reports_to:
-
             def get_allowed_users_to_approve(employee_doc):
                 allowed_users_to_approve = []
                 if employee_doc.reports_to:
@@ -411,7 +409,6 @@ def get_item_valuation_rate(item_code, warehouse=None):
 
     return float(valuation_rate or 0)
 
-
 def calculate_bundle_valuation(doc, method):
     """
     On validate of Product Bundle, calculate valuation_rate, valuation_amount for items,
@@ -545,7 +542,6 @@ def _reorder_item():
     if material_requests:
         return create_material_request(material_requests)
 
-
 @frappe.whitelist()
 def apply_workflow(doc, action):
     """Allow workflow action on the current doc"""
@@ -604,7 +600,6 @@ def apply_workflow(doc, action):
     doc.add_comment("Workflow", _(next_state.state))
 
     return doc
-
 
 @frappe.whitelist()
 def validate_items_are_saleable(doc, method):
