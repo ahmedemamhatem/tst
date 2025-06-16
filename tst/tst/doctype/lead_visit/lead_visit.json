@@ -80,7 +80,8 @@
    "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "Visit Date"
+   "label": "Visit Date",
+   "read_only": 1
   },
   {
    "fieldname": "visit_type",
@@ -91,7 +92,8 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Visit Type",
-   "options": "\nPhone\nOn Location"
+   "options": "\nPhone\nOn Location",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_pfov",
@@ -203,7 +205,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-10 22:56:33.149513",
+ "modified": "2025-06-16 20:21:15.630346",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Lead Visit",
