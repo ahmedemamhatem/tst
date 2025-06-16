@@ -130,8 +130,7 @@ function clean_custom_buttons(frm) {
         // Remove BOTH English and Arabic Customer buttons
         frm.remove_custom_button(__('Customer'), __('Create'));
         frm.remove_custom_button('العميل', __('Create'));
-        frm.remove_custom_button(__('Quotation'), __('Create'));
-        frm.remove_custom_button('عرض سعر', __('Create')); // In case Arabic Quotation appears
+
 
         // if (!frm.is_new() && frm.doc.__onload && !frm.doc.__onload.is_customer) {
         //     frm.add_custom_button(__('Customer'), function () {
