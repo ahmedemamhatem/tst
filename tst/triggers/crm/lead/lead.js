@@ -163,6 +163,8 @@ function handle_tab_visibility(frm) {
     if (isTabCompleted(frm, "Customer Analysis")) {
         if (frm.doc.type === "Company" && !frm.is_new()) {
             frm.set_df_property("custom_tax_id", "reqd", 1);
+            frm.set_df_property("custom_cr_number", "reqd", 1);
+            frm.set_df_property("company_name", "reqd", 1);
             frm.set_df_property("custom_national_id", "reqd", 0);
         } else if (frm.doc.type === "Individual" && !frm.is_new()) {
             frm.set_df_property("custom_national_id", "reqd", 1);
