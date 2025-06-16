@@ -262,6 +262,90 @@ def set_department_from_employee(doc, method):
         frappe.log_error(frappe.get_traceback(), "set_department_from_employee Error")
 
 
+import frappe
+from frappe.utils import flt
+
+
+def validate_quotation_discount_limits(doc, method=None):
+    template_name = doc.custom_quotation_templet
+    if not template_name:
+        return
+
+    settings = frappe.get_single("TST Selling Settings")
+    user_discount_role = settings.user_discount_role
+    supervisor_discount_role = settings.supervisor_discount_role
+    manager_discount_role = settings.manager_discount_role
+
+    # Ensure user and supervisor roles are set
+    if not (user_discount_role and supervisor_discount_role):
+        frappe.throw(
+            "Please set <b>User Discount Role</b> and <b>Supervisor Discount Role</b> in <b>TST Selling Settings</b>."
+        )
+
+    user_roles = frappe.get_roles(frappe.session.user)
+
+    for item in doc.items:
+        discount = flt(item.discount_percentage)
+
+        if discount <= 0:
+            continue
+
+        # --- Manager override only if role is set and user has it ---
+        if manager_discount_role and manager_discount_role in user_roles:
+            continue
+
+        # --- Fetch discount limits from template ---
+        template_item = frappe.db.get_value(
+            "Quotation Templet Item",
+            {"parent": template_name, "item_code": item.item_code},
+            ["user_discount", "supervisor_discount"],
+            as_dict=True,
+        )
+
+        if not template_item:
+            frappe.throw(
+                f"Row {item.idx}: Missing discount limits for item <b>{item.item_code}</b> in Quotation Template <b>{template_name}</b>.<br>"
+                "Please contact your administrator to set the limits."
+            )
+
+        user_limit = flt(template_item.get("user_discount"))
+        supervisor_limit = flt(template_item.get("supervisor_discount"))
+
+        # --- Validate Discount Logic ---
+
+        # Case 1: Discount exceeds supervisor limit
+        if supervisor_limit and discount > supervisor_limit:
+            frappe.throw(
+                f"Row {item.idx}: Discount <b>{discount}%</b> exceeds supervisor limit <b>{supervisor_limit}%</b> "
+                f"for item <b>{item.item_code}</b>."
+            )
+
+        # Case 2: Discount exceeds user limit (needs supervisor)
+        if user_limit and discount > user_limit:
+            if supervisor_discount_role not in user_roles:
+                frappe.throw(
+                    f"Row {item.idx}: Discount <b>{discount}%</b> exceeds user limit <b>{user_limit}%</b> for item <b>{item.item_code}</b>. "
+                    f"You need the <b>{supervisor_discount_role}</b> role."
+                )
+
+        # Case 3: Discount within user limit (needs user or supervisor)
+        elif user_limit and discount <= user_limit:
+            if (
+                user_discount_role not in user_roles
+                and supervisor_discount_role not in user_roles
+            ):
+                frappe.throw(
+                    f"Row {item.idx}: Discount <b>{discount}%</b> requires either <b>{user_discount_role}</b> or <b>{supervisor_discount_role}</b> role."
+                )
+
+        # Case 4: Only supervisor limit set (no user limit)
+        elif not user_limit and supervisor_limit:
+            if supervisor_discount_role not in user_roles:
+                frappe.throw(
+                    f"Row {item.idx}: Discount <b>{discount}%</b> requires the <b>{supervisor_discount_role}</b> role."
+                )
+
+
 def validate_items_are_saleable(self, method):
     for d in self.get("items"):
         # Fetch the custom_item_status from the Item master
