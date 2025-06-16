@@ -5,7 +5,7 @@ function hide_tab(frm, tab_fieldname) {
 
 // Utility: Add "Create Lead Visit" button
 function add_create_lead_visit_button(frm) {
-    frm.add_custom_button(__('Create Lead Visit'), function () {
+    frm.add_custom_button(__('Create Visit'), function () {
         const dialog = new frappe.ui.Dialog({
             title: __('Select Visit Type'),
             fields: [
