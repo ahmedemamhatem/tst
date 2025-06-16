@@ -1,15 +1,19 @@
 import frappe
 from frappe.utils import nowdate
 
+
 @frappe.whitelist()
-def after_insert(doc,method= None):
+def after_insert(doc, method=None):
     if not doc.custom_is_sub_technician:
         check_required_items(doc)
+
 
 def check_required_items(doc):
     material_requests = {}
 
-    installation_order_items, technician_warehouse, assistant_technicians = get_items_from_installation_order(doc.custom_installation_order)
+    installation_order_items, technician_warehouse, assistant_technicians = (
+        get_items_from_installation_order(doc.custom_installation_order)
+    )
 
     if installation_order_items:
         for item in installation_order_items:
@@ -35,32 +39,48 @@ def check_required_items(doc):
             missing_qty = required_qty - total_available
             default_warehouse = get_default_warehouse(item_code)
 
-            material_requests.setdefault(default_warehouse, []).append({
-                'item_code': item_code,
-                'qty': missing_qty,
-                'schedule_date': nowdate(),
-                'from_warehouse': default_warehouse,
-                'warehouse': technician_warehouse  
-            })
+            material_requests.setdefault(default_warehouse, []).append(
+                {
+                    "item_code": item_code,
+                    "qty": missing_qty,
+                    "schedule_date": nowdate(),
+                    "from_warehouse": default_warehouse,
+                    "warehouse": technician_warehouse,
+                }
+            )
 
     if material_requests:
         for source_warehouse, items in material_requests.items():
-            create_material_request(items, technician_warehouse,source_warehouse,doc.custom_technician,doc.name)
+            create_material_request(
+                items,
+                technician_warehouse,
+                source_warehouse,
+                doc.custom_technician,
+                doc.name,
+            )
 
-            
+
 def get_items_from_installation_order(installation_order):
     """
-    fetches all items from its Installation Order , 
+    fetches all items from its Installation Order ,
     """
-    
+
     installation_order = frappe.get_cached_doc("Installation Order", installation_order)
 
-    return installation_order.get("items") or [] , installation_order.warehouse , installation_order.get("sub_installation_order_technician") or []
+    return (
+        installation_order.get("items") or [],
+        installation_order.warehouse,
+        installation_order.get("sub_installation_order_technician") or [],
+    )
+
 
 def get_default_warehouse(item_code):
-    default_warehouse = frappe.get_cached_value("Item Default",{"parent":item_code},"default_warehouse")
-    
+    default_warehouse = frappe.get_cached_value(
+        "Item Default", {"parent": item_code}, "default_warehouse"
+    )
+
     return default_warehouse
+
 
 def get_stock_qty(item_code, warehouse):
     """
@@ -70,53 +90,65 @@ def get_stock_qty(item_code, warehouse):
     :param warehouse: Warehouse to check in
     :return: Actual quantity available (float)
     """
-    return frappe.db.get_value('Bin', {
-        'item_code': item_code,
-        'warehouse': warehouse
-    }, 'actual_qty') or 0
+    return (
+        frappe.db.get_value(
+            "Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty"
+        )
+        or 0
+    )
 
 
-def create_material_request(items , target_warehouse ,source_warehouse,technician,reference_link):
-    
-    mr = frappe.get_doc({
-        'doctype': 'Material Request',
-        'material_request_type': 'Material Transfer',
-        "custom_reference_doctype":"Appointment",
-        "custom_reference_link":reference_link,
-        'schedule_date': nowdate(),
-        "set_from_warehouse":source_warehouse,
-        'set_warehouse': target_warehouse,
-        'items': items
-    })
+def create_material_request(
+    items, target_warehouse, source_warehouse, technician, reference_link
+):
+    mr = frappe.get_doc(
+        {
+            "doctype": "Material Request",
+            "material_request_type": "Material Transfer",
+            "custom_reference_doctype": "Appointment",
+            "custom_reference_link": reference_link,
+            "schedule_date": nowdate(),
+            "set_from_warehouse": source_warehouse,
+            "set_warehouse": target_warehouse,
+            "items": items,
+        }
+    )
 
     mr.insert()
     if mr.name:
-        warehouse_manager_user = frappe.get_cached_value("Warehouse", {"name": target_warehouse}, "custom_warehouse_manager")
+        warehouse_manager_user = frappe.get_cached_value(
+            "Warehouse", {"name": target_warehouse}, "custom_warehouse_manager"
+        )
         mobile_no = None
 
         if warehouse_manager_user:
-            mobile_no = frappe.get_cached_value("User", {"name": warehouse_manager_user}, "mobile_no")
+            mobile_no = frappe.get_cached_value(
+                "User", {"name": warehouse_manager_user}, "mobile_no"
+            )
 
         recipient_persons = [
             {
                 "receipent_person": "Technician",
-                "mobile_no": frappe.get_cached_value("Technician", {"name": technician}, "whatsapp_number")
+                "mobile_no": frappe.get_cached_value(
+                    "Technician", {"name": technician}, "whatsapp_number"
+                ),
             },
-            {
-                "receipent_person": "Warehouse Manager",
-                "mobile_no": mobile_no
-            },
+            {"receipent_person": "Warehouse Manager", "mobile_no": mobile_no},
         ]
 
-        create_whatsapp_message_for_material_request(mr.name,warehouse_manager_user, recipient_persons)
+        create_whatsapp_message_for_material_request(
+            mr.name, warehouse_manager_user, recipient_persons
+        )
 
         return mr.name
 
 
-def create_whatsapp_message_for_material_request(material_request_name,warehouse_manager_user, recipients):
+def create_whatsapp_message_for_material_request(
+    material_request_name, warehouse_manager_user, recipients
+):
     """
     Create WhatsApp Message for each recipient (technician, warehouse manager).
-    
+
     :param material_request_name: Name of the Material Request
     :param recipients: List of dicts with keys: receipent_person, mobile_no
     """
@@ -126,7 +158,9 @@ def create_whatsapp_message_for_material_request(material_request_name,warehouse
     order_number = material_request.name
     posting_date = material_request.transaction_date
     owner = warehouse_manager_user
-    owner_contact = frappe.get_cached_value("User", owner, "mobile_no") or "Not Provided"
+    owner_contact = (
+        frappe.get_cached_value("User", owner, "mobile_no") or "Not Provided"
+    )
     warehouse = material_request.set_warehouse or "Not Specified"
 
     # Format items
@@ -141,7 +175,9 @@ def create_whatsapp_message_for_material_request(material_request_name,warehouse
         role = recipient.get("receipent_person")
 
         if not mobile_no:
-            frappe.log_error(f"No mobile number for {role}", "WhatsApp Message Creation")
+            frappe.log_error(
+                f"No mobile number for {role}", "WhatsApp Message Creation"
+            )
             continue
 
         # Compose message
@@ -172,18 +208,22 @@ def create_whatsapp_message_for_material_request(material_request_name,warehouse
 
     frappe.db.commit()
 
+
 @frappe.whitelist()
 def validate(doc, method=None):
     set_custom_appointment_status(doc)
 
 
 def set_custom_appointment_status(doc):
-    mr = frappe.db.exists("Material Request", {"custom_reference_doctype": "Appointment", 
-                                               "custom_reference_link": doc.name})
+    mr = frappe.db.exists(
+        "Material Request",
+        {"custom_reference_doctype": "Appointment", "custom_reference_link": doc.name},
+    )
     if mr:
         mr_doc = frappe.get_cached_doc("Material Request", mr)
         if mr_doc.status != "Transferred":
             doc.custom_appointment_status = "Out of Stock"
+
 
 @frappe.whitelist()
 def on_submit(doc, method=None):

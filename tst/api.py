@@ -3,6 +3,7 @@ import frappe
 import pandas as pd
 import io
 
+
 @frappe.whitelist()
 def upload_serials_from_file(file_url, docname, row_idx, doctype):
     """
@@ -13,13 +14,13 @@ def upload_serials_from_file(file_url, docname, row_idx, doctype):
         frappe.throw("File URL is required.")
 
     # Step 1: Resolve file path
-    rel_path = file_url.lstrip('/')
+    rel_path = file_url.lstrip("/")
     abs_path = os.path.join(frappe.get_site_path(), rel_path)
     if not os.path.isfile(abs_path):
         frappe.throw(f"File not found at resolved path: {abs_path}")
 
     # Step 2: Read file as Excel or CSV (by extension, fallback by content)
-    ext = abs_path.split('.')[-1].lower()
+    ext = abs_path.split(".")[-1].lower()
     filecontent = None
     with open(abs_path, "rb") as f:
         filecontent = f.read()
@@ -46,8 +47,10 @@ def upload_serials_from_file(file_url, docname, row_idx, doctype):
                 frappe.throw("File must be an Excel (.xlsx) or CSV (.csv) file.")
 
     # Step 3: Ensure 'serial' column exists
-    if 'serial' not in (c.lower() for c in df.columns):
-        frappe.throw('No column named "serial" found in the uploaded file. (Case-insensitive match expected)')
+    if "serial" not in (c.lower() for c in df.columns):
+        frappe.throw(
+            'No column named "serial" found in the uploaded file. (Case-insensitive match expected)'
+        )
     # Find the actual column name for robust case-insensitivity
     serial_col = next(col for col in df.columns if col.lower() == "serial")
     serials = df[serial_col].dropna().astype(str).map(str.strip).tolist()
@@ -77,9 +80,63 @@ def upload_serials_from_file(file_url, docname, row_idx, doctype):
     return {"serials": serials_str}
 
 
+def get_fields(doctype, fields=None):
+    if fields is None:
+        fields = []
+    meta = frappe.get_meta(doctype)
+    fields.extend(meta.get_search_fields())
+
+    if meta.title_field and meta.title_field.strip() not in fields:
+        fields.insert(1, meta.title_field.strip())
+
+    return unique(fields)
 
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def serial_and_batch_bundle_query(
+    doctype, txt, searchfield, start, page_len, filters, as_dict=False
+):
+    doctype = "Serial and Batch Bundle"
+    searchfields = frappe.get_meta(doctype).get_search_fields()
+    searchfields = " or ".join(
+        "sbb." + field + " like %(txt)s" for field in searchfields
+    )
 
+    return frappe.db.sql(
+        """select sbb.name, sbb.item_code, sbb.item_name
+        from `tabSerial and Batch Bundle` sbb
+        join `tabStock Entry Detail` sed on sed.name = sbb.voucher_detail_no  
+        where sbb.docstatus = 1
+          and sbb.voucher_type = "Stock Entry"
+          and sed.custom_installation_order = %(installation_order)s
+          and sbb.type_of_transaction = "Inward"
+            and ({key} like %(txt)s
+                or sbb.item_name like %(txt)s
+                or sbb.item_code like %(txt)s
+                or {scond})
+            {mcond}
+        order by
+            (case when locate(%(_txt)s, sbb.name) > 0 then locate(%(_txt)s, sbb.name) else 99999 end),
+            (case when locate(%(_txt)s, sbb.item_name) > 0 then locate(%(_txt)s, sbb.item_name) else 99999 end),
+            (case when locate(%(_txt)s, sbb.item_code) > 0 then locate(%(_txt)s, sbb.item_code) else 99999 end),
+            sbb.idx desc,
+            sbb.name, sbb.item_name
+        limit %(page_len)s offset %(start)s""".format(
+            **{
+                "key": "sbb." + searchfield,
+                "scond": searchfields,
+                "mcond": get_match_cond(doctype),
+            }
+        ),
+        {
+            "txt": "%%%s%%" % txt,
+            "_txt": txt.replace("%", ""),
+            "start": start,
+            "page_len": page_len,
+            "installation_order": filters.get("custom_installation_order"),
+        },
+    )
 
 
 @frappe.whitelist()
@@ -90,8 +147,11 @@ def serial_no_query(doctype, txt, searchfield, start, page_len, filters, as_dict
     searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
     appointment_with_same_installation_order = frappe.db.get_all(
         "Appointment",
-        filters={"docstatus": ["!=", 2], "custom_installation_order": filters.get("custom_installation_order")},
-        pluck="name"
+        filters={
+            "docstatus": ["!=", 2],
+            "custom_installation_order": filters.get("custom_installation_order"),
+        },
+        pluck="name",
     )
     return frappe.db.sql(
         """select name, item_code, item_name
@@ -129,12 +189,16 @@ def serial_no_query(doctype, txt, searchfield, start, page_len, filters, as_dict
                 "mcond": get_match_cond(doctype),
             }
         ),
-        {"txt": "%%%s%%" % txt, 
-   "_txt": txt.replace("%", ""), 
-   "start": start, 
-   "page_len": page_len, 
-   "custom_serial_and_batch_bundle": filters.get("custom_serial_and_batch_bundle"),
-   "appointment_with_same_installation_order": tuple(appointment_with_same_installation_order) 
-   }, 
-
+        {
+            "txt": "%%%s%%" % txt,
+            "_txt": txt.replace("%", ""),
+            "start": start,
+            "page_len": page_len,
+            "custom_serial_and_batch_bundle": filters.get(
+                "custom_serial_and_batch_bundle"
+            ),
+            "appointment_with_same_installation_order": tuple(
+                appointment_with_same_installation_order
+            ),
+        },
     )

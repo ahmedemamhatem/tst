@@ -1,9 +1,11 @@
 import frappe
 from frappe.model.mapper import get_mapped_doc
 
+
 @frappe.whitelist()
-def before_validate(doc,method = None):
+def before_validate(doc, method=None):
     set_contract_type(doc)
+
 
 @frappe.whitelist()
 def make_installation_order(source_name, target_doc=None):
@@ -33,22 +35,19 @@ def make_installation_order(source_name, target_doc=None):
                     "customer": "customer",
                     "name": "sales_order",
                     "delivery_date": "installation_date",
-                }
+                },
             },
             "Sales Order Item": {
                 "doctype": "Installation Order Item",
-                "field_map": {
-                    "custom_contact": "contact"
-                },
-                "condition": item_filter
-            }
+                "field_map": {"custom_contact": "contact"},
+                "condition": item_filter,
+            },
         },
         target_doc,
-        postprocess=postprocess
+        postprocess=postprocess,
     )
 
     return doc
-
 
 
 def set_contract_type(doc):
@@ -57,11 +56,11 @@ def set_contract_type(doc):
         filters={"min_qty": ["<", doc.total_qty]},
         fields=["contract_type"],
         order_by="min_qty desc",
-        limit=1
+        limit=1,
     )
 
     contract_type = contract_type_row[0].contract_type if contract_type_row else None
-    
+
     doc.custom_contract_type = contract_type
 
 
@@ -75,9 +74,9 @@ def get_customer_address_and_contacts_list(customer):
         filters={
             "link_doctype": "Customer",
             "link_name": customer,
-            "parenttype": "Address"
+            "parenttype": "Address",
         },
-        pluck="parent"
+        pluck="parent",
     )
 
     contacts = frappe.get_all(
@@ -85,10 +84,9 @@ def get_customer_address_and_contacts_list(customer):
         filters={
             "link_doctype": "Customer",
             "link_name": customer,
-            "parenttype":"Contact"
+            "parenttype": "Contact",
         },
-        pluck="parent"
+        pluck="parent",
     )
-    
-    return addresses,contacts
 
+    return addresses, contacts

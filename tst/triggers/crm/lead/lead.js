@@ -137,14 +137,14 @@ function show_action_button(frm) {
 // === Main Form Events ===
 frappe.ui.form.on('Lead', {
     // --- On form load ---
-    onload: function(frm) {
+    onload: function (frm) {
         hide_tab(frm, 'custom_tab_6');
         hide_tab(frm, 'custom_tab_7');
         fetch_and_set_location(frm);
     },
 
     // --- On form refresh ---
-    refresh: function(frm) {
+    refresh: function (frm) {
         clean_custom_buttons(frm);
         handle_tab_visibility(frm);
         show_action_button(frm);
@@ -155,12 +155,12 @@ frappe.ui.form.on('Lead', {
     },
 
     // --- On form save ---
-    after_save: function(frm) {
+    after_save: function (frm) {
         frm.reload_doc();
     },
 
     // --- On form validate ---
-    validate: function(frm) {
+    validate: function (frm) {
         // Only validate if Customer Information tab is completed
         if (isTabCompleted(frm, "Customer Information")) {
             if (frm.doc.type === "Company") {
@@ -179,7 +179,7 @@ frappe.ui.form.on('Lead', {
     // --- Field triggers for progressive tabs and validation (Company Information tab fields) ---
     custom_customer_name: handle_tab_visibility,
     type: handle_tab_visibility,
-    custom_city1: function(frm) { 
+    custom_city1: function (frm) {
         apply_filter_to_field_district(frm);
         handle_tab_visibility(frm);
     },
@@ -187,7 +187,7 @@ frappe.ui.form.on('Lead', {
     custom_company_activity: handle_tab_visibility,
     custom_business_activity: handle_tab_visibility,
     first_name: handle_tab_visibility,
-    mobile_no: function(frm) {
+    mobile_no: function (frm) {
         is_valid_mobile_no(frm);
         handle_tab_visibility(frm);
     },
@@ -248,7 +248,7 @@ function fetch_and_set_location(frm) {
                 // Update the map
                 update_map(frm, latitude, longitude);
 
-                
+
             },
             function (error) {
                 // Handle errors from Geolocation API

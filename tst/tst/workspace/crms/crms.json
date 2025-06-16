@@ -1,0 +1,94 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"G0bbey6X1y\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">CRMs</span>\",\"col\":12}},{\"id\":\"gm-dKy8Otz\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Lead\",\"col\":3}},{\"id\":\"7r9G3MxaKP\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Lead Visit\",\"col\":3}},{\"id\":\"9Dg9yaDC7b\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Quotation\",\"col\":3}},{\"id\":\"dBknE-rpBS\",\"type\":\"card\",\"data\":{\"card_name\":\"Setting \",\"col\":4}}]",
+ "creation": "2025-06-16 02:01:41.149176",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 1,
+ "icon": "share-people",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "CRMs",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Setting ",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "TST Selling Settings",
+   "link_count": 0,
+   "link_to": "TST Selling Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Lead Source",
+   "link_count": 0,
+   "link_to": "Lead Source",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Quotation Template",
+   "link_count": 0,
+   "link_to": "Quotation Template",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-06-16 08:22:04.513489",
+ "modified_by": "Administrator",
+ "module": "Tst",
+ "name": "CRMs",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 41.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Quotation",
+   "link_to": "Quotation",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Lead Visit",
+   "link_to": "Lead Visit",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Lead",
+   "link_to": "Lead",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "title": "CRMs"
+}
