@@ -5,6 +5,7 @@ function hide_tab(frm, tab_fieldname) {
 
 // Utility: Add "Create Lead Visit" button
 function add_create_lead_visit_button(frm) {
+    // Add a custom button with translation
     frm.add_custom_button(__('Create Visit'), function () {
         const dialog = new frappe.ui.Dialog({
             title: __('Select Visit Type'),
@@ -20,6 +21,8 @@ function add_create_lead_visit_button(frm) {
             primary_action_label: __('Create'),
             primary_action(values) {
                 dialog.hide();
+
+                // Check if Geolocation is supported
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(function (position) {
                         frappe.db.insert({
@@ -29,7 +32,7 @@ function add_create_lead_visit_button(frm) {
                             visit_date: frappe.datetime.now_date(),
                             latitude: position.coords.latitude,
                             longitude: position.coords.longitude,
-                            address: `Lat: ${position.coords.latitude}, Long: ${position.coords.longitude}`
+                            address: __('Lat: {0}, Long: {1}', [position.coords.latitude, position.coords.longitude])
                         }).then((doc) => {
                             frappe.msgprint(__('Lead Visit created successfully!'));
                             frappe.set_route('Form', 'Lead Visit', doc.name);
@@ -42,10 +45,11 @@ function add_create_lead_visit_button(frm) {
                 }
             }
         });
+
+        // Show the dialog
         dialog.show();
     });
 }
-
 
 // === Utility: Show Tab by fieldname ===
 function show_tab(frm, tab_fieldname) {
