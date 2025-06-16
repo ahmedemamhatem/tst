@@ -129,20 +129,20 @@ function clean_custom_buttons(frm) {
         frm.remove_custom_button(__('Quotation'), __('Create'));
         frm.remove_custom_button('عرض سعر', __('Create')); // In case Arabic Quotation appears
 
-        if (!frm.is_new() && frm.doc.__onload && !frm.doc.__onload.is_customer) {
-            frm.add_custom_button(__('Customer'), function () {
-                frappe.model.open_mapped_doc({
-                    method: "erpnext.crm.doctype.lead.lead.make_customer",
-                    frm: frm
-                });
-            }, __('Create'));
-            frm.add_custom_button(__('Quotation'), function () {
-                frappe.model.open_mapped_doc({
-                    method: "erpnext.crm.doctype.lead.lead.make_quotation",
-                    frm: frm
-                });
-            }, __('Create'));
-        }
+        // if (!frm.is_new() && frm.doc.__onload && !frm.doc.__onload.is_customer) {
+        //     frm.add_custom_button(__('Customer'), function () {
+        //         frappe.model.open_mapped_doc({
+        //             method: "erpnext.crm.doctype.lead.lead.make_customer",
+        //             frm: frm
+        //         });
+        //     }, __('Create'));
+        //     frm.add_custom_button(__('Quotation'), function () {
+        //         frappe.model.open_mapped_doc({
+        //             method: "erpnext.crm.doctype.lead.lead.make_quotation",
+        //             frm: frm
+        //         });
+        //     }, __('Create'));
+        // }
     }, 250);
 }
 
