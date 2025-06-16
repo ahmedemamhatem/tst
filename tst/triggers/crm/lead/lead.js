@@ -3,6 +3,50 @@ function hide_tab(frm, tab_fieldname) {
     frm.$wrapper.find(`[data-fieldname='${tab_fieldname}']`).hide();
 }
 
+// Utility: Add "Create Lead Visit" button
+function add_create_lead_visit_button(frm) {
+    frm.add_custom_button(__('Create Lead Visit'), function () {
+        const dialog = new frappe.ui.Dialog({
+            title: __('Select Visit Type'),
+            fields: [
+                {
+                    label: __('Visit Type'),
+                    fieldname: 'visit_type',
+                    fieldtype: 'Select',
+                    options: ["", __('On Location'), __('Phone')],
+                    reqd: 1
+                }
+            ],
+            primary_action_label: __('Create'),
+            primary_action(values) {
+                dialog.hide();
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        frappe.db.insert({
+                            doctype: 'Lead Visit',
+                            lead: frm.doc.name,
+                            visit_type: values.visit_type,
+                            visit_date: frappe.datetime.now_date(),
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            address: `Lat: ${position.coords.latitude}, Long: ${position.coords.longitude}`
+                        }).then((doc) => {
+                            frappe.msgprint(__('Lead Visit created successfully!'));
+                            frappe.set_route('Form', 'Lead Visit', doc.name);
+                        });
+                    }, function () {
+                        frappe.msgprint(__('Unable to fetch location. Please enable location access in your browser.'));
+                    });
+                } else {
+                    frappe.msgprint(__('Geolocation is not supported by this browser.'));
+                }
+            }
+        });
+        dialog.show();
+    });
+}
+
+
 // === Utility: Show Tab by fieldname ===
 function show_tab(frm, tab_fieldname) {
     frm.$wrapper.find(`[data-fieldname='${tab_fieldname}']`).show();
@@ -79,9 +123,13 @@ function clean_custom_buttons(frm) {
         frm.remove_custom_button(__('Opportunity'), __('Create'));
         frm.remove_custom_button(__('Prospect'), __('Create'));
         frm.remove_custom_button(__('Add to Prospect'), __('Action'));
+        // Remove BOTH English and Arabic Customer buttons
+        frm.remove_custom_button(__('Customer'), __('Create'));
+        frm.remove_custom_button('العميل', __('Create'));
+        frm.remove_custom_button(__('Quotation'), __('Create'));
+        frm.remove_custom_button('عرض سعر', __('Create')); // In case Arabic Quotation appears
+
         if (!frm.is_new() && frm.doc.__onload && !frm.doc.__onload.is_customer) {
-            frm.remove_custom_button(__('Customer'), __('Create'));
-            frm.remove_custom_button(__('Quotation'), __('Create'));
             frm.add_custom_button(__('Customer'), function () {
                 frappe.model.open_mapped_doc({
                     method: "erpnext.crm.doctype.lead.lead.make_customer",
@@ -141,6 +189,7 @@ frappe.ui.form.on('Lead', {
         hide_tab(frm, 'custom_tab_6');
         hide_tab(frm, 'custom_tab_7');
         fetch_and_set_location(frm);
+        add_create_lead_visit_button(frm);
     },
 
     // --- On form refresh ---
@@ -148,6 +197,7 @@ frappe.ui.form.on('Lead', {
         clean_custom_buttons(frm);
         handle_tab_visibility(frm);
         show_action_button(frm);
+        add_create_lead_visit_button(frm);
         // Update the map if latitude and longitude are set
         if (frm.doc.custom_latitude && frm.doc.custom_longitude) {
             update_map(frm, frm.doc.custom_latitude, frm.doc.custom_longitude);
