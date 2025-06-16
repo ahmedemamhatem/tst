@@ -48,6 +48,8 @@ def set_custom_address(doc, method=None):
             frappe.throw(_("Unable to fetch Arabic address. Please check the logs for more details."))
 
 def validate(doc, method=None):
+    if not self.custom_creation_time and self.creation:
+        self.custom_creation_time = self.creation
     is_valid_number(doc.mobile_no)
     validate_no_of_cars(doc)
     check_duplicate_tax_or_national_id(doc)
