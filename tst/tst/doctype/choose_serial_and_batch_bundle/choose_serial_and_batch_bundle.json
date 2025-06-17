@@ -6,25 +6,17 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "serial_and_batch_bundle",
+  "serial_no",
   "item_code",
+  "item_name",
   "warehouse",
   "type_of_transaction",
   "voucher_type",
-  "voucher_no",
-  "serial_no"
+  "voucher_no"
  ],
  "fields": [
   {
-   "fieldname": "serial_and_batch_bundle",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Serial and Batch Bundle",
-   "options": "Serial and Batch Bundle",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "serial_and_batch_bundle.item_code",
+   "fetch_from": "serial_no.item_code",
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -32,45 +24,54 @@
    "options": "Item"
   },
   {
-   "fetch_from": "serial_and_batch_bundle.warehouse",
+   "fetch_from": "serial_no.warehouse",
    "fieldname": "warehouse",
    "fieldtype": "Data",
    "label": "Warehouse"
   },
   {
-   "fetch_from": "serial_and_batch_bundle.type_of_transaction",
    "fieldname": "type_of_transaction",
    "fieldtype": "Data",
    "label": "Type of Transaction",
    "read_only": 1
   },
   {
-   "fetch_from": "serial_and_batch_bundle.voucher_type",
+   "default": "Device Setup",
    "fieldname": "voucher_type",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "label": "Voucher Type",
+   "options": "Device Setup",
    "read_only": 1
   },
   {
-   "fetch_from": "serial_and_batch_bundle.voucher_no",
    "fieldname": "voucher_no",
-   "fieldtype": "Data",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
    "label": "Voucher No",
+   "options": "voucher_type",
    "read_only": 1
   },
   {
    "fieldname": "serial_no",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Serial No",
+   "options": "Serial No",
    "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-05-26 20:34:51.725713",
+ "modified": "2025-06-03 22:30:11.872159",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Choose Serial and Batch Bundle",

@@ -80,58 +80,6 @@ def upload_serials_from_file(file_url, docname, row_idx, doctype):
 
 
 
-def get_fields(doctype, fields=None):
-    if fields is None:
-        fields = []
-    meta = frappe.get_meta(doctype)
-    fields.extend(meta.get_search_fields())
-
-    if meta.title_field and meta.title_field.strip() not in fields:
-        fields.insert(1, meta.title_field.strip())
-
-    return unique(fields)
-
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def serial_and_batch_bundle_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
-    doctype = "Serial and Batch Bundle"
-    searchfields = frappe.get_meta(doctype).get_search_fields()
-    searchfields = " or ".join('sbb.' + field + " like %(txt)s" for field in searchfields)
-
-    return frappe.db.sql(
-        """select sbb.name, sbb.item_code, sbb.item_name
-        from `tabSerial and Batch Bundle` sbb
-        join `tabStock Entry Detail` sed on sed.name = sbb.voucher_detail_no  
-        where sbb.docstatus = 1
-          and sbb.voucher_type = "Stock Entry"
-          and sed.custom_installation_order = %(installation_order)s
-          and sbb.type_of_transaction = "Inward"
-            and ({key} like %(txt)s
-                or sbb.item_name like %(txt)s
-                or sbb.item_code like %(txt)s
-                or {scond})
-            {mcond}
-        order by
-            (case when locate(%(_txt)s, sbb.name) > 0 then locate(%(_txt)s, sbb.name) else 99999 end),
-            (case when locate(%(_txt)s, sbb.item_name) > 0 then locate(%(_txt)s, sbb.item_name) else 99999 end),
-            (case when locate(%(_txt)s, sbb.item_code) > 0 then locate(%(_txt)s, sbb.item_code) else 99999 end),
-            sbb.idx desc,
-            sbb.name, sbb.item_name
-        limit %(page_len)s offset %(start)s""".format(
-            **{
-                "key": 'sbb.'+searchfield,
-                "scond": searchfields,
-                "mcond": get_match_cond(doctype),
-            }
-        ),
-        {"txt": "%%%s%%" % txt, 
-   "_txt": txt.replace("%", ""), 
-   "start": start, 
-   "page_len": page_len, 
-   "installation_order": filters.get("custom_installation_order")}, 
-    )
 
 
 @frappe.whitelist()

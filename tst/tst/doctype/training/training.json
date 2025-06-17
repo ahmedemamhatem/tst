@@ -1,0 +1,172 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-06-12 22:24:45.923033",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_03af",
+  "amended_from",
+  "naming_series",
+  "device",
+  "user_section",
+  "username",
+  "column_break_whdr",
+  "password",
+  "section_break_vbxb",
+  "account_setup_verified",
+  "schedule_setup",
+  "start_date",
+  "column_break_keii",
+  "number_of_sessions",
+  "column_break_ldft",
+  "periodicity",
+  "section_break_sywy",
+  "training_schedule"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_03af",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Training",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "device",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Device",
+   "link_filters": "[[\"Device Setup\",\"status\",\"=\",\"Active\"],[\"Device Setup\",\"docstatus\",\"=\",\"1\"]]",
+   "options": "Device Setup",
+   "reqd": 1
+  },
+  {
+   "fieldname": "user_section",
+   "fieldtype": "Section Break",
+   "label": "User"
+  },
+  {
+   "fetch_from": "device.username",
+   "fieldname": "username",
+   "fieldtype": "Data",
+   "label": "Username",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_whdr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "device.password",
+   "fieldname": "password",
+   "fieldtype": "Data",
+   "label": "Password",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_vbxb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "account_setup_verified",
+   "fieldtype": "Check",
+   "label": "Account Setup Verified"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date",
+   "mandatory_depends_on": "eval:doc.account_setup_verified"
+  },
+  {
+   "fieldname": "column_break_keii",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "number_of_sessions",
+   "fieldtype": "Int",
+   "label": "Number of Sessions",
+   "mandatory_depends_on": "eval:doc.account_setup_verified"
+  },
+  {
+   "fieldname": "column_break_ldft",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "periodicity",
+   "fieldtype": "Select",
+   "label": "Periodicity",
+   "mandatory_depends_on": "eval:doc.account_setup_verified",
+   "options": "\nWeekly\nMonthly\nDaily"
+  },
+  {
+   "depends_on": "eval:doc.account_setup_verified",
+   "fieldname": "schedule_setup",
+   "fieldtype": "Section Break",
+   "label": "Schedule Setup"
+  },
+  {
+   "fieldname": "section_break_sywy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "training_schedule",
+   "fieldtype": "Table",
+   "label": "Training Schedule",
+   "options": "Training Schedule",
+   "read_only": 1
+  },
+  {
+   "default": "TRAIN-",
+   "fieldname": "naming_series",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Naming Series",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [
+  {
+   "link_doctype": "Training Session",
+   "link_fieldname": "reference_link"
+  }
+ ],
+ "modified": "2025-06-14 04:37:48.106528",
+ "modified_by": "Administrator",
+ "module": "Tst",
+ "name": "Training",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

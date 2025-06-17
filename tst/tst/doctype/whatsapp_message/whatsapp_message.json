@@ -6,7 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "mobile_no",
-  "message"
+  "message",
+  "attach_dcny"
  ],
  "fields": [
   {
@@ -23,12 +24,16 @@
    "in_list_view": 1,
    "label": "Message",
    "reqd": 1
+  },
+  {
+   "fieldname": "attach_dcny",
+   "fieldtype": "Attach"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-25 01:46:54.141642",
+ "modified": "2025-06-03 22:09:38.741098",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "WhatsApp Message",

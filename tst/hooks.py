@@ -30,13 +30,17 @@ doc_events = {
         ]
     },
     "Sales Order": {
-        "validate": "tst.override.validate_items_are_saleable"
+        "validate": "tst.override.validate_items_are_saleable",
+        "before_validate": "tst.triggers.selling.sales_order.sales_order.before_validate"
     },
     "Lead": {
 		"validate": "tst.triggers.crm.lead.lead.validate",
 		# "on_cancel": "method",
 		# "on_trash": "method"
 	},
+    "Event":{
+        "validate":"tst.triggers.desk.event.event.validate"
+    },
     "Appointment": {
 		"after_insert": "tst.triggers.crm.appointment.appointment.after_insert",
 		"validate": "tst.triggers.crm.appointment.appointment.validate",

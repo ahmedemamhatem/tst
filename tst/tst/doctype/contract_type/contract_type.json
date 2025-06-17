@@ -12,15 +12,17 @@
   {
    "fieldname": "type",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Type",
+   "reqd": 1,
    "unique": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-23 00:35:00.695328",
+ "modified": "2025-06-13 02:32:57.197145",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Contract Type",
@@ -52,7 +54,7 @@
    "write": 1
   }
  ],
- "row_format": "Dynamic",
+ "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

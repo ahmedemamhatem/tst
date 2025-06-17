@@ -20,12 +20,15 @@
   "customer_address",
   "contact_person",
   "customer_email",
+  "section_break_ffik",
+  "technician",
+  "column_break_cqhk",
+  "warehouse",
   "reference_section",
   "sales_order",
   "section_break_woob",
   "items",
   "section_break_papx",
-  "technicians",
   "sub_installation_order_technician"
  ],
  "fields": [
@@ -108,18 +111,11 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "technicians",
-   "fieldtype": "Table",
-   "label": "Technicians",
-   "options": "Installation Order Technician",
-   "reqd": 1
-  },
-  {
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Naming Series",
-   "options": "Inst -"
+   "options": "INSTALL-"
   },
   {
    "fieldname": "reference_section",
@@ -161,6 +157,29 @@
    "in_standard_filter": 1,
    "label": "Customer Email",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_break_ffik",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "technician",
+   "fieldtype": "Link",
+   "label": "Technician",
+   "options": "Technician"
+  },
+  {
+   "fieldname": "column_break_cqhk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "technician.warehouse",
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -172,7 +191,7 @@
    "link_fieldname": "custom_installation_order"
   }
  ],
- "modified": "2025-05-26 13:50:01.630147",
+ "modified": "2025-06-16 23:56:21.150064",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Installation Order",
