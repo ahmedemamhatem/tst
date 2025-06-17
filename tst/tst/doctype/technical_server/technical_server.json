@@ -1,42 +1,25 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-05-25 01:41:48.398898",
+ "creation": "2025-06-03 20:07:41.317138",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "mobile_no",
-  "message",
-  "attach_dcny"
+  "section_break_liuv"
  ],
  "fields": [
   {
-   "description": "The phone number that will receive the message.",
-   "fieldname": "mobile_no",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Mobile No",
-   "reqd": 1
-  },
-  {
-   "fieldname": "message",
-   "fieldtype": "Long Text",
-   "in_list_view": 1,
-   "label": "Message",
-   "reqd": 1
-  },
-  {
-   "fieldname": "attach_dcny",
-   "fieldtype": "Attach"
+   "fieldname": "section_break_liuv",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-03 22:09:38.741098",
+ "modified": "2025-06-03 20:07:41.317138",
  "modified_by": "Administrator",
  "module": "Tst",
- "name": "WhatsApp Message",
+ "name": "Technical Server",
  "owner": "Administrator",
  "permissions": [
   {

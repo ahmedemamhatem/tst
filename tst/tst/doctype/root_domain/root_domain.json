@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "prompt",
+ "creation": "2025-06-03 20:51:36.233398",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "default_cluster",
+  "default_proxy_server",
+  "column_break_4",
+  "dns_provider",
+  "aws_access_key_id",
+  "aws_secret_access_key"
+ ],
+ "fields": [
+  {
+   "fieldname": "default_cluster",
+   "fieldtype": "Link",
+   "label": "Default Cluster",
+   "options": "Cluster",
+   "reqd": 1
+  },
+  {
+   "fieldname": "default_proxy_server",
+   "fieldtype": "Link",
+   "label": "Default Proxy Server",
+   "options": "Proxy Server"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "AWS Route 53",
+   "fieldname": "dns_provider",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "DNS Provider",
+   "options": "AWS Route 53\nGeneric",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.dns_provider=='AWS Route 53'",
+   "fieldname": "aws_access_key_id",
+   "fieldtype": "Data",
+   "label": "AWS Access Key ID"
+  },
+  {
+   "depends_on": "eval:doc.dns_provider=='AWS Route 53'",
+   "fieldname": "aws_secret_access_key",
+   "fieldtype": "Password",
+   "label": "AWS Secret Access Key"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-06-03 21:37:52.651435",
+ "modified_by": "Administrator",
+ "module": "Tst",
+ "name": "Root Domain",
+ "naming_rule": "Set by user",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

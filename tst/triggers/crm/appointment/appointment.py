@@ -10,8 +10,6 @@ def after_insert(doc, method=None):
 
 
 def check_required_items(doc):
-    if doc.custom_is_sub_technician:
-        return
     material_requests = {}
     installation_order = frappe.get_cached_doc(
         "Installation Order", doc.custom_installation_order

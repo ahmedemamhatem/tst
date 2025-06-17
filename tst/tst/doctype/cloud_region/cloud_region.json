@@ -1,42 +1,37 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-05-25 01:41:48.398898",
+ "creation": "2025-06-03 20:41:15.999633",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "mobile_no",
-  "message",
-  "attach_dcny"
+  "region_name",
+  "provider"
  ],
  "fields": [
   {
-   "description": "The phone number that will receive the message.",
-   "fieldname": "mobile_no",
+   "fieldname": "region_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Mobile No",
-   "reqd": 1
+   "label": "Region Name",
+   "reqd": 1,
+   "unique": 1
   },
   {
-   "fieldname": "message",
-   "fieldtype": "Long Text",
-   "in_list_view": 1,
-   "label": "Message",
+   "fieldname": "provider",
+   "fieldtype": "Select",
+   "label": "Provider",
+   "options": "AWS EC2\nOCI\nHetzner",
    "reqd": 1
-  },
-  {
-   "fieldname": "attach_dcny",
-   "fieldtype": "Attach"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-03 22:09:38.741098",
+ "modified": "2025-06-03 20:41:54.142628",
  "modified_by": "Administrator",
  "module": "Tst",
- "name": "WhatsApp Message",
+ "name": "Cloud Region",
  "owner": "Administrator",
  "permissions": [
   {

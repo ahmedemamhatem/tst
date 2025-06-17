@@ -1,42 +1,42 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-05-25 01:41:48.398898",
+ "creation": "2025-06-03 20:44:00.421394",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "mobile_no",
-  "message",
-  "attach_dcny"
+  "enabled",
+  "default",
+  "public_key"
  ],
  "fields": [
   {
-   "description": "The phone number that will receive the message.",
-   "fieldname": "mobile_no",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Mobile No",
-   "reqd": 1
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
   },
   {
-   "fieldname": "message",
-   "fieldtype": "Long Text",
-   "in_list_view": 1,
-   "label": "Message",
-   "reqd": 1
+   "default": "0",
+   "fieldname": "default",
+   "fieldtype": "Check",
+   "label": "Default"
   },
   {
-   "fieldname": "attach_dcny",
-   "fieldtype": "Attach"
+   "fieldname": "public_key",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "label": "Public Key",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-03 22:09:38.741098",
+ "modified": "2025-06-03 20:44:28.384242",
  "modified_by": "Administrator",
  "module": "Tst",
- "name": "WhatsApp Message",
+ "name": "SSH Key",
  "owner": "Administrator",
  "permissions": [
   {

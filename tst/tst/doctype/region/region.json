@@ -1,42 +1,37 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-05-25 01:41:48.398898",
+ "creation": "2025-06-03 20:35:37.282878",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "mobile_no",
-  "message",
-  "attach_dcny"
+  "region_name",
+  "last_allocated_to"
  ],
  "fields": [
   {
-   "description": "The phone number that will receive the message.",
-   "fieldname": "mobile_no",
+   "fieldname": "region_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Mobile No",
-   "reqd": 1
+   "label": "Region Name",
+   "reqd": 1,
+   "unique": 1
   },
   {
-   "fieldname": "message",
-   "fieldtype": "Long Text",
-   "in_list_view": 1,
-   "label": "Message",
-   "reqd": 1
-  },
-  {
-   "fieldname": "attach_dcny",
-   "fieldtype": "Attach"
+   "fieldname": "last_allocated_to",
+   "fieldtype": "Link",
+   "label": "Last Allocated To",
+   "options": "ERPNext Consultant",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-03 22:09:38.741098",
+ "modified": "2025-06-03 20:39:58.638380",
  "modified_by": "Administrator",
  "module": "Tst",
- "name": "WhatsApp Message",
+ "name": "Region",
  "owner": "Administrator",
  "permissions": [
   {
