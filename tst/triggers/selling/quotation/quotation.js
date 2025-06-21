@@ -40,34 +40,35 @@ frappe.ui.form.on('Quotation', {
 
 // Hide Print and Email in form view (toolbar + menu) only if draft
 function hide_print_and_email_on_draft(frm) {
-    if (frm.doc.workflow_state === "Supervisor Approved" || frm.doc.workflow_state === "موافقه المشرف") {
+    // Ensure the workflow state is properly checked
+    if (["Supervisor Approved", "موافقه المشرف"].includes(frm.doc.workflow_state?.trim())) {
 
         // Titles/texts to match in both languages
         var print_titles = ['Print', 'طباعة'];
         var email_titles = ['Email', 'البريد الإلكتروني'];
 
         // Hide toolbar buttons by data-original-title (Print, Email in both languages)
-        print_titles.concat(email_titles).forEach(function(title) {
-            frm.page && frm.page.wrapper &&
-                frm.page.wrapper.find('.btn[data-original-title="' + title + '"]').hide();
-        });
+        if (frm.page && frm.page.wrapper) {
+            print_titles.concat(email_titles).forEach(function(title) {
+                frm.page.wrapper.find(`.btn[data-original-title="${title}"]`).hide();
+            });
+        }
 
         // Hide toolbar buttons (legacy references)
-        if (frm.page && frm.page.btn_print) frm.page.btn_print.hide();
-        if (frm.page && frm.page.btn_email) frm.page.btn_email.hide();
+        if (frm.page?.btn_print) frm.page.btn_print.hide();
+        if (frm.page?.btn_email) frm.page.btn_email.hide();
 
         // Hide from menu (wait for menu to render)
-        setTimeout(function() {
-            if (frm.page && frm.page.menu) {
-                // Hide menu items with Print/Email (English and Arabic)
-                print_titles.forEach(function(text) {
-                    frm.page.menu.find('a:contains("' + text + '")').closest('li').hide();
-                });
-                email_titles.forEach(function(text) {
-                    frm.page.menu.find('a:contains("' + text + '")').closest('li').hide();
-                });
-            }
-        }, 150); // Delay for menu build
+        frappe.after_ajax(() => {
+            setTimeout(function() {
+                if (frm.page && frm.page.menu) {
+                    // Hide menu items with Print/Email (English and Arabic)
+                    print_titles.concat(email_titles).forEach(function(text) {
+                        frm.page.menu.find(`a:contains("${text}")`).closest('li').hide();
+                    });
+                }
+            }, 300); // Increased delay for menu to fully build
+        });
     }
 }
 
