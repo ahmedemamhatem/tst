@@ -43,7 +43,7 @@ function hide_print_and_email_on_draft(frm) {
     const state = frm.doc.workflow_state;
 
     // Check if the state matches either Arabic or English version
-    if (state === "Supervisor Approved" || state === "موافقه المشرف") {
+    if (frm.doc.workflow_state === "Supervisor Approved" || frm.doc.workflow_state === "موافقه المشرف") {
 
         const print_titles = ['Print', 'طباعة'];
         const email_titles = ['Email', 'البريد الإلكتروني'];
