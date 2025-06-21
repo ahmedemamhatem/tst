@@ -40,36 +40,39 @@ frappe.ui.form.on('Quotation', {
 
 // Hide Print and Email in form view (toolbar + menu) only if draft
 function hide_print_and_email_on_draft(frm) {
-    if (frm.doc.workflow_state === "Supervisor Approved") || (frm.doc.workflow_state === "موافقه المشرف") {
+    const state = frm.doc.workflow_state;
 
-        // Titles/texts to match in both languages
-        var print_titles = ['Print', 'طباعة'];
-        var email_titles = ['Email', 'البريد الإلكتروني'];
+    // Check if the state matches either Arabic or English version
+    if (state === "Supervisor Approved" || state === "موافقه المشرف") {
 
-        // Hide toolbar buttons by data-original-title (Print, Email in both languages)
-        print_titles.concat(email_titles).forEach(function(title) {
-            frm.page && frm.page.wrapper &&
-                frm.page.wrapper.find('.btn[data-original-title="' + title + '"]').hide();
-        });
+        const print_titles = ['Print', 'طباعة'];
+        const email_titles = ['Email', 'البريد الإلكتروني'];
+        const all_titles = print_titles.concat(email_titles);
 
-        // Hide toolbar buttons (legacy references)
-        if (frm.page && frm.page.btn_print) frm.page.btn_print.hide();
-        if (frm.page && frm.page.btn_email) frm.page.btn_email.hide();
+        // Hide toolbar buttons by data-original-title
+        if (frm.page && frm.page.wrapper) {
+            all_titles.forEach(title => {
+                frm.page.wrapper.find(`.btn[data-original-title="${title}"]`).hide();
+            });
+        }
 
-        // Hide from menu (wait for menu to render)
-        setTimeout(function() {
+        // Hide legacy print/email buttons
+        if (frm.page) {
+            frm.page.btn_print && frm.page.btn_print.hide();
+            frm.page.btn_email && frm.page.btn_email.hide();
+        }
+
+        // Hide from menu (after it's rendered)
+        setTimeout(() => {
             if (frm.page && frm.page.menu) {
-                // Hide menu items with Print/Email (English and Arabic)
-                print_titles.forEach(function(text) {
-                    frm.page.menu.find('a:contains("' + text + '")').closest('li').hide();
-                });
-                email_titles.forEach(function(text) {
-                    frm.page.menu.find('a:contains("' + text + '")').closest('li').hide();
+                all_titles.forEach(text => {
+                    frm.page.menu.find(`a:contains("${text}")`).closest('li').hide();
                 });
             }
-        }, 150); // Delay for menu build
+        }, 150);
     }
 }
+
 
 // List view: Hide Print and Email only if filtering by Draft (docstatus=0)
 frappe.listview_settings['Quotation'] = {
