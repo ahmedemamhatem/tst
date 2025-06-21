@@ -1,9 +1,9 @@
 frappe.ui.form.on('Quotation', {
     onload: function(frm) {
-        hide_print_and_email_on_draft(frm);
+        toggle_print_and_email_buttons(frm);
     },
     refresh: function(frm) {
-        hide_print_and_email_on_draft(frm);
+        toggle_print_and_email_buttons(frm);
     },
     custom_quotation_templet: function(frm) {
         frm.clear_table('items');
@@ -39,35 +39,70 @@ frappe.ui.form.on('Quotation', {
 });
 
 // Hide Print and Email in form view (toolbar + menu) only if draft
-function hide_print_and_email_on_draft(frm) {
-    // Ensure the workflow state is properly checked
-    if (["Supervisor Approved", "موافقه المشرف"].includes(frm.doc.workflow_state?.trim())) {
+function toggle_print_and_email_buttons(frm) {
+    // Debug log to check the current workflow state
+    console.log("Current Workflow State:", frm.doc.workflow_state);
 
-        // Titles/texts to match in both languages
-        var print_titles = ['Print', 'طباعة'];
-        var email_titles = ['Email', 'البريد الإلكتروني'];
+    // Valid workflow states where buttons should appear
+    const valid_states = ["Supervisor Approved", "موافقه المشرف"];
 
-        // Hide toolbar buttons by data-original-title (Print, Email in both languages)
+    // Get the current workflow state and trim any extra spaces
+    const workflow_state = frm.doc.workflow_state?.trim();
+
+    // Titles/texts for Print and Email buttons in both languages
+    const print_titles = ["Print", "طباعة"];
+    const email_titles = ["Email", "البريد الإلكتروني"];
+
+    // Check if the current state matches the valid states
+    if (valid_states.includes(workflow_state)) {
+        console.log("Workflow state matches. Showing Print and Email buttons.");
+
+        // Show toolbar buttons by data-original-title
         if (frm.page && frm.page.wrapper) {
-            print_titles.concat(email_titles).forEach(function(title) {
-                frm.page.wrapper.find(`.btn[data-original-title="${title}"]`).hide();
+            print_titles.concat(email_titles).forEach((title) => {
+                frm.page.wrapper
+                    .find(`.btn[data-original-title="${title}"]`)
+                    .show();
             });
         }
 
-        // Hide toolbar buttons (legacy references)
-        if (frm.page?.btn_print) frm.page.btn_print.hide();
-        if (frm.page?.btn_email) frm.page.btn_email.hide();
-
-        // Hide from menu (wait for menu to render)
+        // Show menu items (Print/Email) with a delay for menu rendering
         frappe.after_ajax(() => {
-            setTimeout(function() {
+            setTimeout(() => {
                 if (frm.page && frm.page.menu) {
-                    // Hide menu items with Print/Email (English and Arabic)
-                    print_titles.concat(email_titles).forEach(function(text) {
-                        frm.page.menu.find(`a:contains("${text}")`).closest('li').hide();
+                    print_titles.concat(email_titles).forEach((text) => {
+                        frm.page.menu
+                            .find(`a:contains("${text}")`)
+                            .closest("li")
+                            .show();
                     });
                 }
-            }, 300); // Increased delay for menu to fully build
+            }, 300); // Short delay to ensure menu rendering
+        });
+    } else {
+        console.log("Workflow state does NOT match. Hiding Print and Email buttons.");
+
+        // Hide toolbar buttons by data-original-title
+        if (frm.page && frm.page.wrapper) {
+            print_titles.concat(email_titles).forEach((title) => {
+                frm.page.wrapper
+                    .find(`.btn[data-original-title="${title}"]`)
+                    .hide();
+            });
+        }
+
+        // Hide menu items (Print/Email) with a delay for menu rendering
+        frappe.after_ajax(() => {
+            setTimeout(() => {
+                if (frm.page && frm.page.menu) {
+                    print_titles.concat(email_titles).forEach((text) => {
+                        frm.page.menu
+                            .find(`a:contains("${text}")`)
+                            .closest("li")
+                            .hide();
+                    });
+                }
+            }, 300); // Short delay to ensure menu rendering
         });
     }
 }
