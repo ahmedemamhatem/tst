@@ -40,7 +40,7 @@ frappe.ui.form.on('Quotation', {
 
 // Hide Print and Email in form view (toolbar + menu) only if draft
 function hide_print_and_email_on_draft(frm) {
-    if (frm.doc.docstatus === 0) {
+    if (frm.doc.workflow_state === "Supervisor Approved") {
         // Titles/texts to match in both languages
         var print_titles = ['Print', 'طباعة'];
         var email_titles = ['Email', 'البريد الإلكتروني'];
