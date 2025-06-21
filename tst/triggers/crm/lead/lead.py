@@ -7,6 +7,9 @@ from erpnext.crm.doctype.lead.lead import Lead as ErpnextLead
 class CustomLead(ErpnextLead):
     def check_email_id_is_unique(self):
         """Override the check_email_id_is_unique method to check for duplicate email IDs."""
+        # Fetch the current user's language
+        user_lang = frappe.db.get_value("User", frappe.session.user, "language")
+
         if self.email_id:
             # Fetch an existing lead with the same email ID
             existing_lead = frappe.db.get_value(
@@ -15,24 +18,39 @@ class CustomLead(ErpnextLead):
                 ['name', 'owner'],  # Fetch both the lead name and its owner/creator
                 as_dict=True
             )
-            
+
             if existing_lead:
                 # If a duplicate is found, fetch the creator's name
                 creator = frappe.db.get_value('User', existing_lead.owner, 'full_name')
 
                 # Throw a translatable error message with the lead name and creator's name
-                frappe.throw(
-                    _("A Lead with this email ID already exists: {0} (Created by: {1})").format(
-                        existing_lead.name, creator
+                if user_lang == "ar":
+                    frappe.throw(
+                        "يوجد عميل بنفس البريد الإلكتروني: {0} (تم إنشاؤه بواسطة: {1})".format(
+                            existing_lead.name, creator
+                        ),
+                        title="تكرار في البريد الإلكتروني"
                     )
-                )
+                else:
+                    frappe.throw(
+                        "A Lead with this email ID already exists: {0} (Created by: {1})".format(
+                            existing_lead.name, creator
+                        ),
+                        title="Duplicate Email ID"
+                    )
             else:
                 # Optionally display a success message if no duplicate is found
-                frappe.msgprint(_("Email ID is unique!"))
+                if user_lang == "ar":
+                    frappe.msgprint("البريد الإلكتروني فريد!")
+                else:
+                    frappe.msgprint("Email ID is unique!")
 
 
 def set_custom_address(doc, method=None):
     """Set the custom address fields based on latitude and longitude."""
+    # Fetch the current user's language
+    user_lang = frappe.db.get_value("User", frappe.session.user, "language")
+
     if doc.custom_longitude and doc.custom_latitude:
         try:
             # Initialize geolocator with user agent
@@ -69,33 +87,46 @@ def set_custom_address(doc, method=None):
         except Exception as e:
             # Log error and notify the user
             frappe.log_error(message=f"Failed to fetch Arabic address: {str(e)}", title="Geolocation Error")
-            frappe.throw(_("Unable to fetch Arabic address. Please check the logs for more details."))
+            if user_lang == "ar":
+                frappe.throw("تعذر استرجاع العنوان بالعربية. يرجى التحقق من السجلات لمزيد من التفاصيل.")
+            else:
+                frappe.throw("Unable to fetch Arabic address. Please check the logs for more details.")
 
 
 def validate(doc, method=None):
     """Validate the Lead document."""
+    # Fetch the current user's language
+    user_lang = frappe.db.get_value("User", frappe.session.user, "language")
+
     if not doc.custom_creation_time and doc.creation:
         doc.custom_creation_time = doc.creation
-    is_valid_number(doc.mobile_no)
-    validate_no_of_cars(doc)
-    check_duplicate_tax_or_national_id(doc)
-    check_duplicate_mobile_or_email(doc)
+
+    is_valid_number(doc.mobile_no, user_lang)
+    validate_no_of_cars(doc, user_lang)
+    check_duplicate_tax_or_national_id(doc, user_lang)
+    check_duplicate_mobile_or_email(doc, user_lang)
     set_custom_address(doc)
 
 
-def is_valid_number(Number):
+def is_valid_number(number, user_lang):
     """
     Validates that the provided mobile number consists only of digits
     and is exactly 10 characters long. Raises an error if validation fails.
     """
-    if Number:
-        if not Number.isdigit():
-            frappe.throw(_("Mobile number must contain digits only (0-9)."))
-        elif len(Number) != 10:
-            frappe.throw(_("Mobile number must be exactly 10 digits."))
+    if number:
+        if not number.isdigit():
+            if user_lang == "ar":
+                frappe.throw("يجب أن يحتوي رقم الهاتف على أرقام فقط (0-9).")
+            else:
+                frappe.throw("Mobile number must contain digits only (0-9).")
+        elif len(number) != 10:
+            if user_lang == "ar":
+                frappe.throw("يجب أن يتكون رقم الهاتف من 10 أرقام بالضبط.")
+            else:
+                frappe.throw("Mobile number must be exactly 10 digits.")
 
 
-def validate_no_of_cars(doc):
+def validate_no_of_cars(doc, user_lang):
     """
     Validates that the total quantity of cars listed in custom_car_details
     matches the custom_number_of_cars field. If custom_number_of_cars is not set,
@@ -108,18 +139,20 @@ def validate_no_of_cars(doc):
 
     if doc.custom_number_of_cars:
         if total_no_of_cars != doc.custom_number_of_cars:
-            frappe.throw(
-                _(
-                    f"Total quantity of cars ({total_no_of_cars}) "
-                    f"does not match the declared number of cars ({doc.custom_number_of_cars}). "
-                    "Please make sure these values are consistent."
+            if user_lang == "ar":
+                frappe.throw(
+                    "إجمالي عدد السيارات ({0}) لا يطابق العدد المُعلن للسيارات ({1}). يرجى التأكد من تناسق هذه القيم.".format(
+                        total_no_of_cars, doc.custom_number_of_cars
+                    )
                 )
-            )
-    elif doc.custom_car_details and not doc.custom_number_of_cars:
-        doc.custom_number_of_cars = total_no_of_cars
+            else:
+                frappe.throw(
+                    "Total quantity of cars ({0}) does not match the declared number of cars ({1}). "
+                    "Please make sure these values are consistent.".format(total_no_of_cars, doc.custom_number_of_cars)
+                )
 
 
-def check_duplicate_tax_or_national_id(doc):
+def check_duplicate_tax_or_national_id(doc, user_lang):
     """
     Checks if there is an existing Lead with the same Tax ID (for Company)
     or National ID (for Individual), excluding the current doc.
@@ -133,12 +166,18 @@ def check_duplicate_tax_or_national_id(doc):
         )
         if existing:
             lead_name, owner = existing
-            frappe.throw(
-                _(
-                    f"A Lead ({lead_name}) already exists with the same Tax ID, created by user: {owner}."
-                    " Please verify to avoid duplicate entries."
+            if user_lang == "ar":
+                frappe.throw(
+                    "يوجد عميل ({0}) بنفس الرقم الضريبي، تم إنشاؤه بواسطة المستخدم: {1}.".format(
+                        lead_name, owner
+                    )
                 )
-            )
+            else:
+                frappe.throw(
+                    "A Lead ({0}) already exists with the same Tax ID, created by user: {1}.".format(
+                        lead_name, owner
+                    )
+                )
     elif doc.type == "Individual" and doc.custom_national_id:
         existing = frappe.db.get_value(
             "Lead",
@@ -147,15 +186,21 @@ def check_duplicate_tax_or_national_id(doc):
         )
         if existing:
             lead_name, owner = existing
-            frappe.throw(
-                _(
-                    f"A Lead ({lead_name}) already exists with the same National ID, created by user: {owner}."
-                    " Please verify to avoid duplicate entries."
+            if user_lang == "ar":
+                frappe.throw(
+                    "يوجد عميل ({0}) بنفس رقم الهوية الوطنية، تم إنشاؤه بواسطة المستخدم: {1}.".format(
+                        lead_name, owner
+                    )
                 )
-            )
+            else:
+                frappe.throw(
+                    "A Lead ({0}) already exists with the same National ID, created by user: {1}.".format(
+                        lead_name, owner
+                    )
+                )
 
 
-def check_duplicate_mobile_or_email(doc):
+def check_duplicate_mobile_or_email(doc, user_lang):
     """
     Checks if another Lead exists with the same mobile number or email id (excluding current doc).
     If found, throws an error with existing lead name and creator.
@@ -168,11 +213,18 @@ def check_duplicate_mobile_or_email(doc):
         )
         if existing:
             lead_name, owner = existing
-            frappe.throw(
-                _(
-                    f"Mobile Number already exists in Lead: {lead_name} (Created by: {owner})"
+            if user_lang == "ar":
+                frappe.throw(
+                    "رقم الهاتف موجود بالفعل في العميل: {0} (تم إنشاؤه بواسطة: {1})".format(
+                        lead_name, owner
+                    )
                 )
-            )
+            else:
+                frappe.throw(
+                    "Mobile number already exists in Lead: {0} (Created by: {1})".format(
+                        lead_name, owner
+                    )
+                )
 
     if doc.email_id:
         existing = frappe.db.get_value(
@@ -182,6 +234,15 @@ def check_duplicate_mobile_or_email(doc):
         )
         if existing:
             lead_name, owner = existing
-            frappe.throw(
-                _(f"Email ID already exists in Lead: {lead_name} (Created by: {owner})")
-            )
+            if user_lang == "ar":
+                frappe.throw(
+                    "البريد الإلكتروني موجود بالفعل في العميل: {0} (تم إنشاؤه بواسطة: {1})".format(
+                        lead_name, owner
+                    )
+                )
+            else:
+                frappe.throw(
+                    "Email ID already exists in Lead: {0} (Created by: {1})".format(
+                        lead_name, owner
+                    )
+                )
