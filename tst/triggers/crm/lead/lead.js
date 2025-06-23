@@ -22,7 +22,7 @@ function add_create_lead_visit_button(frm) {
                     reqd: 1
                 }
             ],
-            primary_action_label: __('Create'),
+            primary_action_label: __('انشاء'),
             primary_action(values) {
                 dialog.hide();
 
@@ -61,7 +61,7 @@ function add_make_quotation_button(frm) {
             method: "erpnext.crm.doctype.lead.lead.make_quotation", // Backend method to create Quotation
             frm: frm
         });
-    }, __("Create")); // Group the button under the "Create" menu
+    }); // Group the button under the "Create" menu
 }
 
 // === Utility: Dynamically observe and clean buttons ===

@@ -36,6 +36,89 @@ def monkey_patch_reorder_item():
     frappe.model.workflow.apply_workflow = apply_workflow
     erpnext.stock.reorder_item._reorder_item = _reorder_item
 
+import frappe
+from frappe.utils import flt
+
+
+def validate_quotation_discount_limits(doc, method=None):
+    template_name = doc.custom_quotation_templet
+    if not template_name:
+        return
+
+    settings = frappe.get_single("TST Selling Settings")
+    user_discount_role = settings.user_discount_role
+    supervisor_discount_role = settings.supervisor_discount_role
+    manager_discount_role = settings.manager_discount_role
+
+    # Ensure user and supervisor roles are set
+    if not (user_discount_role and supervisor_discount_role):
+        frappe.throw(
+            "Please set <b>User Discount Role</b> and <b>Supervisor Discount Role</b> in <b>TST Selling Settings</b>."
+        )
+
+    user_roles = frappe.get_roles(frappe.session.user)
+
+    for item in doc.items:
+        discount = flt(item.discount_percentage)
+
+        if discount <= 0:
+            continue
+
+        # --- Manager override only if role is set and user has it ---
+        if manager_discount_role and manager_discount_role in user_roles:
+            continue
+
+        # --- Fetch discount limits from template ---
+        template_item = frappe.db.get_value(
+            "Quotation Templet Item",
+            {"parent": template_name, "item_code": item.item_code},
+            ["user_discount", "supervisor_discount"],
+            as_dict=True,
+        )
+
+        if not template_item:
+            frappe.throw(
+                f"Row {item.idx}: Missing discount limits for item <b>{item.item_code}</b> in Quotation Template <b>{template_name}</b>.<br>"
+                "Please contact your administrator to set the limits."
+            )
+
+        user_limit = flt(template_item.get("user_discount"))
+        supervisor_limit = flt(template_item.get("supervisor_discount"))
+
+        # --- Validate Discount Logic ---
+
+        # Case 1: Discount exceeds supervisor limit
+        if supervisor_limit and discount > supervisor_limit:
+            frappe.throw(
+                f"Row {item.idx}: Discount <b>{discount}%</b> exceeds supervisor limit <b>{supervisor_limit}%</b> "
+                f"for item <b>{item.item_code}</b>."
+            )
+
+        # Case 2: Discount exceeds user limit (needs supervisor)
+        if user_limit and discount > user_limit:
+            if supervisor_discount_role not in user_roles:
+                frappe.throw(
+                    f"Row {item.idx}: Discount <b>{discount}%</b> exceeds user limit <b>{user_limit}%</b> for item <b>{item.item_code}</b>. "
+                    f"You need the <b>{supervisor_discount_role}</b> role."
+                )
+
+        # Case 3: Discount within user limit (needs user or supervisor)
+        elif user_limit and discount <= user_limit:
+            if (
+                user_discount_role not in user_roles
+                and supervisor_discount_role not in user_roles
+            ):
+                frappe.throw(
+                    f"Row {item.idx}: Discount <b>{discount}%</b> requires either <b>{user_discount_role}</b> or <b>{supervisor_discount_role}</b> role."
+                )
+
+        # Case 4: Only supervisor limit set (no user limit)
+        elif not user_limit and supervisor_limit:
+            if supervisor_discount_role not in user_roles:
+                frappe.throw(
+                    f"Row {item.idx}: Discount <b>{discount}%</b> requires the <b>{supervisor_discount_role}</b> role."
+                )
+
 
 def _reorder_item():
     material_requests = {
@@ -140,9 +223,104 @@ def _reorder_item():
                 ),
             )
 
-    if material_requests:
-        return create_material_request(material_requests)
+def set_department_from_employee(doc, method):
+    """
+    Sets the 'department' field on a Material Request document before insert,
+    based on the department of the Employee record linked to the current user.
 
+    Uses raw SQL for fetching the department and includes error handling.
+
+    Args:
+        doc: The Material Request document being inserted.
+        method: The event method name (not used here, but required by Frappe's doc event signature).
+
+    Logs:
+        Any exceptions encountered during execution will be logged to Frappe's error log.
+    """
+    try:
+        current_user = frappe.session.user
+
+        # Fetch the department from Employee using SQL
+        result = frappe.db.sql(
+            """
+            SELECT department
+            FROM `tabEmployee`
+            WHERE user_id = %s
+            LIMIT 1
+            """,
+            (current_user,),
+            as_dict=True,
+        )
+
+        # Set department on the Material Request doc if found
+        if result and result[0].get("department") and hasattr(doc, "department"):
+            doc.department = result[0]["department"]
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "set_department_from_employee Error")
+
+
+@frappe.whitelist()
+def set_main_warehouse_qty(doc, method):
+    """
+    On Quotation validate, for each item in the items table, set
+    'custom_main_warehouse_qty' with the qty of the item in the employee's
+    'custom_main_warehouse'. The employee is matched where user_id = creator (doc.owner).
+    If any value (employee, custom_main_warehouse, or item code) is missing, the row is skipped.
+
+    Args:
+        doc: The Quotation document being validated.
+        method: The event method name (required by Frappe's doc event signature).
+
+    Logs:
+        Any exceptions are logged to Frappe's error log, but do not stop validation.
+    """
+    try:
+        # Get the creator of the Quotation
+        creator = doc.owner
+
+        # Fetch Employee and custom_main_warehouse using SQL
+        emp_result = frappe.db.sql(
+            """
+            SELECT name, `custom_main_warehouse`
+            FROM `tabEmployee`
+            WHERE user_id = %s
+            LIMIT 1
+            """,
+            (creator,),
+            as_dict=True,
+        )
+        if not emp_result or not emp_result[0].get("custom_main_warehouse"):
+            # No employee or no custom_main_warehouse, skip all rows
+            return
+
+        custom_main_warehouse = emp_result[0]["custom_main_warehouse"]
+
+        for row in doc.items:
+            item_code = row.item_code
+            if not item_code or not custom_main_warehouse:
+                continue  # skip if missing
+
+            # Get actual qty from Bin using SQL
+            bin_result = frappe.db.sql(
+                """
+                SELECT actual_qty
+                FROM `tabBin`
+                WHERE item_code = %s AND warehouse = %s
+                LIMIT 1
+                """,
+                (item_code, custom_main_warehouse),
+                as_dict=True,
+            )
+            qty = (
+                bin_result[0]["actual_qty"]
+                if bin_result and bin_result[0].get("actual_qty") is not None
+                else 0
+            )
+            row.custom_main_warehouse_qty = qty
+
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "set_main_warehouse_qty Error")
 
 @frappe.whitelist()
 def apply_workflow(doc, action):
