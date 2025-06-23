@@ -1,8 +1,13 @@
+
+
 frappe.ui.form.on('Quotation', {
     onload: function(frm) {
         toggle_print_and_email_buttons(frm);
     },
     refresh: function(frm) {
+        setTimeout(() => {
+            frm.remove_custom_button(__('Set as Lost'));
+        }, 300);
         toggle_print_and_email_buttons(frm);
     },
     custom_quotation_templet: function(frm) {

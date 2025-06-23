@@ -523,27 +523,64 @@ def alert_supervisor_on_item_shortfall(doc, method):
         frappe.log_error(frappe.get_traceback(), _("Error in alert_supervisor_on_item_shortfall"))
 
 
-def validate_items_are_saleable(doc, method):
-    """
-    Validate that all items in the document are saleable.
-    """
-    # Get the language of the current user
+def validate_items_are_saleable(self, method):
+    # Fetch user language
     user_lang = frappe.db.get_value("User", frappe.session.user, "language")
 
-    for item in doc.items:
-        item_status = frappe.db.get_value("Item", item.item_code, "custom_item_status")
-        if item_status and item_status != "Saleable":
+    for d in self.get("items"):
+        # Fetch the custom_item_status from the Item master
+        item_status = frappe.db.get_value("Item", d.item_code, "custom_item_status")
+        if item_status != "Saleable":
             if user_lang == "ar":
                 frappe.throw(
-                    "العنصر {0} لا يمكن معالجته لأن حالته هي {1}".format(
-                        frappe.bold(item.item_code), frappe.bold(item_status)
+                    "العنصر {0} غير صالح للبيع. حالته الحالية: {1}".format(
+                        frappe.bold(d.item_code), frappe.bold(item_status or "غير محدد")
                     ),
                     title="حالة العنصر غير صالحة",
                 )
             else:
                 frappe.throw(
-                    _("Item {0} cannot be processed because its status is {1}.").format(
-                        frappe.bold(item.item_code), frappe.bold(item_status)
+                    _("Item {0} is not saleable. Its status is: {1}").format(
+                        frappe.bold(d.item_code), frappe.bold(item_status or "Not Set")
                     ),
                     title=_("Invalid Item Status"),
                 )
+
+def calculate_bundle_valuation(doc, method):
+    """
+    On validate of Product Bundle, calculate valuation_rate, valuation_amount for items,
+    and set total_valuation_amount on the doc.
+    """
+    total_valuation = 0
+    for item in getattr(doc, "items", []):
+        # Pass warehouse if you have it per item: item.warehouse
+        valuation_rate = get_item_valuation_rate(item.item_code)
+        item.custom_valuation_rate = valuation_rate
+        item.custom_total = (valuation_rate or 0) * (item.qty or 0)
+        total_valuation += item.custom_total
+
+    doc.custom_total = total_valuation
+
+
+def update_item_status_from_doc(doc, method):
+    """
+    On submit of Purchase Receipt or Stock Entry, update Item.item_status
+    for each item's selected status in the child table.
+    """
+    # Identify the child table
+    items_table = []
+    if doc.doctype == "Purchase Receipt":
+        items_table = doc.items
+    elif doc.doctype == "Stock Entry":
+        items_table = doc.items
+
+    for row in items_table:
+        item_code = row.item_code
+        custom_item_status = row.get("custom_item_status")
+        if item_code and custom_item_status:
+            # Update the status in Item master
+            frappe.db.set_value(
+                "Item", item_code, "custom_item_status", custom_item_status
+            )
+
+
