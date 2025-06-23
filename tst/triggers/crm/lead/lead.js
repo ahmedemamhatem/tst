@@ -208,15 +208,15 @@ frappe.ui.form.on('Lead', {
         observe_and_clean_buttons(frm);
     },
     validate: function (frm) {
-        if (frm.doc.type === "Company") {
-            if (!/^\d{10}$/.test(frm.doc.custom_cr_number)) {
+        if (frm.doc.type === "Company" ) {
+            if (frm.doc.custom_cr_number && !/^\d{10}$/.test(frm.doc.custom_cr_number)) {
                 frappe.throw(__('CR Number must be exactly 10 digits.'));
             }
             if (!/^\d{15}$/.test(frm.doc.custom_tax_id)) {
                 frappe.throw(__('Tax ID must be exactly 15 digits.'));
             }
         } else if (frm.doc.type === "Individual") {
-            if (!/^\d{10}$/.test(frm.doc.custom_national_id)) {
+            if (frm.doc.custom_national_id && !/^\d{10}$/.test(frm.doc.custom_national_id)) {
                 frappe.throw(__('National ID must be exactly 10 digits.'));
             }
         }
