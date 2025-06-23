@@ -12,17 +12,17 @@ function show_tab(frm, tab_fieldname) {
 function add_create_lead_visit_button(frm) {
     frm.add_custom_button(__('انشاء زيارة'), function () {
         const dialog = new frappe.ui.Dialog({
-            title: __('Select Visit Type'),
+            title: __('اختر نوع الزيارة'),
             fields: [
                 {
-                    label: __('Visit Type'),
+                    label: __('نوع الزيارة'),
                     fieldname: 'visit_type',
                     fieldtype: 'Select',
-                    options: ["", __('زيارة ميدانيه'), __('هاتف')],
+                    options: ["", __("زيارة ميدانية"), __("هاتف")],
                     reqd: 1
                 }
             ],
-            primary_action_label: __('انشاء'),
+            primary_action_label: __('إنشاء'),
             primary_action(values) {
                 dialog.hide();
 
@@ -35,16 +35,16 @@ function add_create_lead_visit_button(frm) {
                             visit_date: frappe.datetime.now_date(),
                             latitude: position.coords.latitude,
                             longitude: position.coords.longitude,
-                            address: __('Lat: {0}, Long: {1}', [position.coords.latitude, position.coords.longitude])
+                            address: __('خط العرض: {0}, خط الطول: {1}', [position.coords.latitude, position.coords.longitude])
                         }).then((doc) => {
-                            frappe.msgprint(__('Lead Visit created successfully!'));
+                            frappe.msgprint(__('تم إنشاء الزيارة بنجاح!'));
                             frappe.set_route('Form', 'Lead Visit', doc.name);
                         });
                     }, function () {
-                        frappe.msgprint(__('Unable to fetch location. Please enable location access in your browser.'));
+                        frappe.msgprint(__('غير قادر على جلب الموقع. يرجى تفعيل إذن الموقع في المتصفح.'));
                     });
                 } else {
-                    frappe.msgprint(__('Geolocation is not supported by this browser.'));
+                    frappe.msgprint(__('المتصفح لا يدعم خاصية تحديد الموقع الجغرافي.'));
                 }
             }
         });
@@ -55,13 +55,7 @@ function add_create_lead_visit_button(frm) {
 
 // === Utility: Add "Make Quotation" button ===
 function add_make_quotation_button(frm) {
-    frm.remove_custom_button(__('Quotation'), __('Create')); // Remove any duplicates
-    frm.add_custom_button(__('Make Quotation'), function () {
-        frappe.model.open_mapped_doc({
-            method: "erpnext.crm.doctype.lead.lead.make_quotation", // Backend method to create Quotation
-            frm: frm
-        });
-    }); // Group the button under the "Create" menu
+    frm.remove_custom_button(__('Quotation'), __('Create')); 
 }
 
 // === Utility: Dynamically observe and clean buttons ===
@@ -127,7 +121,6 @@ function getTabFields(frm, tabLabel) {
 
 // === Main Tab Logic: Handle visibility of tabs ===
 function handle_tab_visibility(frm) {
-    // Show "Customer Analysis" tab if "Company Information" is complete
     if (isTabCompleted(frm, "Company Information")) {
         show_tab(frm, "custom_tab_6");
     } else {
@@ -136,17 +129,15 @@ function handle_tab_visibility(frm) {
         return;
     }
 
-    // Show "Customer Information" tab if "Customer Analysis" is complete
     if (isTabCompleted(frm, "Customer Analysis")) {
         show_tab(frm, "custom_tab_7");
 
-        // If Lead Type is "Company", make specific fields mandatory
         if (frm.doc.type === "Company") {
-            frm.set_df_property("company_name", "reqd", 1); // Make Trade Name mandatory
-            frm.set_df_property("custom_cr_number", "reqd", 1); // Make CR Number mandatory
-            frm.set_df_property("custom_tax_id", "reqd", 1); // Make Tax ID mandatory
+            frm.set_df_property("company_name", "reqd", 1);
+            frm.set_df_property("custom_cr_number", "reqd", 1);
+            frm.set_df_property("custom_tax_id", "reqd", 1);
         } else if (frm.doc.type === "Individual") {
-            frm.set_df_property("custom_national_id", "reqd", 1); // Make National ID mandatory
+            frm.set_df_property("custom_national_id", "reqd", 1);
             frm.set_df_property("custom_cr_number", "reqd", 0);
             frm.set_df_property("custom_tax_id", "reqd", 0);
             frm.set_df_property("company_name", "reqd", 0);
@@ -166,7 +157,7 @@ function update_map(frm, latitude, longitude) {
                 attribution: 'Map data © OpenStreetMap contributors'
             }).addTo(map);
             L.marker([${latitude}, ${longitude}]).addTo(map)
-                .bindPopup('You are here!').openPopup();
+                .bindPopup('${__("أنت هنا!")}').openPopup();
         </script>
     `;
     frm.fields_dict.custom_geolocation.$wrapper.html(mapHTML);
@@ -183,11 +174,11 @@ function fetch_and_set_location(frm) {
             frm.set_value('custom_latitude', position.coords.latitude);
             frm.set_value('custom_longitude', position.coords.longitude);
             update_map(frm, position.coords.latitude, position.coords.longitude);
-        }, function (error) {
-            frappe.msgprint(__('Unable to fetch geolocation.'));
+        }, function () {
+            frappe.msgprint(__('غير قادر على جلب الموقع.'));
         });
     } else {
-        frappe.msgprint(__('Geolocation is not supported by your browser.'));
+        frappe.msgprint(__('المتصفح لا يدعم خاصية تحديد الموقع الجغرافي.'));
     }
 }
 
@@ -208,16 +199,16 @@ frappe.ui.form.on('Lead', {
         observe_and_clean_buttons(frm);
     },
     validate: function (frm) {
-        if (frm.doc.type === "Company" ) {
+        if (frm.doc.type === "Company") {
             if (frm.doc.custom_cr_number && !/^\d{10}$/.test(frm.doc.custom_cr_number)) {
-                frappe.throw(__('CR Number must be exactly 10 digits.'));
+                frappe.throw(__('رقم السجل التجاري يجب أن يكون مكوناً من 10 أرقام بالضبط.'));
             }
             if (frm.doc.custom_tax_id && !/^\d{15}$/.test(frm.doc.custom_tax_id)) {
-                frappe.throw(__('Tax ID must be exactly 15 digits.'));
+                frappe.throw(__('الرقم الضريبي يجب أن يكون مكوناً من 15 رقماً بالضبط.'));
             }
         } else if (frm.doc.type === "Individual") {
             if (frm.doc.custom_national_id && !/^\d{10}$/.test(frm.doc.custom_national_id)) {
-                frappe.throw(__('National ID must be exactly 10 digits.'));
+                frappe.throw(__('رقم الهوية الوطنية يجب أن يكون مكوناً من 10 أرقام بالضبط.'));
             }
         }
     }
