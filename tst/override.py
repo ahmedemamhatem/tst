@@ -29,6 +29,180 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+def monkey_patch_reorder_item():
+    import erpnext.stock.reorder_item
+    import frappe.model.workflow
+
+    frappe.model.workflow.apply_workflow = apply_workflow
+    erpnext.stock.reorder_item._reorder_item = _reorder_item
+
+
+def _reorder_item():
+    material_requests = {
+        "Purchase": {},
+        "Transfer": {},
+        "Material Issue": {},
+        "Manufacture": {},
+    }
+    warehouse_company = frappe._dict(
+        frappe.db.sql(
+            """select name, company from `tabWarehouse`
+            where disabled=0"""
+        )
+    )
+    default_company = (
+        erpnext.get_default_company()
+        or frappe.db.sql("""select name from tabCompany limit 1""")[0][0]
+    )
+
+    items_to_consider = get_items_for_reorder()
+    if not items_to_consider:
+        return
+
+    item_warehouse_projected_qty = get_item_warehouse_projected_qty(items_to_consider)
+
+    def add_to_material_request(**kwargs):
+        if isinstance(kwargs, dict):
+            kwargs = frappe._dict(kwargs)
+
+        if kwargs.warehouse not in warehouse_company:
+            return
+
+        reorder_level = flt(kwargs.reorder_level)
+        reorder_qty = flt(kwargs.reorder_qty)
+
+        if kwargs.warehouse_group:
+            projected_qty = flt(
+                item_warehouse_projected_qty.get(kwargs.item_code, {}).get(
+                    kwargs.warehouse_group
+                )
+            )
+        else:
+            projected_qty = flt(
+                item_warehouse_projected_qty.get(kwargs.item_code, {}).get(
+                    kwargs.warehouse
+                )
+            )
+
+        if (reorder_level or reorder_qty) and projected_qty <= reorder_level:
+            deficiency = reorder_level - projected_qty
+            if deficiency > reorder_qty:
+                reorder_qty = deficiency
+
+            company = warehouse_company.get(kwargs.warehouse) or default_company
+
+            mr_item = {
+                "item_code": kwargs.item_code,
+                "warehouse": kwargs.warehouse,
+                "reorder_qty": reorder_qty,
+                "item_details": kwargs.item_details,
+            }
+
+            if kwargs.material_request_type == "Transfer":
+                try:
+                    wh_doc = frappe.get_doc("Warehouse", kwargs.warehouse)
+                    default_source = wh_doc.get("custom_default_source_warehouse")
+                    if default_source:
+                        mr_item["from_warehouse"] = default_source
+                except Exception as e:
+                    frappe.log_error(
+                        f"Error fetching custom source warehouse for {kwargs.warehouse}: {e}"
+                    )
+
+            material_requests[kwargs.material_request_type].setdefault(
+                company, []
+            ).append(mr_item)
+
+    for item_code, reorder_levels in items_to_consider.items():
+        for d in reorder_levels:
+            if d.has_variants:
+                continue
+
+            add_to_material_request(
+                item_code=item_code,
+                warehouse=d.warehouse,
+                reorder_level=d.warehouse_reorder_level,
+                reorder_qty=d.warehouse_reorder_qty,
+                material_request_type=d.material_request_type,
+                warehouse_group=d.warehouse_group,
+                item_details=frappe._dict(
+                    {
+                        "item_code": item_code,
+                        "name": item_code,
+                        "item_name": d.item_name,
+                        "item_group": d.item_group,
+                        "brand": d.brand,
+                        "description": d.description,
+                        "stock_uom": d.stock_uom,
+                        "purchase_uom": d.purchase_uom,
+                        "lead_time_days": d.lead_time_days,
+                    }
+                ),
+            )
+
+    if material_requests:
+        return create_material_request(material_requests)
+
+
+@frappe.whitelist()
+def apply_workflow(doc, action):
+    """Allow workflow action on the current doc"""
+    frappe.msgprint(_("Applying Workflow Action"), alert=True)
+    doc = frappe.get_doc(frappe.parse_json(doc))
+    doc.load_from_db()
+    workflow = get_workflow(doc.doctype)
+    transitions = get_transitions(doc, workflow)
+    user = frappe.session.user
+
+    # find the transition
+    transition = None
+    for t in transitions:
+        if t.action == action:
+            transition = t
+
+    if not transition:
+        frappe.throw(_("Not a valid Workflow Action"), WorkflowTransitionError)
+
+    if not has_approval_access(user, doc, transition):
+        frappe.throw(_("Self approval is not allowed"))
+
+    # update workflow state field
+    doc.set(workflow.workflow_state_field, transition.next_state)
+
+    # find settings for the next state
+    next_state = next(d for d in workflow.states if d.state == transition.next_state)
+
+    reports_to = ValidateReportsTo(doc)
+    reports_to.validate_reports_to()
+    # update any additional field
+    if next_state.update_field:
+        doc.set(next_state.update_field, next_state.update_value)
+
+    new_docstatus = DocStatus(next_state.doc_status or 0)
+    if doc.docstatus.is_draft() and new_docstatus.is_draft():
+        doc.save()
+    elif doc.docstatus.is_draft() and new_docstatus.is_submitted():
+        from frappe.core.doctype.submission_queue.submission_queue import (
+            queue_submission,
+        )
+        from frappe.utils.scheduler import is_scheduler_inactive
+
+        if doc.meta.queue_in_background and not is_scheduler_inactive():
+            queue_submission(doc, "Submit")
+            return
+
+        doc.submit()
+    elif doc.docstatus.is_submitted() and new_docstatus.is_submitted():
+        doc.save()
+    elif doc.docstatus.is_submitted() and new_docstatus.is_cancelled():
+        doc.cancel()
+    else:
+        frappe.throw(_("Illegal Document Status for {0}").format(next_state.state))
+
+    doc.add_comment("Workflow", _(next_state.state))
+
+    return doc
+
 
 class ValidateReportsTo:
     def __init__(self, doc):
