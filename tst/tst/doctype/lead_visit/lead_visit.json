@@ -85,14 +85,13 @@
   },
   {
    "fieldname": "visit_type",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "in_filter": 1,
    "in_global_search": 1,
    "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Visit Type",
-   "options": "\nPhone\nOn Location",
    "read_only": 1
   },
   {
@@ -105,32 +104,32 @@
    "label": "Notes"
   },
   {
-   "depends_on": "eval:doc.visit_type ==\"On Location\"",
+   "depends_on": "eval:doc.visit_type ==\"زيارة ميدانيه\"",
    "fieldname": "section_break_ntjq",
    "fieldtype": "Section Break"
   },
   {
-   "depends_on": "eval:doc.visit_type ==\"On Location\"",
+   "depends_on": "eval:doc.visit_type ==\"زيارة ميدانيه\"",
    "fieldname": "geolocation_xuqf",
    "fieldtype": "HTML",
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.visit_type ==\"On Location\"",
+   "depends_on": "eval:doc.visit_type ==\"زيارة ميدانيه\"",
    "fieldname": "longitude",
    "fieldtype": "Float",
    "label": "Longitude",
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.visit_type ==\"On Location\"",
+   "depends_on": "eval:doc.visit_type ==\"زيارة ميدانيه\"",
    "fieldname": "latitude",
    "fieldtype": "Float",
    "label": "latitude",
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.visit_type ==\"On Location\"",
+   "depends_on": "eval:doc.visit_type ==\"زيارة ميدانيه\"",
    "fieldname": "address",
    "fieldtype": "Small Text",
    "label": "Address",
