@@ -55,7 +55,7 @@ function add_create_lead_visit_button(frm) {
 
 // === Utility: Add "Make Quotation" button ===
 function add_make_quotation_button(frm) {
-    frm.remove_custom_button(__('Quotation'), __('Create'));
+    frm.remove_custom_button(__('Quotation'), __('Create')); // Remove any duplicates
     frm.add_custom_button(__('Make Quotation'), function () {
         frappe.model.open_mapped_doc({
             method: "erpnext.crm.doctype.lead.lead.make_quotation", // Backend method to create Quotation
@@ -145,11 +145,11 @@ function handle_tab_visibility(frm) {
             frm.set_df_property("company_name", "reqd", 1); // Make Trade Name mandatory
             frm.set_df_property("custom_cr_number", "reqd", 1); // Make CR Number mandatory
             frm.set_df_property("custom_tax_id", "reqd", 1); // Make Tax ID mandatory
-        } else {
-            // If not a Company, remove the mandatory requirement
-            frm.set_df_property("company_name", "reqd", 0);
+        } else if (frm.doc.type === "Individual") {
+            frm.set_df_property("custom_national_id", "reqd", 1); // Make National ID mandatory
             frm.set_df_property("custom_cr_number", "reqd", 0);
             frm.set_df_property("custom_tax_id", "reqd", 0);
+            frm.set_df_property("company_name", "reqd", 0);
         }
     } else {
         hide_tab(frm, "custom_tab_7");
@@ -207,10 +207,18 @@ frappe.ui.form.on('Lead', {
         clean_custom_buttons(frm);
         observe_and_clean_buttons(frm);
     },
-    after_save: function (frm) {
-        frm.reload_doc();
-    },
-    first_name: handle_tab_visibility,
-    last_name: handle_tab_visibility,
-    email_id: handle_tab_visibility
+    validate: function (frm) {
+        if (frm.doc.type === "Company") {
+            if (!/^\d{10}$/.test(frm.doc.custom_cr_number)) {
+                frappe.throw(__('CR Number must be exactly 10 digits.'));
+            }
+            if (!/^\d{15}$/.test(frm.doc.custom_tax_id)) {
+                frappe.throw(__('Tax ID must be exactly 15 digits.'));
+            }
+        } else if (frm.doc.type === "Individual") {
+            if (!/^\d{10}$/.test(frm.doc.custom_national_id)) {
+                frappe.throw(__('National ID must be exactly 10 digits.'));
+            }
+        }
+    }
 });
