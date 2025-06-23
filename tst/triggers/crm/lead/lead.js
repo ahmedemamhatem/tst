@@ -55,6 +55,7 @@ function add_create_lead_visit_button(frm) {
 
 // === Utility: Add "Make Quotation" button ===
 function add_make_quotation_button(frm) {
+    frm.remove_custom_button(__('Quotation'), __('Create'));
     frm.add_custom_button(__('Make Quotation'), function () {
         frappe.model.open_mapped_doc({
             method: "erpnext.crm.doctype.lead.lead.make_quotation", // Backend method to create Quotation
@@ -138,6 +139,18 @@ function handle_tab_visibility(frm) {
     // Show "Customer Information" tab if "Customer Analysis" is complete
     if (isTabCompleted(frm, "Customer Analysis")) {
         show_tab(frm, "custom_tab_7");
+
+        // If Lead Type is "Company", make specific fields mandatory
+        if (frm.doc.type === "Company") {
+            frm.set_df_property("company_name", "reqd", 1); // Make Trade Name mandatory
+            frm.set_df_property("custom_cr_number", "reqd", 1); // Make CR Number mandatory
+            frm.set_df_property("custom_tax_id", "reqd", 1); // Make Tax ID mandatory
+        } else {
+            // If not a Company, remove the mandatory requirement
+            frm.set_df_property("company_name", "reqd", 0);
+            frm.set_df_property("custom_cr_number", "reqd", 0);
+            frm.set_df_property("custom_tax_id", "reqd", 0);
+        }
     } else {
         hide_tab(frm, "custom_tab_7");
     }
