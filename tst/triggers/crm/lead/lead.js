@@ -10,7 +10,9 @@ function show_tab(frm, tab_fieldname) {
 
 // === Utility: Add "Create Lead Visit" button ===
 function add_create_lead_visit_button(frm) {
+    // Ensure the button is always added
     frm.add_custom_button(__('Create Visit'), function () {
+        // Create a dialog for selecting the visit type
         const dialog = new frappe.ui.Dialog({
             title: __('Select Visit Type'),
             fields: [
@@ -26,8 +28,10 @@ function add_create_lead_visit_button(frm) {
             primary_action(values) {
                 dialog.hide();
 
+                // Check if Geolocation is supported
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(function (position) {
+                        // Insert a new Lead Visit record
                         frappe.db.insert({
                             doctype: 'Lead Visit',
                             lead: frm.doc.name,
@@ -127,19 +131,20 @@ function show_action_button(frm) {
 frappe.ui.form.on('Lead', {
     // --- On form load ---
     onload: function(frm) {
+        add_create_lead_visit_button(frm);
         hide_tab(frm, 'custom_tab_6');
         hide_tab(frm, 'custom_tab_7');
         fetch_and_set_location(frm);
-        add_create_lead_visit_button(frm);
     },
 
     // --- On form refresh ---
     refresh: function(frm) {
+        add_create_lead_visit_button(frm);
         clean_custom_buttons(frm);
         observe_and_clean_buttons(frm); // Dynamically clean buttons
         handle_tab_visibility(frm);
         show_action_button(frm);
-        add_create_lead_visit_button(frm);
+        
         if (frm.doc.custom_latitude && frm.doc.custom_longitude) {
             update_map(frm, frm.doc.custom_latitude, frm.doc.custom_longitude);
         }
