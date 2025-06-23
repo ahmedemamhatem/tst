@@ -1,102 +1,3 @@
-frappe.provide("erpnext");
-cur_frm.email_field = "email_id";
-
-erpnext.LeadController = class LeadController extends frappe.ui.form.Controller {
-    setup() {
-        this.frm.make_methods = {
-            // Removed "Customer" and "Opportunity"
-            Quotation: this.make_quotation.bind(this),
-        };
-
-        // For avoiding integration issues.
-        this.frm.set_df_property("first_name", "reqd", true);
-    }
-
-    onload() {
-        this.frm.set_query("lead_owner", function (doc, cdt, cdn) {
-            return { query: "frappe.core.doctype.user.user.user_query" };
-        });
-
-        // Call additional custom functions
-        hide_tab(this.frm, 'custom_tab_6');
-        hide_tab(this.frm, 'custom_tab_7');
-        fetch_and_set_location(this.frm);
-    }
-
-    refresh() {
-        var me = this;
-        let doc = this.frm.doc;
-
-        erpnext.toggle_naming_series();
-
-        if (!this.frm.is_new() && doc.__onload && !doc.__onload.is_customer) {
-            // Add only Quotation button from core functionality
-            this.frm.add_custom_button(__("Quotation"), this.make_quotation.bind(this), __("Create"));
-
-            // Add custom "Create Visit" button
-            add_create_lead_visit_button(this.frm);
-        }
-
-        if (!this.frm.is_new()) {
-            frappe.contacts.render_address_and_contact(this.frm);
-        } else {
-            frappe.contacts.clear_address_and_contact(this.frm);
-        }
-
-        // Custom button clean-up
-        clean_custom_buttons(this.frm);
-        observe_and_clean_buttons(this.frm);
-
-        // Custom logic for hiding/showing tabs and buttons
-        handle_tab_visibility(this.frm);
-        hide_buttons_on_mobile(this.frm);
-        hide_user_action_menu(this.frm);
-
-        // Show/hide Action/Create buttons based on tab completion
-        show_action_button(this.frm);
-
-        // Update the map if latitude and longitude are set
-        if (this.frm.doc.custom_latitude && this.frm.doc.custom_longitude) {
-            update_map(this.frm, this.frm.doc.custom_latitude, this.frm.doc.custom_longitude);
-        }
-
-        this.show_notes();
-        this.show_activities();
-    }
-
-    make_quotation() {
-        frappe.model.open_mapped_doc({
-            method: "erpnext.crm.doctype.lead.lead.make_quotation",
-            frm: this.frm,
-        });
-    }
-
-    show_notes() {
-        if (this.frm.doc.docstatus == 1) return;
-
-        const crm_notes = new erpnext.utils.CRMNotes({
-            frm: this.frm,
-            notes_wrapper: $(this.frm.fields_dict.notes_html.wrapper),
-        });
-        crm_notes.refresh();
-    }
-
-    show_activities() {
-        if (this.frm.doc.docstatus == 1) return;
-
-        const crm_activities = new erpnext.utils.CRMActivities({
-            frm: this.frm,
-            open_activities_wrapper: $(this.frm.fields_dict.open_activities_html.wrapper),
-            all_activities_wrapper: $(this.frm.fields_dict.all_activities_html.wrapper),
-            form_wrapper: $(this.frm.wrapper),
-        });
-        crm_activities.refresh();
-    }
-};
-
-// Extend the core LeadController with your customizations
-extend_cscript(cur_frm.cscript, new erpnext.LeadController({ frm: cur_frm }));
-
 // === Utility: Hide Tab by fieldname ===
 function hide_tab(frm, tab_fieldname) {
     frm.$wrapper.find(`[data-fieldname='${tab_fieldname}']`).hide();
@@ -105,6 +6,49 @@ function hide_tab(frm, tab_fieldname) {
 // === Utility: Show Tab by fieldname ===
 function show_tab(frm, tab_fieldname) {
     frm.$wrapper.find(`[data-fieldname='${tab_fieldname}']`).show();
+}
+
+// === Utility: Returns TRUE if all (non-optional) fields in a tab are filled ===
+function isTabCompleted(frm, tabLabel) {
+    let tabFields = getTabFields(frm, tabLabel);
+    let optional_fields = [
+        "email_id",
+        "custom_competitor_company_name",
+        "custom_tax_certificate",
+        "custom_national_address",
+        "custom_tax_registration",
+        "custom_tax_id",
+        "custom_national_id"
+    ];
+    for (let fieldname of tabFields) {
+        if (optional_fields.includes(fieldname)) continue;
+        let field = frm.fields_dict[fieldname];
+        if (field && field.df.fieldtype === "Table") {
+            if (!frm.doc[fieldname] || frm.doc[fieldname].length === 0) return false;
+        } else {
+            if (!frm.doc[fieldname] || frm.doc[fieldname] === "") return false;
+        }
+    }
+    return true;
+}
+
+// === Utility: Get all fieldnames (excluding layout-only) under a given tab by label ===
+function getTabFields(frm, tabLabel) {
+    let fields = [];
+    let meta = frappe.get_meta(frm.doc.doctype);
+    let found = false;
+    for (let field of meta.fields) {
+        if (field.fieldtype === "Tab Break" && field.label === tabLabel) {
+            found = true;
+            continue;
+        }
+        if (found) {
+            if (field.fieldtype === "Tab Break") break;
+            if (["Column Break", "Section Break"].includes(field.fieldtype)) continue;
+            fields.push(field.fieldname);
+        }
+    }
+    return fields;
 }
 
 // === Utility: Add "Create Lead Visit" button ===
@@ -117,7 +61,7 @@ function add_create_lead_visit_button(frm) {
                     label: __('Visit Type'),
                     fieldname: 'visit_type',
                     fieldtype: 'Select',
-                    options: ["", __('On Location'), __('Phone')],
+                    options: ["", __('زيارة ميدانيه'), __('هاتف')],
                     reqd: 1
                 }
             ],
@@ -152,6 +96,15 @@ function add_create_lead_visit_button(frm) {
     });
 }
 
+// === Utility: Apply filter to district based on selected city ===
+function apply_filter_to_field_district(frm) {
+    frm.fields_dict["custom_district"].get_query = function (doc) {
+        return {
+            filters: [["District", "city", "=", frm.doc.custom_city1]],
+        };
+    };
+}
+
 // === Utility: Validate mobile number and color input border ===
 function is_valid_mobile_no(frm) {
     const mobile = frm.doc.mobile_no?.trim() || "";
@@ -165,7 +118,7 @@ function is_valid_mobile_no(frm) {
     }
 }
 
-// === Utility: Clean up unwanted buttons ===
+// === Utility: Remove unwanted custom buttons ===
 function clean_custom_buttons(frm) {
     setTimeout(function () {
         frm.remove_custom_button(__('Opportunity'), __('Create'));
@@ -176,32 +129,45 @@ function clean_custom_buttons(frm) {
     }, 250);
 }
 
-// === Utility: Observe and clean buttons dynamically ===
-function observe_and_clean_buttons(frm) {
-    const observer = new MutationObserver(() => {
-        frm.remove_custom_button(__('Opportunity'), __('Create'));
-        frm.remove_custom_button(__('Prospect'), __('Create'));
-        frm.remove_custom_button(__('Add to Prospect'), __('Action'));
-        frm.remove_custom_button(__('Customer'), __('Create'));
-        frm.remove_custom_button('العميل', __('Create'));
-        $('button:contains("Opportunity")').hide();
-        $('button:contains("Prospect")').hide();
-        $('button:contains("Add to Prospect")').hide();
-        $('button:contains("Customer")').hide();
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-}
-
-// === Utility: Hide buttons on mobile ===
-function hide_buttons_on_mobile(frm) {
-    if (window.innerWidth <= 768) {
-        frm.remove_custom_button(__('Opportunity'), __('Create'));
-        frm.remove_custom_button(__('Prospect'), __('Create'));
+// === Main tab logic: Show/hide tabs progressively ===
+function handle_tab_visibility(frm) {
+    // 1. Show Customer Analysis tab when Company Information is complete
+    if (isTabCompleted(frm, "Company Information")) {
+        show_tab(frm, 'custom_tab_6');
+    } else {
+        hide_tab(frm, 'custom_tab_6');
+        hide_tab(frm, 'custom_tab_7');
+        return;
+    }
+    // 2. Show Customer Information tab when Customer Analysis is complete
+    if (isTabCompleted(frm, "Customer Analysis")) {
+        if (frm.doc.type === "Company" && !frm.is_new()) {
+            frm.set_df_property("custom_tax_id", "reqd", 1);
+            frm.set_df_property("custom_cr_number", "reqd", 1);
+            frm.set_df_property("company_name", "reqd", 1);
+            frm.set_df_property("custom_national_id", "reqd", 0);
+        } else if (frm.doc.type === "Individual" && !frm.is_new()) {
+            frm.set_df_property("custom_national_id", "reqd", 1);
+            frm.set_df_property("custom_tax_id", "reqd", 0);
+        }
+        show_tab(frm, 'custom_tab_7');
+    } else {
+        hide_tab(frm, 'custom_tab_7');
     }
 }
 
-// === Utility: Dynamically update the map ===
+// === OPTIONAL: Hide Action/Create buttons if Customer Information is incomplete ===
+function show_action_button(frm) {
+    if (!isTabCompleted(frm, "Customer Information")) {
+        frm.$wrapper.find("[data-label='Action']").hide();
+        frm.$wrapper.find("[data-label='Create']").hide();
+    } else {
+        frm.$wrapper.find("[data-label='Action']").show();
+        frm.$wrapper.find("[data-label='Create']").show();
+    }
+}
+
+// === Utility: Update the Map in the custom_geolocation HTML field ===
 function update_map(frm, latitude, longitude) {
     const mapHTML = `
         <div id="map" style="width: 100%; height: 300px;"></div>
@@ -218,7 +184,7 @@ function update_map(frm, latitude, longitude) {
     frm.fields_dict.custom_geolocation.$wrapper.html(mapHTML);
 }
 
-// === Utility: Fetch geolocation and update fields ===
+// === Utility: Fetch Geolocation and Update Lat/Lon Fields ===
 function fetch_and_set_location(frm) {
     if (!frm.is_new() || (frm.doc.custom_latitude && frm.doc.custom_longitude)) {
         return;
@@ -227,15 +193,78 @@ function fetch_and_set_location(frm) {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             function (position) {
-                frm.set_value('custom_latitude', position.coords.latitude);
-                frm.set_value('custom_longitude', position.coords.longitude);
-                update_map(frm, position.coords.latitude, position.coords.longitude);
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+
+                frm.set_value('custom_latitude', latitude);
+                frm.set_value('custom_longitude', longitude);
+
+                update_map(frm, latitude, longitude);
             },
-            function () {
-                frappe.msgprint(__('Unable to fetch location.'));
+            function (error) {
+                let error_message = '';
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        error_message = __('User denied the request for Geolocation.');
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        error_message = __('Location information is unavailable.');
+                        break;
+                    case error.TIMEOUT:
+                        error_message = __('The request to get user location timed out.');
+                        break;
+                    default:
+                        error_message = __('An unknown error occurred while fetching location.');
+                        break;
+                }
+                frappe.msgprint(error_message);
             }
         );
     } else {
         frappe.msgprint(__('Geolocation is not supported by your browser.'));
     }
 }
+
+// === Main Form Events ===
+frappe.ui.form.on('Lead', {
+    onload: function(frm) {
+        hide_tab(frm, 'custom_tab_6');
+        hide_tab(frm, 'custom_tab_7');
+        fetch_and_set_location(frm);
+        add_create_lead_visit_button(frm);
+    },
+    refresh: function(frm) {
+        clean_custom_buttons(frm);
+        handle_tab_visibility(frm);
+        show_action_button(frm);
+        add_create_lead_visit_button(frm);
+        if (frm.doc.custom_latitude && frm.doc.custom_longitude) {
+            update_map(frm, frm.doc.custom_latitude, frm.doc.custom_longitude);
+        }
+    },
+    after_save: function(frm) {
+        frm.reload_doc();
+    },
+    validate: function(frm) {
+        if (isTabCompleted(frm, "Customer Information")) {
+            if (frm.doc.type === "Company") {
+                if (!/^\d{15}$/.test(frm.doc.custom_tax_id)) {
+                    frappe.throw(__('Custom Tax ID must be exactly 15 digits for Company Leads.'));
+                }
+            }
+            if (frm.doc.type === "Individual") {
+                if (!/^\d{10}$/.test(frm.doc.custom_national_id)) {
+                    frappe.throw(__('Custom National ID must be exactly 10 digits for Individual Leads.'));
+                }
+            }
+        }
+    },
+    custom_city1: function(frm) {
+        apply_filter_to_field_district(frm);
+        handle_tab_visibility(frm);
+    },
+    mobile_no: function(frm) {
+        is_valid_mobile_no(frm);
+        handle_tab_visibility(frm);
+    }
+});
