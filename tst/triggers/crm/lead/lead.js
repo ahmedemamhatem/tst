@@ -8,49 +8,6 @@ function show_tab(frm, tab_fieldname) {
     frm.$wrapper.find(`[data-fieldname='${tab_fieldname}']`).show();
 }
 
-// === Utility: Returns TRUE if all (non-optional) fields in a tab are filled ===
-function isTabCompleted(frm, tabLabel) {
-    let tabFields = getTabFields(frm, tabLabel);
-    let optional_fields = [
-        "email_id",
-        "custom_competitor_company_name",
-        "custom_tax_certificate",
-        "custom_national_address",
-        "custom_tax_registration",
-        "custom_tax_id",
-        "custom_national_id"
-    ];
-    for (let fieldname of tabFields) {
-        if (optional_fields.includes(fieldname)) continue;
-        let field = frm.fields_dict[fieldname];
-        if (field && field.df.fieldtype === "Table") {
-            if (!frm.doc[fieldname] || frm.doc[fieldname].length === 0) return false;
-        } else {
-            if (!frm.doc[fieldname] || frm.doc[fieldname] === "") return false;
-        }
-    }
-    return true;
-}
-
-// === Utility: Get all fieldnames (excluding layout-only) under a given tab by label ===
-function getTabFields(frm, tabLabel) {
-    let fields = [];
-    let meta = frappe.get_meta(frm.doc.doctype);
-    let found = false;
-    for (let field of meta.fields) {
-        if (field.fieldtype === "Tab Break" && field.label === tabLabel) {
-            found = true;
-            continue;
-        }
-        if (found) {
-            if (field.fieldtype === "Tab Break") break;
-            if (["Column Break", "Section Break"].includes(field.fieldtype)) continue;
-            fields.push(field.fieldname);
-        }
-    }
-    return fields;
-}
-
 // === Utility: Add "Create Lead Visit" button ===
 function add_create_lead_visit_button(frm) {
     frm.add_custom_button(__('Create Visit'), function () {
@@ -96,26 +53,25 @@ function add_create_lead_visit_button(frm) {
     });
 }
 
-// === Utility: Apply filter to district based on selected city ===
-function apply_filter_to_field_district(frm) {
-    frm.fields_dict["custom_district"].get_query = function (doc) {
-        return {
-            filters: [["District", "city", "=", frm.doc.custom_city1]],
-        };
-    };
-}
+// === Utility: Dynamically observe and clean buttons ===
+function observe_and_clean_buttons(frm) {
+    const observer = new MutationObserver(() => {
+        // Remove unwanted buttons dynamically
+        frm.remove_custom_button(__('Opportunity'), __('Create'));
+        frm.remove_custom_button(__('Prospect'), __('Create'));
+        frm.remove_custom_button(__('Add to Prospect'), __('Action'));
+        frm.remove_custom_button(__('Customer'), __('Create'));
+        frm.remove_custom_button('العميل', __('Create'));
 
-// === Utility: Validate mobile number and color input border ===
-function is_valid_mobile_no(frm) {
-    const mobile = frm.doc.mobile_no?.trim() || "";
-    const field = frm.fields_dict.mobile_no.$wrapper.find('input');
-    const isDigitsOnly = /^\d+$/.test(mobile);
-    const isTenDigits = mobile.length === 10;
-    if (isDigitsOnly && isTenDigits) {
-        field.css('border-color', 'green');
-    } else {
-        field.css('border-color', 'red');
-    }
+        // Hide buttons directly using jQuery if they persist
+        $('button:contains("Opportunity")').hide();
+        $('button:contains("Prospect")').hide();
+        $('button:contains("Add to Prospect")').hide();
+        $('button:contains("Customer")').hide();
+    });
+
+    // Observe the document body for button changes
+    observer.observe(document.body, { childList: true, subtree: true });
 }
 
 // === Utility: Remove unwanted custom buttons ===
@@ -166,6 +122,44 @@ function show_action_button(frm) {
         frm.$wrapper.find("[data-label='Create']").show();
     }
 }
+
+// === Main Form Events ===
+frappe.ui.form.on('Lead', {
+    // --- On form load ---
+    onload: function(frm) {
+        hide_tab(frm, 'custom_tab_6');
+        hide_tab(frm, 'custom_tab_7');
+        fetch_and_set_location(frm);
+        add_create_lead_visit_button(frm);
+    },
+
+    // --- On form refresh ---
+    refresh: function(frm) {
+        clean_custom_buttons(frm);
+        observe_and_clean_buttons(frm); // Dynamically clean buttons
+        handle_tab_visibility(frm);
+        show_action_button(frm);
+        add_create_lead_visit_button(frm);
+        if (frm.doc.custom_latitude && frm.doc.custom_longitude) {
+            update_map(frm, frm.doc.custom_latitude, frm.doc.custom_longitude);
+        }
+    },
+
+    // --- On form save ---
+    after_save: function(frm) {
+        frm.reload_doc();
+    },
+
+    // --- On field triggers ---
+    custom_city1: function(frm) {
+        apply_filter_to_field_district(frm);
+        handle_tab_visibility(frm);
+    },
+    mobile_no: function(frm) {
+        is_valid_mobile_no(frm);
+        handle_tab_visibility(frm);
+    }
+});
 
 // === Utility: Update the Map in the custom_geolocation HTML field ===
 function update_map(frm, latitude, longitude) {
@@ -224,47 +218,3 @@ function fetch_and_set_location(frm) {
         frappe.msgprint(__('Geolocation is not supported by your browser.'));
     }
 }
-
-// === Main Form Events ===
-frappe.ui.form.on('Lead', {
-    onload: function(frm) {
-        hide_tab(frm, 'custom_tab_6');
-        hide_tab(frm, 'custom_tab_7');
-        fetch_and_set_location(frm);
-        add_create_lead_visit_button(frm);
-    },
-    refresh: function(frm) {
-        clean_custom_buttons(frm);
-        handle_tab_visibility(frm);
-        show_action_button(frm);
-        add_create_lead_visit_button(frm);
-        if (frm.doc.custom_latitude && frm.doc.custom_longitude) {
-            update_map(frm, frm.doc.custom_latitude, frm.doc.custom_longitude);
-        }
-    },
-    after_save: function(frm) {
-        frm.reload_doc();
-    },
-    validate: function(frm) {
-        if (isTabCompleted(frm, "Customer Information")) {
-            if (frm.doc.type === "Company") {
-                if (!/^\d{15}$/.test(frm.doc.custom_tax_id)) {
-                    frappe.throw(__('Custom Tax ID must be exactly 15 digits for Company Leads.'));
-                }
-            }
-            if (frm.doc.type === "Individual") {
-                if (!/^\d{10}$/.test(frm.doc.custom_national_id)) {
-                    frappe.throw(__('Custom National ID must be exactly 10 digits for Individual Leads.'));
-                }
-            }
-        }
-    },
-    custom_city1: function(frm) {
-        apply_filter_to_field_district(frm);
-        handle_tab_visibility(frm);
-    },
-    mobile_no: function(frm) {
-        is_valid_mobile_no(frm);
-        handle_tab_visibility(frm);
-    }
-});
