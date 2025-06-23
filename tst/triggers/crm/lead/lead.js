@@ -10,7 +10,7 @@ function show_tab(frm, tab_fieldname) {
 
 // === Utility: Add "Create Visit" button ===
 function add_create_lead_visit_button(frm) {
-    frm.add_custom_button(__('Create Visit'), function () {
+    frm.add_custom_button(__('انشاء زيارة'), function () {
         const dialog = new frappe.ui.Dialog({
             title: __('Select Visit Type'),
             fields: [
