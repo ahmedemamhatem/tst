@@ -212,7 +212,7 @@ frappe.ui.form.on('Lead', {
             if (frm.doc.custom_cr_number && !/^\d{10}$/.test(frm.doc.custom_cr_number)) {
                 frappe.throw(__('CR Number must be exactly 10 digits.'));
             }
-            if (!/^\d{15}$/.test(frm.doc.custom_tax_id)) {
+            if (frm.doc.custom_tax_id && !/^\d{15}$/.test(frm.doc.custom_tax_id)) {
                 frappe.throw(__('Tax ID must be exactly 15 digits.'));
             }
         } else if (frm.doc.type === "Individual") {
