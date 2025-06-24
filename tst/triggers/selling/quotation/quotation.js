@@ -1,4 +1,29 @@
-
+frappe.ui.form.on('Quotation', {
+    party_name: function(frm) {
+        if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
+            frappe.db.get_doc('Lead', frm.doc.party_name).then(function(lead_doc) {
+                frm.set_value('custom_number_of_cars', lead_doc.custom_number_of_cars);
+            });
+        }
+    },
+    quotation_to: function(frm) {
+        if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
+            frappe.db.get_doc('Lead', frm.doc.party_name).then(function(lead_doc) {
+                frm.set_value('custom_number_of_cars', lead_doc.custom_number_of_cars);
+            });
+        } else {
+            frm.set_value('custom_number_of_cars', null);
+        }
+    },
+    refresh: function(frm) {
+        // On form load, ensure the value is set if needed
+        if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
+            frappe.db.get_doc('Lead', frm.doc.party_name).then(function(lead_doc) {
+                frm.set_value('custom_number_of_cars', lead_doc.custom_number_of_cars);
+            });
+        }
+    }
+});
 
 frappe.ui.form.on('Quotation', {
     onload: function(frm) {
