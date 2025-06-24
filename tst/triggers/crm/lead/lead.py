@@ -20,31 +20,35 @@ class CustomLead(ErpnextLead):
             )
 
             if existing_lead:
-                # If a duplicate is found, fetch the creator's name
-                creator = frappe.db.get_value('User', existing_lead.owner, 'full_name')
-
-                # Throw a translatable error message with the lead name and creator's name
-                if user_lang == "ar":
-                    frappe.throw(
-                        "يوجد عميل بنفس البريد الإلكتروني: {0} (تم إنشاؤه بواسطة: {1})".format(
-                            existing_lead.name, creator
-                        ),
-                        title="تكرار في البريد الإلكتروني"
-                    )
+                # Check if the owner of the existing lead is the same as the current lead's owner
+                if existing_lead.owner == frappe.session.user:
+                    # If the owner is the same, no issue, continue
+                    pass
                 else:
-                    frappe.throw(
-                        "A Lead with this email ID already exists: {0} (Created by: {1})".format(
-                            existing_lead.name, creator
-                        ),
-                        title="Duplicate Email ID"
-                    )
+                    # If the owner is different, fetch the creator's name
+                    creator = frappe.db.get_value('User', existing_lead.owner, 'full_name')
+
+                    # Throw a translatable error message with the lead name and creator's name
+                    if user_lang == "ar":
+                        frappe.throw(
+                            "يوجد عميل بنفس البريد الإلكتروني: {0} (تم إنشاؤه بواسطة: {1})".format(
+                                existing_lead.name, creator
+                            ),
+                            title="تكرار في البريد الإلكتروني"
+                        )
+                    else:
+                        frappe.throw(
+                            "A Lead with this email ID already exists: {0} (Created by: {1})".format(
+                                existing_lead.name, creator
+                            ),
+                            title="Duplicate Email ID"
+                        )
             else:
                 # Optionally display a success message if no duplicate is found
                 if user_lang == "ar":
                     frappe.msgprint("البريد الإلكتروني فريد!")
                 else:
                     frappe.msgprint("Email ID is unique!")
-
 
 def set_custom_address(doc, method=None):
     """Set the custom address fields based on latitude and longitude."""
@@ -199,13 +203,13 @@ def check_duplicate_tax_or_national_id(doc, user_lang):
                     )
                 )
 
-
 def check_duplicate_mobile_or_email(doc, user_lang):
     """
     Checks if another Lead exists with the same mobile number or email id (excluding current doc).
     If found, throws an error with existing lead name and creator.
     """
     if doc.mobile_no:
+        # Check for duplicate mobile number
         existing = frappe.db.get_value(
             "Lead",
             {"mobile_no": doc.mobile_no, "name": ["!=", doc.name]},
@@ -213,20 +217,23 @@ def check_duplicate_mobile_or_email(doc, user_lang):
         )
         if existing:
             lead_name, owner = existing
-            if user_lang == "ar":
-                frappe.throw(
-                    "رقم الهاتف موجود بالفعل في العميل: {0} (تم إنشاؤه بواسطة: {1})".format(
-                        lead_name, owner
+            # Allow duplicate if the owner matches the current session user
+            if owner != frappe.session.user:
+                if user_lang == "ar":
+                    frappe.throw(
+                        "رقم الهاتف موجود بالفعل في العميل: {0} (تم إنشاؤه بواسطة: {1})".format(
+                            lead_name, frappe.db.get_value("User", owner, "full_name")
+                        )
                     )
-                )
-            else:
-                frappe.throw(
-                    "Mobile number already exists in Lead: {0} (Created by: {1})".format(
-                        lead_name, owner
+                else:
+                    frappe.throw(
+                        "Mobile number already exists in Lead: {0} (Created by: {1})".format(
+                            lead_name, frappe.db.get_value("User", owner, "full_name")
+                        )
                     )
-                )
 
     if doc.email_id:
+        # Check for duplicate email ID
         existing = frappe.db.get_value(
             "Lead",
             {"email_id": doc.email_id, "name": ["!=", doc.name]},
@@ -234,15 +241,17 @@ def check_duplicate_mobile_or_email(doc, user_lang):
         )
         if existing:
             lead_name, owner = existing
-            if user_lang == "ar":
-                frappe.throw(
-                    "البريد الإلكتروني موجود بالفعل في العميل: {0} (تم إنشاؤه بواسطة: {1})".format(
-                        lead_name, owner
+            # Allow duplicate if the owner matches the current session user
+            if owner != frappe.session.user:
+                if user_lang == "ar":
+                    frappe.throw(
+                        "البريد الإلكتروني موجود بالفعل في العميل: {0} (تم إنشاؤه بواسطة: {1})".format(
+                            lead_name, frappe.db.get_value("User", owner, "full_name")
+                        )
                     )
-                )
-            else:
-                frappe.throw(
-                    "Email ID already exists in Lead: {0} (Created by: {1})".format(
-                        lead_name, owner
+                else:
+                    frappe.throw(
+                        "Email ID already exists in Lead: {0} (Created by: {1})".format(
+                            lead_name, frappe.db.get_value("User", owner, "full_name")
+                        )
                     )
-                )

@@ -31,97 +31,99 @@ function hide_menu_items() {
     observer.observe(document.body, { childList: true, subtree: true });
 }
 
-// === Utility: Add "Create Visit" button ===
 function add_create_lead_visit_button(frm) {
-    frm.add_custom_button(__('انشاء زيارة'), function () {
-        const dialog = new frappe.ui.Dialog({
-            title: __('اختر نوع الزيارة'),
-            fields: [
-                {
-                    label: __('نوع الزيارة'),
-                    fieldname: 'visit_type',
-                    fieldtype: 'Select',
-                    options: ["", __("زيارة ميدانية"), __("هاتف")],
-                    reqd: 1
-                }
-            ],
-            primary_action_label: __('إنشاء'),
-            primary_action(values) {
-                // Hide the dialog after action
-                dialog.hide();
-
-                // Check if the visit type is "زيارة ميدانية" (Field Visit)
-                if (values.visit_type === __("زيارة ميدانية")) {
-                    // Ensure Geolocation API is supported
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                            function (position) {
-                                // Insert the Lead Visit record with mandatory location
-                                frappe.db.insert({
-                                    doctype: 'Lead Visit',
-                                    lead: frm.doc.name,
-                                    visit_type: values.visit_type,
-                                    visit_date: frappe.datetime.now_date(),
-                                    latitude: position.coords.latitude,
-                                    longitude: position.coords.longitude,
-                                    address: __('خط العرض: {0}, خط الطول: {1}', [
-                                        position.coords.latitude,
-                                        position.coords.longitude
-                                    ])
-                                }).then((doc) => {
-                                    frappe.msgprint(__('تم إنشاء الزيارة بنجاح!'));
-                                    frappe.set_route('Form', 'Lead Visit', doc.name);
-                                });
-                            },
-                            function (error) {
-                                // Handle errors if geolocation fails
-                                let errorMessage = '';
-                                switch (error.code) {
-                                    case error.PERMISSION_DENIED:
-                                        errorMessage = __('تم رفض إذن الموقع. يرجى السماح بالوصول إلى الموقع.');
-                                        break;
-                                    case error.POSITION_UNAVAILABLE:
-                                        errorMessage = __('معلومات الموقع غير متوفرة.');
-                                        break;
-                                    case error.TIMEOUT:
-                                        errorMessage = __('انتهت مهلة الحصول على الموقع.');
-                                        break;
-                                    default:
-                                        errorMessage = __('حدث خطأ غير معروف أثناء الحصول على الموقع.');
-                                }
-                                frappe.throw(errorMessage); // Throw error to prevent record insertion
-                            },
-                            {
-                                enableHighAccuracy: true, // Request high accuracy if available
-                                timeout: 10000, // Timeout after 10 seconds
-                                maximumAge: 0 // Do not use cached location
-                            }
-                        );
-                    } else {
-                        frappe.throw(__('المتصفح لا يدعم خاصية تحديد الموقع الجغرافي.'));
+    // Only add the button if the document is not new or local
+    if (frm.doc.name && !frm.doc.__islocal) {
+        frm.add_custom_button(__('انشاء زيارة'), function () {
+            const dialog = new frappe.ui.Dialog({
+                title: __('اختر نوع الزيارة'),
+                fields: [
+                    {
+                        label: __('نوع الزيارة'),
+                        fieldname: 'visit_type',
+                        fieldtype: 'Select',
+                        options: ["", __("زيارة ميدانية"), __("هاتف")],
+                        reqd: 1
                     }
-                } else {
-                    // If visit type is "هاتف" (Phone), location is not required
-                    frappe.db.insert({
-                        doctype: 'Lead Visit',
-                        lead: frm.doc.name,
-                        visit_type: values.visit_type,
-                        visit_date: frappe.datetime.now_date(),
-                        latitude: null, // No location for phone visits
-                        longitude: null,
-                        address: __('زيارة هاتفية')
-                    }).then((doc) => {
-                        frappe.msgprint(__('تم إنشاء زيارة الهاتف بنجاح!'));
-                        frappe.set_route('Form', 'Lead Visit', doc.name);
-                    });
+                ],
+                primary_action_label: __('إنشاء'),
+                primary_action(values) {
+                    // Hide the dialog after action
+                    dialog.hide();
+
+                    // Check if the visit type is "زيارة ميدانية" (Field Visit)
+                    if (values.visit_type === __("زيارة ميدانية")) {
+                        // Ensure Geolocation API is supported
+                        if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(
+                                function (position) {
+                                    // Insert the Lead Visit record with mandatory location
+                                    frappe.db.insert({
+                                        doctype: 'Lead Visit',
+                                        lead: frm.doc.name,
+                                        visit_type: values.visit_type,
+                                        visit_date: frappe.datetime.now_date(),
+                                        latitude: position.coords.latitude,
+                                        longitude: position.coords.longitude,
+                                        address: __('خط العرض: {0}, خط الطول: {1}', [
+                                            position.coords.latitude,
+                                            position.coords.longitude
+                                        ])
+                                    }).then((doc) => {
+                                        frappe.msgprint(__('تم إنشاء الزيارة بنجاح!'));
+                                        frappe.set_route('Form', 'Lead Visit', doc.name);
+                                    });
+                                },
+                                function (error) {
+                                    // Handle errors if geolocation fails
+                                    let errorMessage = '';
+                                    switch (error.code) {
+                                        case error.PERMISSION_DENIED:
+                                            errorMessage = __('تم رفض إذن الموقع. يرجى السماح بالوصول إلى الموقع.');
+                                            break;
+                                        case error.POSITION_UNAVAILABLE:
+                                            errorMessage = __('معلومات الموقع غير متوفرة.');
+                                            break;
+                                        case error.TIMEOUT:
+                                            errorMessage = __('انتهت مهلة الحصول على الموقع.');
+                                            break;
+                                        default:
+                                            errorMessage = __('حدث خطأ غير معروف أثناء الحصول على الموقع.');
+                                    }
+                                    frappe.throw(errorMessage); // Throw error to prevent record insertion
+                                },
+                                {
+                                    enableHighAccuracy: true, // Request high accuracy if available
+                                    timeout: 10000, // Timeout after 10 seconds
+                                    maximumAge: 0 // Do not use cached location
+                                }
+                            );
+                        } else {
+                            frappe.throw(__('المتصفح لا يدعم خاصية تحديد الموقع الجغرافي.'));
+                        }
+                    } else {
+                        // If visit type is "هاتف" (Phone), location is not required
+                        frappe.db.insert({
+                            doctype: 'Lead Visit',
+                            lead: frm.doc.name,
+                            visit_type: values.visit_type,
+                            visit_date: frappe.datetime.now_date(),
+                            latitude: null, // No location for phone visits
+                            longitude: null,
+                            address: __('زيارة هاتفية')
+                        }).then((doc) => {
+                            frappe.msgprint(__('تم إنشاء زيارة الهاتف بنجاح!'));
+                            frappe.set_route('Form', 'Lead Visit', doc.name);
+                            frm.reload_doc();
+                        });
+                    }
                 }
-            }
+            });
+
+            dialog.show();
         });
-
-        dialog.show();
-    });
+    }
 }
-
 // === Utility: Add "Make Quotation" button ===
 function add_make_quotation_button(frm) {
     frm.remove_custom_button(__('Quotation'), __('Create')); 
