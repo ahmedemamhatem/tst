@@ -104,32 +104,28 @@
    "label": "Notes"
   },
   {
-   "depends_on": "eval:doc.visit_type ==\"زيارة ميدانيه\"",
    "fieldname": "section_break_ntjq",
    "fieldtype": "Section Break"
   },
   {
-   "depends_on": "eval:doc.visit_type ==\"زيارة ميدانيه\"",
    "fieldname": "geolocation_xuqf",
    "fieldtype": "HTML",
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.visit_type ==\"زيارة ميدانيه\"",
    "fieldname": "longitude",
    "fieldtype": "Float",
    "label": "Longitude",
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.visit_type ==\"زيارة ميدانيه\"",
    "fieldname": "latitude",
    "fieldtype": "Float",
    "label": "latitude",
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.visit_type ==\"زيارة ميدانيه\"",
+   "depends_on": "eval:doc.visit_type ==\"\u0632\u064a\u0627\u0631\u0629 \u0645\u064a\u062f\u0627\u0646\u064a\u0647\"",
    "fieldname": "address",
    "fieldtype": "Small Text",
    "label": "Address",
@@ -204,7 +200,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-16 20:21:15.630346",
+ "modified": "2025-06-24 16:58:27.309919",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Lead Visit",
