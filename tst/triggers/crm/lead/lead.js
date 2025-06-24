@@ -1,25 +1,4 @@
-frappe.ui.form.on('Quotation', {
-    party_name: function(frm) {
-        // Only fetch if Quotation To is Lead
-        if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
-            frappe.db.get_doc('Lead', frm.doc.lead).then(function(lead_doc) {
-                // Set the value in Quotation
-                frm.set_value('custom_number_of_cars', lead_doc.custom_number_of_cars);
-            });
-        }
-    },
-    quotation_to: function(frm) {
-        // If Quotation To is changed to Lead, fetch the value
-        if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
-            frappe.db.get_doc('Lead', frm.doc.lead).then(function(lead_doc) {
-                frm.set_value('custom_number_of_cars', lead_doc.custom_number_of_cars);
-            });
-        } else {
-            // Clear field if Quotation To is not Lead
-            frm.set_value('custom_number_of_cars', null);
-        }
-    }
-});
+
 
 // === Utility: Hide Tab by fieldname ===
 function hide_tab(frm, tab_fieldname) {
