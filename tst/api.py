@@ -2,6 +2,7 @@ import os
 import frappe
 import pandas as pd
 import io
+from erpnext.stock.utils import get_stock_balance
 
 
 @frappe.whitelist()
@@ -115,7 +116,6 @@ def serial_and_batch_bundle_query(
                 or sbb.item_name like %(txt)s
                 or sbb.item_code like %(txt)s
                 or {scond})
-            {mcond}
         order by
             (case when locate(%(_txt)s, sbb.name) > 0 then locate(%(_txt)s, sbb.name) else 99999 end),
             (case when locate(%(_txt)s, sbb.item_name) > 0 then locate(%(_txt)s, sbb.item_name) else 99999 end),
@@ -126,7 +126,6 @@ def serial_and_batch_bundle_query(
             **{
                 "key": "sbb." + searchfield,
                 "scond": searchfields,
-                "mcond": get_match_cond(doctype),
             }
         ),
         {
@@ -145,37 +144,24 @@ def serial_no_query(doctype, txt, searchfield, start, page_len, filters, as_dict
     doctype = "Serial No"
     searchfields = frappe.get_meta(doctype).get_search_fields()
     searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
-    appointment_with_same_installation_order = frappe.db.get_all(
-        "Appointment",
+    installation_items = frappe.db.get_all(
+        "Installation Order Item",
         filters={
-            "docstatus": ["!=", 2],
-            "custom_installation_order": filters.get("custom_installation_order"),
+            "parent": filters.get("custom_installation_order"),
         },
-        pluck="name",
+        pluck="item_code",
     )
+
     return frappe.db.sql(
         """select name, item_code, item_name
         from `tabSerial No`
         where status = "Active"
-        and name in (
-            select distinct serial_no
-            from `tabSerial and Batch Entry` 
-            where docstatus = 1
-            and parent = %(custom_serial_and_batch_bundle)s
-            and parenttype = "Serial and Batch Bundle"
-            and parentfield = "entries"
-        )
-        and name not in (
-            select distinct serial_no
-            from `tabChoose Serial and Batch Bundle`
-            where parent in %(appointment_with_same_installation_order)s
-            and parenttype = "Appointment"
-        )
+        and item_code in %(installation_items)s
+        and warehouse = %(warehouse)s
             and ({key} like %(txt)s
                 or item_name like %(txt)s
                 or item_code like %(txt)s
                 or {scond})
-            {mcond}
         order by
             (case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
             (case when locate(%(_txt)s, item_name) > 0 then locate(%(_txt)s, item_name) else 99999 end),
@@ -186,7 +172,6 @@ def serial_no_query(doctype, txt, searchfield, start, page_len, filters, as_dict
             **{
                 "key": searchfield,
                 "scond": searchfields,
-                "mcond": get_match_cond(doctype),
             }
         ),
         {
@@ -194,11 +179,7 @@ def serial_no_query(doctype, txt, searchfield, start, page_len, filters, as_dict
             "_txt": txt.replace("%", ""),
             "start": start,
             "page_len": page_len,
-            "custom_serial_and_batch_bundle": filters.get(
-                "custom_serial_and_batch_bundle"
-            ),
-            "appointment_with_same_installation_order": tuple(
-                appointment_with_same_installation_order
-            ),
+            "installation_items": tuple(installation_items),
+            "warehouse": filters.get("warehouse"),
         },
     )

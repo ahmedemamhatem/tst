@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{item_code}-{serial_no}",
+ "autoname": "format:{item_code}-{######}",
  "creation": "2025-06-03 21:57:18.433379",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -10,16 +10,32 @@
   "serial_no",
   "item_code",
   "item_name",
-  "column_break_fbng",
   "status",
+  "attachments",
+  "posting_date",
+  "customer",
+  "customer_name",
+  "column_break_fbng",
+  "appointment",
+  "sales_order",
+  "technician",
+  "technician_warehouse",
+  "employee",
+  "full_name",
+  "chassie_no",
+  "license_plate",
   "user_section",
+  "user_id",
   "username",
   "column_break_iivt",
   "password",
   "section_break_yvax",
   "site",
+  "domain",
   "column_break_qror",
   "site_name",
+  "api_key",
+  "api_secret",
   "section_break_hktx",
   "amended_from"
  ],
@@ -50,7 +66,7 @@
    "fetch_from": "site.server",
    "fieldname": "site_name",
    "fieldtype": "Data",
-   "label": "Site Name"
+   "label": "Server IP"
   },
   {
    "fieldname": "serial_no",
@@ -62,6 +78,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -119,13 +136,109 @@
   {
    "fieldname": "column_break_qror",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "appointment",
+   "fieldtype": "Link",
+   "label": "Appointment",
+   "options": "Appointment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "chassie_no",
+   "fieldtype": "Data",
+   "label": " Chassie No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "license_plate",
+   "fieldtype": "Data",
+   "label": " License Plate ",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "appointment.custom_technician",
+   "fieldname": "technician",
+   "fieldtype": "Data",
+   "label": " Technician "
+  },
+  {
+   "fetch_from": "appointment.custom_technician_warehouse",
+   "fieldname": "technician_warehouse",
+   "fieldtype": "Data",
+   "label": " Technician Warehouse "
+  },
+  {
+   "fetch_from": "appointment.custom_employee",
+   "fieldname": "employee",
+   "fieldtype": "Data",
+   "label": "Employee"
+  },
+  {
+   "fetch_from": "appointment.custom_full_name",
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "label": " Full Name "
+  },
+  {
+   "fetch_from": "appointment.custom_customer",
+   "fieldname": "customer",
+   "fieldtype": "Data",
+   "label": " Customer "
+  },
+  {
+   "fetch_from": "appointment.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name "
+  },
+  {
+   "fieldname": "attachments",
+   "fieldtype": "Small Text",
+   "label": "attachments",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "site.domain",
+   "fieldname": "domain",
+   "fieldtype": "Data",
+   "label": "Domain"
+  },
+  {
+   "fetch_from": "site.api_key",
+   "fieldname": "api_key",
+   "fieldtype": "Data",
+   "label": "API KEY"
+  },
+  {
+   "fetch_from": "site.api_secret",
+   "fieldname": "api_secret",
+   "fieldtype": "Data",
+   "label": "API SECRET"
+  },
+  {
+   "fieldname": "user_id",
+   "fieldtype": "Data",
+   "label": "User ID"
+  },
+  {
+   "fetch_from": "appointment.custom_sales_order",
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-12 23:11:53.171141",
+ "modified": "2025-06-25 20:48:46.119798",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Device Setup",
@@ -146,6 +259,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

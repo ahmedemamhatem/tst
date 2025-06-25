@@ -17,6 +17,7 @@ class InstallationOrder(Document):
         appointment = frappe.new_doc("Appointment")
         appointment.scheduled_time = frappe.utils.now_datetime()
         appointment.status = "Open"
+        appointment.custom_appointment_status = "Delivering to Customer"
         appointment.custom_technician = self.technician
         appointment.custom_installation_order = self.name
         appointment.custom_technician_warehouse = self.warehouse
@@ -34,6 +35,8 @@ class InstallationOrder(Document):
             appointment.custom_is_sub_technician = 1
             appointment.scheduled_time = frappe.utils.now_datetime()
             appointment.status = "Open"
+            appointment.custom_appointment_status = "Delivering to Customer"
+
             appointment.custom_technician = technician.technician
             appointment.custom_installation_order = self.name
             appointment.custom_technician_warehouse = technician.warehouse

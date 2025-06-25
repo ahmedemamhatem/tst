@@ -1,0 +1,19 @@
+{
+ "content": null,
+ "creation": "2025-06-25 21:58:53.855061",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2025-06-25 21:58:53.855061",
+ "modified_by": "Administrator",
+ "module": "Tst",
+ "name": "setup-device-page",
+ "owner": "Administrator",
+ "page_name": "setup-device-page",
+ "roles": [],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "setup-device-page"
+}

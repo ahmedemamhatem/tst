@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"kb3XPLg8lb\",\"type\":\"header\",\"data\":{\"text\":\"<span style=\\\"font-size: 18px; letter-spacing: 0.18px;\\\"><b>Contract</b></span>\",\"col\":12}},{\"id\":\"WU4F-HUcIQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Order\",\"col\":6}},{\"id\":\"at9p1NCZES\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Contract Classification Rule\",\"col\":6}},{\"id\":\"JiuSi0ubOg\",\"type\":\"card\",\"data\":{\"card_name\":\"Technical Support Master Data\",\"col\":4}},{\"id\":\"ji2Jlm3Q8i\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaction\",\"col\":4}},{\"id\":\"6ZxSB5ZCSt\",\"type\":\"card\",\"data\":{\"card_name\":\"Server Setup\",\"col\":4}},{\"id\":\"FdSEhE16dn\",\"type\":\"card\",\"data\":{\"card_name\":\"Device Setup\",\"col\":4}}]",
+ "content": "[{\"id\":\"GEIO13sBpK\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Setup Devices \",\"col\":4}},{\"id\":\"kb3XPLg8lb\",\"type\":\"header\",\"data\":{\"text\":\"<span style=\\\"font-size: 18px; letter-spacing: 0.18px;\\\"><b>Contract</b></span>\",\"col\":12}},{\"id\":\"WU4F-HUcIQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Order\",\"col\":4}},{\"id\":\"at9p1NCZES\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Contract Classification Rule\",\"col\":4}},{\"id\":\"hfYt0bYH4f\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"JiuSi0ubOg\",\"type\":\"card\",\"data\":{\"card_name\":\"Technical Support Master Data\",\"col\":4}},{\"id\":\"ji2Jlm3Q8i\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaction\",\"col\":4}},{\"id\":\"6ZxSB5ZCSt\",\"type\":\"card\",\"data\":{\"card_name\":\"Server Setup\",\"col\":4}}]",
  "creation": "2025-06-03 19:26:37.116486",
  "custom_blocks": [],
  "docstatus": 0,
@@ -332,27 +332,8 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Device Setup",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Device Setup",
-   "link_count": 0,
-   "link_to": "Device Setup",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Server Setup",
-   "link_count": 2,
+   "link_count": 4,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -370,15 +351,35 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Server",
+   "label": "Device Setup",
    "link_count": 0,
-   "link_to": "Server",
+   "link_to": "Device Setup",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Training",
+   "link_count": 0,
+   "link_to": "Training",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Training Session",
+   "link_count": 0,
+   "link_to": "Training Session",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2025-06-14 00:12:10.046012",
+ "modified": "2025-06-25 23:03:41.572908",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Technical Support",
@@ -391,6 +392,13 @@
  "roles": [],
  "sequence_id": 1.1,
  "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Setup Devices ",
+   "link_to": "setup-device-page",
+   "type": "Page"
+  },
   {
    "doc_view": "List",
    "label": "Sales Order",

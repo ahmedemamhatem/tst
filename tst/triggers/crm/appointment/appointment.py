@@ -1,19 +1,24 @@
 import frappe
-from frappe.utils import nowdate
+from frappe import _
+from frappe.utils import nowdate, get_link_to_form
 
 
 @frappe.whitelist()
 def after_insert(doc, method=None):
-    if not doc.custom_is_sub_technician:
-        check_required_items(doc)
+    check_required_items(doc)
 
 
 def check_required_items(doc):
+    if doc.custom_is_sub_technician:
+        return
     material_requests = {}
-
-    installation_order_items, technician_warehouse, assistant_technicians = (
-        get_items_from_installation_order(doc.custom_installation_order)
+    installation_order = frappe.get_cached_doc(
+        "Installation Order", doc.custom_installation_order
     )
+    technician = frappe.get_cached_doc("Technician", doc.custom_technician)
+    installation_order_items = installation_order.items
+    technician_warehouse = technician.warehouse
+    assistant_technicians = installation_order.sub_installation_order_technician
 
     if installation_order_items:
         for item in installation_order_items:
@@ -58,20 +63,6 @@ def check_required_items(doc):
                 doc.custom_technician,
                 doc.name,
             )
-
-
-def get_items_from_installation_order(installation_order):
-    """
-    fetches all items from its Installation Order ,
-    """
-
-    installation_order = frappe.get_cached_doc("Installation Order", installation_order)
-
-    return (
-        installation_order.get("items") or [],
-        installation_order.warehouse,
-        installation_order.get("sub_installation_order_technician") or [],
-    )
 
 
 def get_default_warehouse(item_code):
@@ -210,19 +201,91 @@ def create_whatsapp_message_for_material_request(
 
 
 @frappe.whitelist()
-def validate(doc, method=None):
-    set_custom_appointment_status(doc)
+def validate(self, method=None):
+    self.calendar_event = None
+    handle_attachments(self)
+    if self.custom_appointment_status == "Done Installation":
+        create_device_setup(self)
 
 
-def set_custom_appointment_status(doc):
-    mr = frappe.db.exists(
-        "Material Request",
-        {"custom_reference_doctype": "Appointment", "custom_reference_link": doc.name},
+def create_device_setup(self):
+    for row in self.custom_choose_serial_and_batch_bundle:
+        device_setup = frappe.new_doc("Device Setup")
+        device_setup.status = "Pending"
+        device_setup.appointment = self.name
+        if device_setup_name := frappe.db.get_value(
+            "Device Setup",
+            {
+                "appointment": self.name,
+                "serial_no": row.serial_no,
+                # "status": ["not in", ["Inactive", "Broken", "Archived", "Suspended"]],
+                # "docstatus": 1,
+            },
+        ):
+            frappe.msgprint(
+                _(
+                    f"There is a Device Setup Still Open {get_link_to_form('Device Setup', device_setup_name)} Serial NO: {row.serial_no}"
+                )
+            )
+            continue
+        device_setup.serial_no = row.serial_no
+        device_setup.attachments = row.attachments
+        device_setup.chassie_no = row.chassie_no
+        device_setup.license_plate = row.license_plate
+        device_setup.save()
+    self.status = "Closed"
+    frappe.msgprint(_("Sent to Server Setup Team"))
+
+
+def handle_attachments(self):
+    for row in self.custom_choose_serial_and_batch_bundle:
+        validate_license_chassie_no(row)
+        if row.attachment:
+            # Add to existing attachments if any
+            if row.attachments:
+                row.attachments += "\n" + row.attachment
+            else:
+                row.attachments = row.attachment
+
+            # Get the Serial No document
+            serial_no_doc = frappe.get_doc("Serial No", row.serial_no)
+
+            # Copy attachment to Serial No
+            copy_attachment_to_serial_no(row.attachment, serial_no_doc)
+
+            # Reset the attachment field
+            row.attachment = None
+            frappe.msgprint(_("File Attached Successfully"))
+
+
+def validate_license_chassie_no(row):
+    if not (row.license_plate or row.chassie_no):
+        frappe.throw(
+            _("Has to include license plate or chassie number")
+            + f" row index {row.idx}"
+        )
+
+
+def copy_attachment_to_serial_no(attachment_url, serial_no_doc):
+    """Copy attachment from current doc to Serial No document"""
+    from frappe.utils.file_manager import save_file
+
+    # Get the file data from the attachment
+    file_name = attachment_url.split("/")[-1]
+    file_data = frappe.get_doc("File", {"file_url": attachment_url})
+
+    # Save the file to the Serial No document
+    save_file(
+        fname=file_name,
+        content=file_data.get_content(),
+        dt="Serial No",
+        dn=serial_no_doc.name,
+        folder="Home/Attachments",
+        is_private=0,
     )
-    if mr:
-        mr_doc = frappe.get_cached_doc("Material Request", mr)
-        if mr_doc.status != "Transferred":
-            doc.custom_appointment_status = "Out of Stock"
+
+    # Commit to ensure the file is saved before proceeding
+    frappe.db.commit()
 
 
 @frappe.whitelist()

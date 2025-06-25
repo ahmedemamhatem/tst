@@ -47,7 +47,23 @@ frappe.ui.form.on('Sales Order', {
                     dialog.show();
                 }
 
-            }, __('Create'));
+            });
+            frm.add_custom_button(__('Start Training'), () => {
+                frappe.call({
+                    method: 'tst.triggers.selling.sales_order.sales_order.make_training',
+                    args: {
+                        sales_order_name: frm.doc.name
+                    },
+                    callback: function(response) {
+                        if(response.message) {
+                            // Route to the created Training
+                            frappe.set_route('Form', 'Training', response.message);
+                        }
+                    },
+                    freeze: true,
+                    freeze_message: __('Creating Training...')
+                });
+            }).addClass('btn-primary');
         }
     }
 });

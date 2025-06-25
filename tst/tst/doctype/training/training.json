@@ -9,11 +9,28 @@
   "section_break_03af",
   "amended_from",
   "naming_series",
+  "section_break_xmnr",
   "device",
+  "sales_order",
+  "customer",
+  "customer_name",
+  "mobile",
+  "address",
+  "column_break_gpra",
+  "serial_no",
+  "item_code",
+  "item_name",
+  "appointment",
+  "technician",
+  "license_plate",
+  "chassie_no",
   "user_section",
+  "user_id",
   "username",
-  "column_break_whdr",
   "password",
+  "column_break_whdr",
+  "site",
+  "server_ip",
   "section_break_vbxb",
   "account_setup_verified",
   "schedule_setup",
@@ -44,6 +61,7 @@
    "fieldname": "device",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Device",
    "link_filters": "[[\"Device Setup\",\"status\",\"=\",\"Active\"],[\"Device Setup\",\"docstatus\",\"=\",\"1\"]]",
    "options": "Device Setup",
@@ -58,6 +76,8 @@
    "fetch_from": "device.username",
    "fieldname": "username",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Username",
    "read_only": 1
   },
@@ -69,6 +89,8 @@
    "fetch_from": "device.password",
    "fieldname": "password",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Password",
    "read_only": 1
   },
@@ -80,11 +102,15 @@
    "default": "0",
    "fieldname": "account_setup_verified",
    "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Account Setup Verified"
   },
   {
    "fieldname": "start_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Start Date",
    "mandatory_depends_on": "eval:doc.account_setup_verified"
   },
@@ -134,6 +160,110 @@
    "hidden": 1,
    "label": "Naming Series",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_xmnr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "device.sales_order",
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order"
+  },
+  {
+   "fetch_from": "device.appointment",
+   "fieldname": "appointment",
+   "fieldtype": "Link",
+   "label": "Appointment",
+   "options": "Appointment"
+  },
+  {
+   "fetch_from": "device.technician",
+   "fieldname": "technician",
+   "fieldtype": "Data",
+   "label": "Technician"
+  },
+  {
+   "fieldname": "column_break_gpra",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "device.item_code",
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item code",
+   "options": "Item"
+  },
+  {
+   "fetch_from": "device.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name"
+  },
+  {
+   "fetch_from": "device.customer",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer ",
+   "options": "Customer"
+  },
+  {
+   "fetch_from": "device.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name"
+  },
+  {
+   "fetch_from": "device.license_plate",
+   "fieldname": "license_plate",
+   "fieldtype": "Data",
+   "label": "License Plate"
+  },
+  {
+   "fetch_from": "device.chassie_no",
+   "fieldname": "chassie_no",
+   "fieldtype": "Data",
+   "label": "Chassie No"
+  },
+  {
+   "fetch_from": "device.user_id",
+   "fieldname": "user_id",
+   "fieldtype": "Data",
+   "label": "User ID"
+  },
+  {
+   "fetch_from": "device.site",
+   "fieldname": "site",
+   "fieldtype": "Link",
+   "label": "Site",
+   "options": "Site"
+  },
+  {
+   "fetch_from": "device.site_name",
+   "fieldname": "server_ip",
+   "fieldtype": "Data",
+   "label": "Server IP"
+  },
+  {
+   "fetch_from": "sales_order.contact_mobile",
+   "fieldname": "mobile",
+   "fieldtype": "Small Text",
+   "label": "Mobile"
+  },
+  {
+   "fetch_from": "sales_order.address_display",
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "address"
+  },
+  {
+   "fetch_from": "device.serial_no",
+   "fieldname": "serial_no",
+   "fieldtype": "Link",
+   "label": "Serial No",
+   "options": "Serial No"
   }
  ],
  "grid_page_length": 50,
@@ -145,7 +275,7 @@
    "link_fieldname": "reference_link"
   }
  ],
- "modified": "2025-06-14 04:37:48.106528",
+ "modified": "2025-06-25 21:15:10.901888",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Training",
@@ -166,6 +296,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

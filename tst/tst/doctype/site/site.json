@@ -5,41 +5,27 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "subdomain",
-  "domain",
-  "status",
-  "status_before_update",
   "server",
-  "archive_failed",
-  "cluster",
-  "admin_password",
-  "additional_system_user_created",
-  "billing_tab",
-  "plan",
-  "free",
-  "staging",
-  "column_break_15",
-  "is_erpnext_setup",
-  "trial_end_date",
-  "erpnext_consultant"
+  "domain",
+  "column_break_zvfd",
+  "port",
+  "status",
+  "disabled",
+  "credentials_section",
+  "api_key",
+  "column_break_fryy",
+  "api_secret"
  ],
  "fields": [
   {
-   "fieldname": "subdomain",
-   "fieldtype": "Data",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Subdomain",
-   "reqd": 1
-  },
-  {
    "fieldname": "domain",
-   "fieldtype": "Link",
-   "label": "Domain",
-   "options": "Root Domain"
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Domain"
   },
   {
-   "default": "Pending",
+   "default": "Active",
    "fieldname": "status",
    "fieldtype": "Select",
    "hide_days": 1,
@@ -47,109 +33,64 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Pending\nInstalling\nUpdating\nRecovering\nActive\nInactive\nBroken\nArchived\nSuspended",
-   "read_only": 1,
-   "reqd": 1
+   "options": "Active\nInactive\nBroken\nArchived\nSuspended"
   },
   {
-   "fieldname": "status_before_update",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Status Before Update"
-  },
-  {
-   "fetch_from": "bench.server",
-   "fetch_if_empty": 1,
    "fieldname": "server",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "hide_days": 1,
    "hide_seconds": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Server",
-   "options": "Server",
+   "label": "Server IP",
    "reqd": 1
   },
   {
-   "default": "0",
-   "fieldname": "archive_failed",
-   "fieldtype": "Check",
-   "label": "Archive Failed",
-   "read_only": 1
-  },
-  {
-   "fieldname": "cluster",
-   "fieldtype": "Link",
-   "label": "Cluster",
-   "options": "Cluster",
-   "reqd": 1
-  },
-  {
-   "fieldname": "admin_password",
-   "fieldtype": "Password",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Administrator Password"
-  },
-  {
-   "default": "0",
-   "fieldname": "additional_system_user_created",
-   "fieldtype": "Check",
-   "label": "Additional System User Created"
-  },
-  {
-   "fieldname": "billing_tab",
-   "fieldtype": "Tab Break",
-   "label": "Billing"
-  },
-  {
-   "fieldname": "plan",
-   "fieldtype": "Link",
-   "label": "Plan",
-   "options": "Site Plan",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "description": "If checked, this site's usage data won't be sent to Stripe",
-   "fieldname": "free",
-   "fieldtype": "Check",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Free Site"
-  },
-  {
-   "default": "0",
-   "fieldname": "staging",
-   "fieldtype": "Check",
-   "label": "Staging"
-  },
-  {
-   "fieldname": "column_break_15",
+   "fieldname": "column_break_zvfd",
    "fieldtype": "Column Break"
   },
   {
    "default": "0",
-   "fieldname": "is_erpnext_setup",
+   "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Is ERPNext Setup"
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Disabled"
   },
   {
-   "fieldname": "trial_end_date",
-   "fieldtype": "Date",
-   "label": "Trial End Date"
+   "fieldname": "credentials_section",
+   "fieldtype": "Section Break",
+   "label": "Credentials"
   },
   {
-   "fieldname": "erpnext_consultant",
-   "fieldtype": "Link",
-   "label": "ERPNext Consultant",
-   "options": "ERPNext Consultant"
+   "fieldname": "api_key",
+   "fieldtype": "Data",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "API Key"
+  },
+  {
+   "fieldname": "column_break_fryy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "api_secret",
+   "fieldtype": "Data",
+   "label": "API Secret"
+  },
+  {
+   "default": "80",
+   "fieldname": "port",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Port"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-03 21:56:14.189728",
+ "modified": "2025-06-25 20:32:16.399561",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Site",
@@ -166,9 +107,24 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
   }
  ],
+ "row_format": "Dynamic",
+ "search_fields": "server,domain,port",
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "server"
 }
