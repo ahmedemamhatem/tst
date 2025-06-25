@@ -48,6 +48,7 @@ frappe.ui.form.on("Appointment", {
 
                 }
             });
+<<<<<<< HEAD
             if (!found) {
                 let device_row = frm.add_child("custom_choose_serial_and_batch_bundle");
                 device_row.serial_no = frm.doc.custom_serial_no;
@@ -63,6 +64,23 @@ frappe.ui.form.on("Appointment", {
             }
         }
     },
+=======
+        if (!found) {
+            let device_row = frm.add_child("custom_choose_serial_and_batch_bundle");
+            device_row.serial_no = frm.doc.custom_serial_no;
+            frm.refresh_field("custom_choose_serial_and_batch_bundle");
+            frm.doc.custom_serial_no = "";
+            frm.doc.custom_item_code = "";
+            frm.doc.custom_item_name = "";
+
+            frm.refresh_field("custom_serial_no");
+            frm.refresh_field("custom_item_code");
+            frm.refresh_field("custom_item_name");
+            frm.dirty()
+        }
+    }
+},
+>>>>>>> 216b9a7 (technical cycle)
     getCurrentLocation: function (frm) {
         return new Promise((resolve) => {
             if (navigator.geolocation) {

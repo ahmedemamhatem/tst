@@ -53,6 +53,50 @@ def make_training(sales_order_name):
 
 
 @frappe.whitelist()
+def make_training(sales_order_name):
+    """
+    Create Training documents for all Device Setups linked to this Sales Order
+    Returns the last created Training name for routing
+    """
+    if not sales_order_name:
+        frappe.throw(_("Sales Order name is required"))
+
+    # Get all submitted Device Setups for this Sales Order
+    device_setups = frappe.get_all(
+        "Device Setup",
+        filters={"sales_order": sales_order_name, "docstatus": 1},
+        fields=["name", "serial_no"],
+    )
+
+    if not device_setups:
+        frappe.throw(_("No submitted Device Setups found for this Sales Order"))
+
+    last_training = None
+
+    for device in device_setups:
+        # Check if Training already exists
+        if not frappe.db.exists("Training", {"device": device.name}):
+            training = frappe.new_doc("Training")
+            training.update(
+                {
+                    "device": device.name,
+                    "serial_no": device.serial_no,  # Include serial no if needed
+                    "sales_order": sales_order_name,
+                    "account_setup_verified": 1,
+                    "posting_date": frappe.utils.nowdate(),
+                }
+            )
+            training.insert(ignore_permissions=True)
+            last_training = training.name
+
+    if not last_training:
+        frappe.msgprint(_("Trainings already exist for all Device Setups"))
+        return None
+
+    return last_training
+
+
+@frappe.whitelist()
 def make_installation_order(source_name, target_doc=None):
     args = frappe.form_dict.get("args")
     if isinstance(args, str):

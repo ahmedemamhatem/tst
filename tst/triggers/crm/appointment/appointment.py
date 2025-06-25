@@ -3,13 +3,14 @@ from frappe import _
 from frappe.utils import nowdate, get_link_to_form
 
 
-
 @frappe.whitelist()
 def after_insert(doc, method=None):
     check_required_items(doc)
 
 
 def check_required_items(doc):
+    if doc.custom_is_sub_technician:
+        return
     material_requests = {}
     installation_order = frappe.get_cached_doc(
         "Installation Order", doc.custom_installation_order
@@ -285,7 +286,6 @@ def copy_attachment_to_serial_no(attachment_url, serial_no_doc):
 
     # Commit to ensure the file is saved before proceeding
     frappe.db.commit()
-
 
 
 @frappe.whitelist()
