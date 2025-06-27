@@ -9,8 +9,9 @@ def after_insert(doc, method=None):
             doc.custom_reference_doctype,
             doc.custom_reference_link,
             "custom_appointment_status",
-            "Out of Stock",
+            "Out of Stock"
         )
+
 
 
 @frappe.whitelist()
@@ -20,19 +21,23 @@ def validate(doc, method=None):
         doc.custom_installation_order = frappe.db.get_value(
             doc.custom_reference_doctype,
             doc.custom_reference_link,
-            "custom_installation_order",
+            "custom_installation_order"
         )
 
 
 @frappe.whitelist()
 def set_department_in_items(doc, method=None):
+    
     """
     For each item row, set department (if field exists) from Employee's department.
     Throws an error if Employee or department is not found.
     """
     # Fetch Employee department
     employee = frappe.db.get_value(
-        "Employee", {"user_id": doc.owner}, ["name", "department"], as_dict=True
+        "Employee",
+        {"user_id": doc.owner},
+        ["name", "department"],
+        as_dict=True
     )
     if not employee:
         frappe.throw("No Employee found for user {}".format(doc.owner))
@@ -46,9 +51,7 @@ def set_department_in_items(doc, method=None):
 
             # After insert, update DB directly if needed
             if not getattr(doc, "__islocal", False):
-                frappe.db.set_value(
-                    item.doctype, item.name, "department", employee["department"]
-                )
+                frappe.db.set_value(item.doctype, item.name, "department", employee["department"])
 
 
 @frappe.whitelist()
