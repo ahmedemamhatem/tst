@@ -8,6 +8,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "antd": "^5.26.2",
     "frappe-react-sdk": "^1.11.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
