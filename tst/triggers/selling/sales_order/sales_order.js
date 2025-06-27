@@ -1,7 +1,31 @@
 frappe.ui.form.on('Sales Order', {
-    refresh: function (frm) {
+    onload_post_render: function(frm) {
+            cur_frm.remove_custom_button(__('Update Items'));
+            cur_frm.remove_custom_button(__('Status'));
+            cur_frm.remove_custom_button(__('Pick List'), __('Create'));
+            // cur_frm.remove_custom_button(__('Delivery Note'), __('Create'));
+            cur_frm.remove_custom_button(__('Work Order'), __('Create'));
+            cur_frm.remove_custom_button(__('Request for Raw Materials'), __('Create'));
+            cur_frm.remove_custom_button(__('Project'), __('Create'));
+            cur_frm.remove_custom_button(__('Payment Request'), __('Create'));
+            cur_frm.remove_custom_button(__('Purchase Order'), __('Create'));
+            let statusButton = $(`[data-label="${__('Status')}"]`);
+            statusButton.hide();
+    },
+    refresh:  function (frm) {
+        cur_frm.remove_custom_button(__('Update Items'));
+            cur_frm.remove_custom_button(__('Status'));
+            cur_frm.remove_custom_button(__('Pick List'), __('Create'));
+            // cur_frm.remove_custom_button(__('Delivery Note'), __('Create'));
+            cur_frm.remove_custom_button(__('Work Order'), __('Create'));
+            cur_frm.remove_custom_button(__('Request for Raw Materials'), __('Create'));
+            cur_frm.remove_custom_button(__('Project'), __('Create'));
+            cur_frm.remove_custom_button(__('Payment Request'), __('Create'));
+            cur_frm.remove_custom_button(__('Purchase Order'), __('Create'));
+            let statusButton = $(`[data-label="${__('Status')}"]`);
+            statusButton.hide();
         address_filter(frm)
-        if (frm.doc.docstatus == 1) {
+        if (frm.doc.docstatus == 1 ) {
             frm.add_custom_button(__('Installation Order'), function () {
 
                 // Step 1: Get unique addresses from items
@@ -48,23 +72,38 @@ frappe.ui.form.on('Sales Order', {
                 }
 
             });
-            frm.add_custom_button(__('Start Training'), () => {
-                frappe.call({
-                    method: 'tst.triggers.selling.sales_order.sales_order.make_training',
-                    args: {
-                        sales_order_name: frm.doc.name
-                    },
-                    callback: function(response) {
-                        if(response.message) {
-                            // Route to the created Training
-                            frappe.set_route('Form', 'Training', response.message);
-                        }
-                    },
-                    freeze: true,
-                    freeze_message: __('Creating Training...')
-                });
-            }).addClass('btn-primary');
-        }
+            frappe.call({
+            method: 'frappe.client.get_value',
+            args: {
+                doctype: 'Device Setup',
+                filters: { sales_order: frm.doc.name },
+                fieldname: 'name'
+            },
+            callback: function(r) {
+                
+                if (!r.exc && r.message && r.message.name) {
+                    // Prevent duplicate button
+                    if (!frm.custom_buttons || !frm.custom_buttons['Start Training']) {
+                        frm.add_custom_button(__('Start Training'), () => {
+                            frappe.call({
+                                method: 'tst.triggers.selling.sales_order.sales_order.make_training',
+                                args: {
+                                    sales_order_name: frm.doc.name
+                                },
+                                callback: function(response) {
+                                    if (response.message) {
+                                        frappe.set_route('Form', 'Training');
+                                    }
+                                },
+                                freeze: true,
+                                freeze_message: __('Creating Training...')
+                            });
+                        }).addClass('btn-primary');
+                    }
+                }
+            }
+        });
+    }
     }
 });
 

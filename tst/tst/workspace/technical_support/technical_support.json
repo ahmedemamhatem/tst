@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"GEIO13sBpK\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Setup Devices \",\"col\":4}},{\"id\":\"kb3XPLg8lb\",\"type\":\"header\",\"data\":{\"text\":\"<span style=\\\"font-size: 18px; letter-spacing: 0.18px;\\\"><b>Contract</b></span>\",\"col\":12}},{\"id\":\"WU4F-HUcIQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Order\",\"col\":4}},{\"id\":\"at9p1NCZES\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Contract Classification Rule\",\"col\":4}},{\"id\":\"hfYt0bYH4f\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"JiuSi0ubOg\",\"type\":\"card\",\"data\":{\"card_name\":\"Technical Support Master Data\",\"col\":4}},{\"id\":\"ji2Jlm3Q8i\",\"type\":\"card\",\"data\":{\"card_name\":\"Transaction\",\"col\":4}},{\"id\":\"6ZxSB5ZCSt\",\"type\":\"card\",\"data\":{\"card_name\":\"Server Setup\",\"col\":4}}]",
+ "content": "[{\"id\":\"QbsZWYzHur\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Device Setup</b></span>\",\"col\":12}},{\"id\":\"GEIO13sBpK\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Setup Devices Page\",\"col\":4}},{\"id\":\"kb3XPLg8lb\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h2\\\">Back Desk</span>\",\"col\":12}},{\"id\":\"WU4F-HUcIQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Order\",\"col\":4}},{\"id\":\"LW1baIVQ8N\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Whatsapp Message\",\"col\":3}},{\"id\":\"hfYt0bYH4f\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"JiuSi0ubOg\",\"type\":\"card\",\"data\":{\"card_name\":\"Technical Support\",\"col\":4}},{\"id\":\"SFFCBSYLzo\",\"type\":\"card\",\"data\":{\"card_name\":\"Device Setup\",\"col\":4}},{\"id\":\"lzoinAWoJ8\",\"type\":\"card\",\"data\":{\"card_name\":\"Training\",\"col\":4}}]",
  "creation": "2025-06-03 19:26:37.116486",
  "custom_blocks": [],
  "docstatus": 0,
@@ -170,7 +170,117 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Technical Support Master Data",
+   "label": "Quotation",
+   "link_count": 0,
+   "link_to": "Quotation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Supplier Quotation",
+   "link_count": 0,
+   "link_to": "Supplier Quotation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Purchase Invoice",
+   "link_count": 0,
+   "link_to": "Purchase Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Order",
+   "link_count": 0,
+   "link_to": "Sales Order",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Installation Order",
+   "link_count": 0,
+   "link_to": "Installation Order",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Appointment",
+   "link_count": 0,
+   "link_to": "Appointment",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Asset Custody Request",
+   "link_count": 0,
+   "link_to": "Asset Custody Request",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Site",
+   "link_count": 0,
+   "link_to": "Site",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Device Setup",
+   "link_count": 0,
+   "link_to": "Device Setup",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Training",
+   "link_count": 0,
+   "link_to": "Training",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Training Session",
+   "link_count": 0,
+   "link_to": "Training Session",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Training",
    "link_count": 6,
    "link_type": "DocType",
    "onboard": 0,
@@ -179,12 +289,71 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Quotation Templet",
+   "label": "Customer",
    "link_count": 0,
-   "link_to": "Quotation Templet",
+   "link_to": "Customer",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Technician",
+   "link_count": 0,
+   "link_to": "Technician",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Order",
+   "link_count": 0,
+   "link_to": "Sales Order",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Device Setup",
+   "link_count": 0,
+   "link_to": "Device Setup",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Training",
+   "link_count": 0,
+   "link_to": "Training",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Training Session",
+   "link_count": 0,
+   "link_to": "Training Session",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Technical Support",
+   "link_count": 15,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
   },
   {
    "dependencies": "",
@@ -239,15 +408,6 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Transaction",
-   "link_count": 8,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
   },
   {
    "hidden": 0,
@@ -332,11 +492,51 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Server Setup",
-   "link_count": 4,
+   "label": "Site",
+   "link_count": 0,
+   "link_to": "Site",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Device Setup",
+   "link_count": 0,
+   "link_to": "Device Setup",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Device Setup",
+   "link_count": 6,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Warehouse",
+   "link_count": 0,
+   "link_to": "Warehouse",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Technician",
+   "link_count": 0,
+   "link_to": "Technician",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -361,9 +561,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Training",
+   "label": "Appointment",
    "link_count": 0,
-   "link_to": "Training",
+   "link_to": "Appointment",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -371,16 +571,16 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Training Session",
+   "label": "Serial No Items",
    "link_count": 0,
-   "link_to": "Training Session",
+   "link_to": "Serial No",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2025-06-25 23:03:41.572908",
- "modified_by": "Administrator",
+ "modified": "2025-06-27 22:58:16.231594",
+ "modified_by": "ahmedmansy265@gmail.com",
  "module": "Tst",
  "name": "Technical Support",
  "number_cards": [],
@@ -395,21 +595,22 @@
   {
    "color": "Grey",
    "doc_view": "List",
-   "label": "Setup Devices ",
+   "label": "Setup Devices Page",
    "link_to": "setup-device-page",
    "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Whatsapp Message",
+   "link_to": "WH Massage",
+   "stats_filter": "[]",
+   "type": "DocType"
   },
   {
    "doc_view": "List",
    "label": "Sales Order",
    "link_to": "Sales Order",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Contract Classification Rule",
-   "link_to": "Contract Classification Rule",
    "type": "DocType"
   }
  ],

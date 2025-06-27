@@ -4,15 +4,31 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import get_link_to_form
 
 
 class DeviceSetup(Document):
     def validate(self):
+        if device_setup := frappe.db.get_value(
+            "Device Setup",
+            {
+                "serial_no": self.serial_no,
+                "status": ["not in", ["Inactive", "Broken", "Archived", "Suspended"]],
+            },
+        ):
+            frappe.throw(
+                _(
+                    f"There is a Device Setup Still Open {get_link_to_form('Device Setup', device_setup)} Serial NO: {self.serial_no}"
+                )
+            )
         if not self.posting_date:
             self.posting_date = frappe.utils.now()
 
-    def on_submit(self):
+    def after_insert(self):
         self.update_serial_no()
+
+    def on_submit(self):
+        pass
 
     def on_cancel(self):
         self.clear_serial_no_references()

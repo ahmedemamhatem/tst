@@ -275,7 +275,8 @@
    "link_fieldname": "reference_link"
   }
  ],
- "modified": "2025-06-25 21:15:10.901888",
+ "make_attachments_public": 1,
+ "modified": "2025-06-27 19:18:58.887731",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Training",

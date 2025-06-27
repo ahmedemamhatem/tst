@@ -12,12 +12,14 @@ class InstallationOrder(Document):
     # 		if len(self.technicians) > 1:
     # 			frappe.throw(_("Only one technician can be assigned to an installation order. Assign Sub Technicians instead."))
     def on_submit(self):
+        if not self.technician:
+            frappe.throw(_("Technician is required for the Installation Order."))
         # create Appointments
         # for technician in self.technicians:
         appointment = frappe.new_doc("Appointment")
-        appointment.scheduled_time = frappe.utils.now_datetime()
+        appointment.scheduled_time = self.scheduled_time
         appointment.status = "Open"
-        appointment.custom_appointment_status = "Delivering to Customer"
+        appointment.custom_appointment_status = "Pending"
         appointment.custom_technician = self.technician
         appointment.custom_installation_order = self.name
         appointment.custom_technician_warehouse = self.warehouse
@@ -33,9 +35,9 @@ class InstallationOrder(Document):
         for technician in self.sub_installation_order_technician:
             appointment = frappe.new_doc("Appointment")
             appointment.custom_is_sub_technician = 1
-            appointment.scheduled_time = frappe.utils.now_datetime()
+            appointment.scheduled_time = self.scheduled_time
             appointment.status = "Open"
-            appointment.custom_appointment_status = "Delivering to Customer"
+            appointment.custom_appointment_status = "Pending"
 
             appointment.custom_technician = technician.technician
             appointment.custom_installation_order = self.name

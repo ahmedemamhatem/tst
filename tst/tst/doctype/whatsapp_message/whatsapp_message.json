@@ -1,58 +1,60 @@
 {
-  "actions": [],
-  "allow_rename": 1,
-  "creation": "2025-05-25 01:41:48.398898",
-  "doctype": "DocType",
-  "engine": "InnoDB",
-  "field_order": [
-    "mobile_no",
-    "message",
-    "attach_dcny"
-  ],
-  "fields": [
-    {
-      "description": "The phone number that will receive the message.",
-      "fieldname": "mobile_no",
-      "fieldtype": "Data",
-      "in_list_view": 1,
-      "label": "Mobile No",
-      "reqd": 1
-    },
-    {
-      "fieldname": "message",
-      "fieldtype": "Long Text",
-      "in_list_view": 1,
-      "label": "Message",
-      "reqd": 1
-    },
-    {
-      "fieldname": "attach_dcny",
-      "fieldtype": "Attach"
-    }
-  ],
-  "grid_page_length": 50,
-  "index_web_pages_for_search": 1,
-  "links": [],
-  "modified": "2025-06-03 22:09:38.741098",
-  "modified_by": "Administrator",
-  "module": "Tst",
-  "name": "WhatsApp Message",
-  "owner": "Administrator",
-  "permissions": [
-    {
-      "create": 1,
-      "delete": 1,
-      "email": 1,
-      "export": 1,
-      "print": 1,
-      "read": 1,
-      "report": 1,
-      "role": "System Manager",
-      "share": 1,
-      "write": 1
-    }
-  ],
-  "sort_field": "modified",
-  "sort_order": "DESC",
-  "states": []
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-05-25 01:41:48.398898",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "mobile_no",
+  "message",
+  "attach_dcny"
+ ],
+ "fields": [
+  {
+   "description": "The phone number that will receive the message.",
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mobile No",
+   "reqd": 1
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Long Text",
+   "in_list_view": 1,
+   "label": "Message",
+   "reqd": 1
+  },
+  {
+   "fieldname": "attach_dcny",
+   "fieldtype": "Attach"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "make_attachments_public": 1,
+ "modified": "2025-06-27 19:18:59.866271",
+ "modified_by": "Administrator",
+ "module": "Tst",
+ "name": "WhatsApp Message",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
 }

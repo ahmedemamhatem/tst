@@ -21,7 +21,8 @@
   "ends_on",
   "status",
   "section_break_rgvn",
-  "description"
+  "description",
+  "amended_from"
  ],
  "fields": [
   {
@@ -66,11 +67,15 @@
   {
    "fieldname": "subject",
    "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Subject"
   },
   {
    "fieldname": "session_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Session Type",
    "options": "Online\nOffline"
   },
@@ -81,16 +86,22 @@
   {
    "fieldname": "starts_on",
    "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Starts on"
   },
   {
    "fieldname": "ends_on",
    "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Ends on"
   },
   {
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Status",
    "options": "Open\nCompleted\nClosed\nCancelled"
   },
@@ -115,12 +126,24 @@
    "fieldtype": "Data",
    "label": "Trainer Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Training Session",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2025-06-14 05:19:54.418365",
+ "make_attachments_public": 1,
+ "modified": "2025-06-27 20:42:32.626402",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Training Session",
@@ -139,7 +162,11 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
 }

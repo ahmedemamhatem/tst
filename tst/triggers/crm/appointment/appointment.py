@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
 from frappe.utils import nowdate, get_link_to_form
+from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 
 
 @frappe.whitelist()
@@ -11,58 +12,79 @@ def after_insert(doc, method=None):
 def check_required_items(doc):
     if doc.custom_is_sub_technician:
         return
+
     material_requests = {}
     installation_order = frappe.get_cached_doc(
         "Installation Order", doc.custom_installation_order
     )
     technician = frappe.get_cached_doc("Technician", doc.custom_technician)
-    installation_order_items = installation_order.items
     technician_warehouse = technician.warehouse
-    assistant_technicians = installation_order.sub_installation_order_technician
 
-    if installation_order_items:
-        for item in installation_order_items:
-            item_code = item.get("item_code")
-            required_qty = item.get("qty")
+    for item in installation_order.items:
+        item_code = item.get("item_code")
+        required_qty = item.get("qty")
 
-            # Step 1: Stock in technician warehouse
-            tech_qty = get_stock_qty(item_code, technician_warehouse)
+        # 1. Check technician's warehouse first
+        tech_qty = get_stock_qty(item_code, technician_warehouse)
+        allocated_qty = min(tech_qty, required_qty)
+        remaining_needed = required_qty - allocated_qty
 
-            # Step 2: Stock in all assistant  technician warehouses
-            assistant_total_qty = 0
-            for tech in assistant_technicians:
-                assistant_wh = tech.get("warehouse")
-                if assistant_wh:
-                    assistant_total_qty += get_stock_qty(item_code, assistant_wh)
+        # 2. Check assistant technicians' warehouses
+        if remaining_needed > 0:
+            for tech in installation_order.sub_installation_order_technician:
+                if not tech.warehouse:
+                    continue
 
-            # Step 3: Is total stock enough?
-            total_available = tech_qty + assistant_total_qty
-            if total_available >= required_qty:
-                continue  # No material request needed
+                wh_qty = get_stock_qty(item_code, tech.warehouse)
+                allocate = min(wh_qty, remaining_needed)
+                if allocate > 0:
+                    remaining_needed -= allocate
 
-            # Step 4: Not enough stock anywhere → create material request
-            missing_qty = required_qty - total_available
-            default_warehouse = get_default_warehouse(item_code)
+        # 3. Create MR for remaining quantity
+        if remaining_needed > 0:
+            source_warehouse = get_best_source_warehouse(
+                item_code, technician_warehouse
+            )
 
-            material_requests.setdefault(default_warehouse, []).append(
+            if not source_warehouse:
+                frappe.throw(_(f"No available stock found for {item_code}"))
+
+            material_requests.setdefault(source_warehouse, []).append(
                 {
                     "item_code": item_code,
-                    "qty": missing_qty,
+                    "qty": remaining_needed,
                     "schedule_date": nowdate(),
-                    "from_warehouse": default_warehouse,
+                    "from_warehouse": source_warehouse,
                     "warehouse": technician_warehouse,
                 }
             )
 
-    if material_requests:
-        for source_warehouse, items in material_requests.items():
-            create_material_request(
-                items,
-                technician_warehouse,
-                source_warehouse,
-                doc.custom_technician,
-                doc.name,
-            )
+    # Create material requests
+    for source_wh, items in material_requests.items():
+        create_material_request(
+            items, technician_warehouse, source_wh, doc.custom_technician, doc.name
+        )
+
+
+def get_best_source_warehouse(item_code, exclude_warehouse):
+    """Find the best warehouse to source items from"""
+    warehouses = frappe.db.sql(
+        """
+        SELECT warehouse, actual_qty
+        FROM `tabBin`
+        JOIN `tabWarehouse` ON `tabBin`.warehouse = `tabWarehouse`.name
+        WHERE item_code = %s
+          AND warehouse != %s
+          AND actual_qty > 0
+            AND `tabWarehouse`.custom_warehouse_ownership = 'Fiscal Warehouse'
+        ORDER BY actual_qty DESC
+        LIMIT 1
+    """,
+        (item_code, exclude_warehouse),
+        as_dict=1,
+    )
+
+    return warehouses[0].warehouse if warehouses else None
 
 
 def get_default_warehouse(item_code):
@@ -173,7 +195,7 @@ def create_whatsapp_message_for_material_request(
 
         # Compose message
         message = f"""
-                تم تجهيز الطلبية
+                تم طلب الطلبية
 
                 رقم الطلبية: {order_number}
 
@@ -192,9 +214,9 @@ def create_whatsapp_message_for_material_request(
                 """
 
         # Create WhatsApp Message
-        whatsapp_doc = frappe.new_doc("WhatsApp Message")
-        whatsapp_doc.mobile_no = mobile_no
-        whatsapp_doc.message = message
+        whatsapp_doc = frappe.new_doc("WH Massage")
+        whatsapp_doc.phone = mobile_no
+        whatsapp_doc.send_message = message
         whatsapp_doc.insert(ignore_permissions=True)
 
     frappe.db.commit()
@@ -202,21 +224,42 @@ def create_whatsapp_message_for_material_request(
 
 @frappe.whitelist()
 def validate(self, method=None):
-    self.calendar_event = None
+    self.calendar_event = ""
+    validate_item_serial_qty_to_so_qty(self)
+
     handle_attachments(self)
     if self.custom_appointment_status == "Done Installation":
+        if not self.custom_choose_serial_and_batch_bundle:
+            frappe.throw(_("Please add at least one Serial No or Batch Bundle."))
         create_device_setup(self)
+        create_delivery_note(self)
+
+
+def validate_item_serial_qty_to_so_qty(self):
+    if not self.custom_sales_order:
+        frappe.throw(_("Sales Order is required to validate serial numbers."))
+    total_qty = frappe.db.get_value(
+        "Sales Order",
+        self.custom_sales_order,
+        "total_qty",
+    )
+    if len(self.custom_choose_serial_and_batch_bundle) > total_qty:
+        frappe.throw(
+            _(
+                "The number of Serial No  entries exceeds the total quantity in Sales Order."
+            )
+        )
 
 
 def create_device_setup(self):
     for row in self.custom_choose_serial_and_batch_bundle:
         device_setup = frappe.new_doc("Device Setup")
-        device_setup.status = "Pending"
+        device_setup.status = "Done Installation Ready for Server Setup"
         device_setup.appointment = self.name
         if device_setup_name := frappe.db.get_value(
             "Device Setup",
             {
-                "appointment": self.name,
+                # "appointment": self.name,
                 "serial_no": row.serial_no,
                 # "status": ["not in", ["Inactive", "Broken", "Archived", "Suspended"]],
                 # "docstatus": 1,
@@ -291,3 +334,29 @@ def copy_attachment_to_serial_no(attachment_url, serial_no_doc):
 @frappe.whitelist()
 def on_submit(doc, method=None):
     pass
+
+
+# def make_delivery_note(source_name, target_doc=None, kwargs=None):
+def create_delivery_note(doc):
+    """
+    Create Delivery Note from Sales Order.
+
+    :param source_name: Name of the Sales Order
+    :param target_doc: Optional target document to modify
+    :param kwargs: Additional arguments for customization
+    :return: Name of the created Delivery Note
+    """
+    delivery_note = make_delivery_note(
+        doc.custom_sales_order, target_doc=None, kwargs=None
+    )
+    if delivery_note:
+        delivery_note.save()
+        delivery_note.submit()
+        frappe.msgprint(
+            _("Delivery Note created successfully: {0}").format(
+                get_link_to_form("Delivery Note", delivery_note.name)
+            )
+        )
+        return delivery_note
+    else:
+        frappe.throw(_("Failed to create Delivery Note."))

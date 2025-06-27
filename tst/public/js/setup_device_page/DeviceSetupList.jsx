@@ -1,16 +1,38 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
-import { Button, Table, Modal, Form, Input, message, Card, Space, Tag } from "antd";
+import { Button, Table, Modal, Form, Input, message, Card, Space, Tag, Select } from "antd";
 import { SearchOutlined, UserOutlined, CheckCircleOutlined } from '@ant-design/icons';
 
 const DeviceSetupList = forwardRef((props, ref) => {
     const [devices, setDevices] = useState([]);
+    const [servers, setServers] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [serverLoading, setServerLoading] = useState(false);
     const [searchText, setSearchText] = useState('');
     const [selectedDevice, setSelectedDevice] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [actionType, setActionType] = useState('');
     const [form] = Form.useForm();
 
+    const fetchServers = () => {
+        setServerLoading(true);
+        frappe.call({
+            method: 'frappe.client.get_list',
+            args: {
+                doctype: 'Site',
+                fields: ['name', 'server', 'domain', 'port'],
+                limit: 100
+            },
+            callback: (response) => {
+                setServers(response.message || []);
+                setServerLoading(false);
+            }
+        });
+    };
+
+    useEffect(() => {
+        fetchDevices();
+        fetchServers(); // Fetch servers when component mounts
+    }, []);
     // Expose refresh method to parent
     useImperativeHandle(ref, () => ({
         refresh: fetchDevices
@@ -28,7 +50,6 @@ const DeviceSetupList = forwardRef((props, ref) => {
                 limit: 100
             },
             callback: (response) => {
-                console.log(response)
                 setDevices(response.message || []);
                 setLoading(false);
             }
@@ -176,7 +197,7 @@ const DeviceSetupList = forwardRef((props, ref) => {
 
             <Modal
                 title={`${actionType === 'check' ? 'Check' : 'Create'} User for ${selectedDevice?.serial_no}`}
-                visible={isModalVisible}
+                open={isModalVisible}
                 onOk={handleOk}
                 onCancel={handleCancel}
                 okText={actionType === 'check' ? 'Check' : 'Create'}
@@ -200,21 +221,27 @@ const DeviceSetupList = forwardRef((props, ref) => {
                         </Form.Item>
                     )}
 
-                    <Form.Item
-                        name="api_key"
-                        label="API Key"
-                        rules={[{ required: true, message: 'Please input API Key!' }]}
-                    >
-                        <Input />
-                    </Form.Item>
 
                     {actionType === 'create' && (
                         <Form.Item
-                            name="api_secret"
-                            label="API Secret"
-                            rules={[{ required: true, message: 'Please input API Secret!' }]}
+                            name="server"
+                            label="Select Server"
+                            rules={[{ required: true, message: 'Please select a server!' }]}
                         >
-                            <Input.Password />
+                            <Select
+                                loading={serverLoading}
+                                placeholder="Select a server"
+                                optionFilterProp="children"
+                            >
+                                {servers.map(server => (
+                                    <Select.Option
+                                        key={server.name}
+                                        value={server.server}
+                                    >
+                                        {server.server} ({server.domain}:{server.port})
+                                    </Select.Option>
+                                ))}
+                            </Select>
                         </Form.Item>
                     )}
                 </Form>

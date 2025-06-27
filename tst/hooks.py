@@ -14,9 +14,7 @@ from tst.override import monkey_patch_reorder_item
 
 monkey_patch_reorder_item()
 
-override_doctype_class = {
-    "Lead": "tst.triggers.crm.lead.lead.CustomLead"
-}
+override_doctype_class = {"Lead": "tst.triggers.crm.lead.lead.CustomLead"}
 # ------------------
 # Document Events (doc_events)
 # ------------------
@@ -26,30 +24,26 @@ doc_events = {
     "Stock Entry": {
         "after_insert": "tst.triggers.stock.stock_entry.stock_entry.after_insert",
         "validate": "tst.triggers.stock.stock_entry.stock_entry.validate",
-        "on_submit": "tst.override.update_item_status_from_doc"
+        "on_submit": "tst.override.update_item_status_from_doc",
     },
     "Quotation": {
         "validate": [
             "tst.override.set_main_warehouse_qty",
             "tst.override.validate_items_are_saleable",
             "tst.override.alert_supervisor_on_item_shortfall",
-            "tst.override.validate_quotation_discount_limits"
+            "tst.override.validate_quotation_discount_limits",
         ]
     },
-    "Sales Order": {
-        "validate": "tst.override.validate_items_are_saleable"
-    },
-    "Lead": {
-        "validate": "tst.triggers.crm.lead.lead.validate"
-    },
+    "Sales Order": {"validate": "tst.override.validate_items_are_saleable"},
+    "Lead": {"validate": "tst.triggers.crm.lead.lead.validate"},
     "Appointment": {
         "after_insert": "tst.triggers.crm.appointment.appointment.after_insert",
         "validate": "tst.triggers.crm.appointment.appointment.validate",
-        "on_submit": "tst.triggers.crm.appointment.appointment.on_submit"
+        "on_submit": "tst.triggers.crm.appointment.appointment.on_submit",
     },
     "Purchase Order": {
         "validate": "tst.triggers.buying.purchase_order.purchase_order.validate",
-        "on_update_after_submit": "tst.triggers.buying.purchase_order.purchase_order.on_update_after_submit"
+        "on_update_after_submit": "tst.triggers.buying.purchase_order.purchase_order.on_update_after_submit",
     },
     "Purchase Invoice": {
         "validate": "tst.triggers.buying.purchase_invoice.purchase_invoice.validate",
@@ -58,20 +52,18 @@ doc_events = {
     "Material Request": {
         "after_insert": [
             "tst.triggers.stock.material_request.material_request.after_insert",
-            "tst.triggers.stock.material_request.material_request.set_department_in_items"
+            "tst.triggers.stock.material_request.material_request.set_department_in_items",
         ],
         "validate": [
             "tst.triggers.stock.material_request.material_request.validate",
-            "tst.triggers.stock.material_request.material_request.set_department_in_items"
+            "tst.triggers.stock.material_request.material_request.set_department_in_items",
         ],
-        "on_submit": "tst.triggers.stock.material_request.material_request.on_submit"
+        "on_submit": "tst.triggers.stock.material_request.material_request.on_submit",
     },
     "Stock Entry": {
         "after_insert": "tst.triggers.stock.stock_entry.stock_entry.after_insert",
         "validate": "tst.triggers.stock.stock_entry.stock_entry.validate",
         "on_submit": "tst.triggers.stock.stock_entry.stock_entry.on_submit",
-        
-    
     },
 }
 
@@ -108,7 +100,6 @@ from tst.override import monkey_patch_reorder_item
 
 monkey_patch_reorder_item()
 
-doc_events = {"Product Bundle": {"validate": "tst.override.calculate_bundle_valuation"}}
 # required_apps = []
 
 # # Each item in the list will be shown as an app in the apps page
@@ -135,7 +126,7 @@ doctype_js = {
     "Stock Reconciliation": "public/js/upload_serials_str.js",
     "Employee": "public/js/employee.js",
     "Sales Order": "triggers/selling/sales_order/sales_order.js",
-    "Stock Entry": "triggers/stock/stock_entry/stock_entry.js"
+    "Stock Entry": "triggers/stock/stock_entry/stock_entry.js",
 }
 
 # ------------------

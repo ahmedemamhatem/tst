@@ -24,15 +24,12 @@ frappe.ui.form.on("Appointment", {
         });
         frm.fields_dict.custom_choose_serial_and_batch_bundle.grid.wrapper.find(".grid-add-row").remove();
 
-        // Remove the existing button field if it's visible
-        if (frm.fields_dict.custom_next_status) {
-            frm.fields_dict.custom_next_status.$wrapper.hide();
-        }
 
         // Add custom button
-        // if (frm.doc.custom_appointment_status != "Done Installation") {
         addCustomStatusButton(frm);
-        // }
+    },
+    after_save: function (frm) {
+        frm.doc.calendar_event = '';
     },
     custom_append_device: function (frm) {
         if (!frm.doc.custom_serial_no) {
@@ -48,7 +45,6 @@ frappe.ui.form.on("Appointment", {
 
                 }
             });
-<<<<<<< HEAD
             if (!found) {
                 let device_row = frm.add_child("custom_choose_serial_and_batch_bundle");
                 device_row.serial_no = frm.doc.custom_serial_no;
@@ -60,28 +56,11 @@ frappe.ui.form.on("Appointment", {
                 frm.refresh_field("custom_serial_no");
                 frm.refresh_field("custom_item_code");
                 frm.refresh_field("custom_item_name");
-                frm.dirty()
             }
         }
     },
-=======
-        if (!found) {
-            let device_row = frm.add_child("custom_choose_serial_and_batch_bundle");
-            device_row.serial_no = frm.doc.custom_serial_no;
-            frm.refresh_field("custom_choose_serial_and_batch_bundle");
-            frm.doc.custom_serial_no = "";
-            frm.doc.custom_item_code = "";
-            frm.doc.custom_item_name = "";
-
-            frm.refresh_field("custom_serial_no");
-            frm.refresh_field("custom_item_code");
-            frm.refresh_field("custom_item_name");
-            frm.dirty()
-        }
-    }
-},
->>>>>>> 216b9a7 (technical cycle)
     getCurrentLocation: function (frm) {
+
         return new Promise((resolve) => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -107,14 +86,14 @@ frappe.ui.form.on("Appointment", {
 // Function to add custom button
 function addCustomStatusButton(frm) {
     const statusFlow = [
-        'Stock Available',
+        'Pending',
         'Delivering to Customer',
         'Arrived at Customer',
         'Start Installation',
         'Done Installation'
     ];
 
-    const currentStatus = frm.doc.custom_appointment_status || 'Out of Stock';
+    const currentStatus = frm.doc.custom_appointment_status || 'Pending';
     const currentIndex = statusFlow.indexOf(currentStatus);
     let nextStatus = currentIndex === -1 || currentIndex === statusFlow.length - 1
         ? statusFlow[0]
@@ -122,7 +101,7 @@ function addCustomStatusButton(frm) {
 
     // Button color mapping
     const statusColors = {
-        'Stock Available': 'btn-warning',
+        'Pending': 'btn-warning',
         'Delivering to Customer': 'btn-info',
         'Arrived at Customer': 'btn-primary',
         'Start Installation': 'btn-success',
@@ -131,7 +110,8 @@ function addCustomStatusButton(frm) {
 
     // Remove existing button if it exists
     if (frm.custom_next_status_button) {
-        frm.custom_next_status_button.remove();
+        cur_frm.remove_custom_button(__(frm.custom_next_status_button));
+
     }
 
     // Add new button
@@ -146,14 +126,14 @@ function addCustomStatusButton(frm) {
 // Modify your existing promptForStatusUpdate function
 function promptForStatusUpdate(frm) {
     const statusFlow = [
-        'Stock Available',
+        'Pending',
         'Delivering to Customer',
         'Arrived at Customer',
         'Start Installation',
         'Done Installation'
     ];
 
-    const currentStatus = frm.doc.custom_appointment_status || 'Out of Stock';
+    const currentStatus = frm.doc.custom_appointment_status || 'Pending';
     const currentIndex = statusFlow.indexOf(currentStatus);
     let nextStatus = currentIndex === -1 || currentIndex === statusFlow.length - 1
         ? statusFlow[0]
@@ -195,8 +175,6 @@ function updateStatus(frm, nextStatus) {
 
                     // Update the custom button
                     addCustomStatusButton(frm);
-                    frm.save()
-                    frm.reload()
                 });
             }
         },

@@ -144,20 +144,28 @@ def serial_no_query(doctype, txt, searchfield, start, page_len, filters, as_dict
     doctype = "Serial No"
     searchfields = frappe.get_meta(doctype).get_search_fields()
     searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
-    installation_items = frappe.db.get_all(
-        "Installation Order Item",
+    warehouse = frappe.db.get_all(
+        "Installation Order Technician",
         filters={
             "parent": filters.get("custom_installation_order"),
         },
-        pluck="item_code",
+        pluck="warehouse",
     )
-
+    warehouse.append(filters.get("warehouse"))
+    warehouse.append(
+        frappe.db.get_value(
+            "Installation Order",
+            filters.get("custom_installation_order"),
+            "warehouse",
+        )
+    )
+    warehouse = list(set(warehouse))
     return frappe.db.sql(
         """select name, item_code, item_name
         from `tabSerial No`
         where status = "Active"
-        and item_code in %(installation_items)s
-        and warehouse = %(warehouse)s
+        and warehouse in %(warehouse)s
+        and custom_device_setup is null
             and ({key} like %(txt)s
                 or item_name like %(txt)s
                 or item_code like %(txt)s
@@ -179,7 +187,6 @@ def serial_no_query(doctype, txt, searchfield, start, page_len, filters, as_dict
             "_txt": txt.replace("%", ""),
             "start": start,
             "page_len": page_len,
-            "installation_items": tuple(installation_items),
-            "warehouse": filters.get("warehouse"),
+            "warehouse": tuple(warehouse),
         },
     )
