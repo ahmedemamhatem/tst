@@ -79,6 +79,7 @@ class ValidateReportsTo:
                 )
 
 
+
 def alert_supervisor_on_item_shortfall(doc, method):
     """
     If any item in the Quotation has qty > custom_main_warehouse_qty (and custom_main_warehouse_qty > 0),
@@ -350,7 +351,7 @@ def validate_items_are_saleable(self, method):
     for d in self.get("items"):
         # Fetch the custom_item_status from the Item master
         item_status = frappe.db.get_value("Item", d.item_code, "custom_item_status")
-        if item_status != "Saleable":
+        if item_status != "قابل للبيع":
             frappe.throw(
                 _("Item {0} is not saleable. Its status is: {1}").format(
                     frappe.bold(d.item_code), frappe.bold(item_status or "Not Set")
@@ -362,7 +363,7 @@ def validate_items_are_saleable(self, method):
 def validate_item_status_for_quotation(doc, method):
     for row in doc.items:
         item_status = frappe.db.get_value("Item", row.item_code, "custom_item_status")
-        if item_status and item_status != "Saleable":
+        if item_status and item_status != "قابل للبيع":
             frappe.throw(
                 _("Item {0} cannot be quoted because its status is {1}.").format(
                     row.item_code, item_status
@@ -860,7 +861,7 @@ def validate_items_are_saleable(self, method):
     for d in self.get("items"):
         # Fetch the custom_item_status from the Item master
         item_status = frappe.db.get_value("Item", d.item_code, "custom_item_status")
-        if item_status != "Saleable":
+        if item_status != "قابل للبيع":
             if user_lang == "ar":
                 frappe.throw(
                     "العنصر {0} غير صالح للبيع. حالته الحالية: {1}".format(
@@ -890,6 +891,31 @@ def calculate_bundle_valuation(doc, method):
         total_valuation += item.custom_total
 
     doc.custom_total = total_valuation
+
+
+def get_item_valuation_rate(item_code, warehouse=None):
+    """
+    If warehouse is given: Get valuation_rate from Bin for this warehouse.
+    If not: Get the highest (MAX) valuation_rate from Bin for this item.
+    If nothing in Bin: fallback to Item.valuation_rate.
+    """
+    valuation_rate = None
+    if warehouse:
+        valuation_rate = frappe.db.get_value(
+            "Bin", {"item_code": item_code, "warehouse": warehouse}, "valuation_rate"
+        )
+    else:
+        result = frappe.db.sql(
+            "SELECT MAX(valuation_rate) FROM `tabBin` WHERE item_code = %s",
+            (item_code,),
+            as_list=True,
+        )
+        valuation_rate = result[0][0] if result and result[0][0] is not None else None
+
+    if valuation_rate is None:
+        valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate") or 0
+
+    return float(valuation_rate or 0)
 
 
 def update_item_status_from_doc(doc, method):
