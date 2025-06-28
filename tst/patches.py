@@ -20,17 +20,21 @@ def execute():
         if cf:
             doc = frappe.get_doc("Custom Field", cf)
             changed = False
-            if not doc.hidden:
-                doc.hidden = 1
+            # Update to Data field
+            if doc.fieldtype != "Data":
+                doc.fieldtype = "Data"
                 changed = True
+            # Remove Link options if present
+            if doc.options:
+                doc.options = ""
+                changed = True
+            # Set read_only to True
             if not doc.read_only:
                 doc.read_only = 1
                 changed = True
-            if doc.fieldtype != "Link":
-                doc.fieldtype = "Link"
-                changed = True
-            if doc.options != "User":
-                doc.options = "User"
+            # Make sure the field is visible (not hidden)
+            if doc.hidden:
+                doc.hidden = 0
                 changed = True
             if changed:
                 doc.save()
@@ -44,11 +48,11 @@ def execute():
                 "dt": doctype,
                 "fieldname": "reports_to_user",
                 "label": "Reports To User",
-                "fieldtype": "Link",
-                "options": "User",
+                "fieldtype": "Data",        # Data field type
+                "options": "",              # No options for Data field
                 "insert_after": "owner",
                 "read_only": 1,
-                "hidden": 1,
+                "hidden": 0,                # Not hidden
                 "no_copy": 1,
                 "print_hide": 1,
             })
