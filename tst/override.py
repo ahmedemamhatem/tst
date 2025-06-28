@@ -861,7 +861,7 @@ def validate_items_are_saleable(self, method):
     for d in self.get("items"):
         # Fetch the custom_item_status from the Item master
         item_status = frappe.db.get_value("Item", d.item_code, "custom_item_status")
-        if item_status != "Saleable":
+        if item_status != "قابل للبيع":
             if user_lang == "ar":
                 frappe.throw(
                     "العنصر {0} غير صالح للبيع. حالته الحالية: {1}".format(

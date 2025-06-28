@@ -6,6 +6,18 @@ from erpnext.stock.utils import get_stock_balance
 
 
 @frappe.whitelist()
+def set_reports_to_user(doc, method=None):
+    if not getattr(doc, "reports_to_user", None):
+        owner = doc.owner
+        if owner:
+            emp = frappe.get_value("Employee", {"user_id": owner}, ["name", "reports_to"])
+            if emp and emp[1]:
+                reports_to_user_id = frappe.get_value("Employee", emp[1], "user_id")
+                if reports_to_user_id:
+                    doc.reports_to_user = reports_to_user_id  
+
+
+@frappe.whitelist()
 def upload_serials_from_file(file_url, docname, row_idx, doctype):
     """
     Reads an uploaded CSV/XLSX file, extracts the 'serial' column,

@@ -32,10 +32,16 @@ doc_events = {
             "tst.override.validate_items_are_saleable",
             "tst.override.alert_supervisor_on_item_shortfall",
             "tst.override.validate_quotation_discount_limits",
+            "tst.api.set_reports_to_user",
         ]
     },
     "Sales Order": {"validate": "tst.override.validate_items_are_saleable"},
-    "Lead": {"validate": "tst.triggers.crm.lead.lead.validate"},
+    "Lead": {
+        "validate": [
+            "tst.triggers.crm.lead.lead.validate",
+            "tst.api.set_reports_to_user",
+        ]
+    },
     "Appointment": {
         "after_insert": "tst.triggers.crm.appointment.appointment.after_insert",
         "validate": "tst.triggers.crm.appointment.appointment.validate",
