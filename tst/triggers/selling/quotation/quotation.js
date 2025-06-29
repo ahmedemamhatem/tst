@@ -1,45 +1,36 @@
 frappe.ui.form.on('Quotation', {
     refresh: function(frm) {
         frm.add_custom_button('إرسال واتساب', function() {
-             const allowed_states = ["Supervisor Approved", "موافقه المشرف"];
-                if (!allowed_states.includes(frm.doc.workflow_state)) {
-                    frappe.msgprint({
-                        title: __('خطأ'),
-                        message: __('لا يمكنك إرسال البريد إلا بعد موافقة المشرف.'),
-                        indicator: 'red'
-                    });
-                    return;
-                }
-            frappe.prompt([
-                {
-                    fieldname: 'send_message',
-                    label: 'نص الرسالة',
-                    fieldtype: 'Small Text',
-                    reqd: 1
-                }
-            ], function(values) {
-                frappe.call({
-                    method: "tst.whatsapp.create_wh_massage_with_attachment",
-                    args: {
-                        quotation_name: frm.doc.name,
-                        send_message: values.send_message
-                    },
-                    callback: function(r) {
-                        if (!r.exc) {
-                            frappe.msgprint(r.message.msg || 'تم إنشاء رسالة الواتساب بنجاح مع الإرفاق.');
-                        }
-                    },
-                    error: function() {
-                        frappe.msgprint('حدث خطأ أثناء إنشاء رسالة الواتساب أو إرفاق الملف.');
-                    },
-                    freeze: true,
-                    freeze_message: 'يرجى الانتظار حتى يتم إرسال الرسالة...'
+            const allowed_states = ["Supervisor Approved", "موافقه المشرف"];
+            if (!allowed_states.includes(frm.doc.workflow_state)) {
+                frappe.msgprint({
+                    title: __('خطأ'),
+                    message: __('لا يمكنك إرسال الرسالة إلا بعد موافقة المشرف.'),
+                    indicator: 'red'
                 });
-            }, 'إرسال رسالة واتساب مع ملف', 'إرسال');
+                return;
+            }
+            // Call backend directly, no prompt
+            frappe.call({
+                method: "tst.whatsapp.create_wh_massage_with_attachment",
+                args: {
+                    quotation_name: frm.doc.name,
+                    doctype: frm.doctype // Pass doctype as well
+                },
+                callback: function(r) {
+                    if (!r.exc) {
+                        frappe.msgprint(r.message.msg || 'تم إنشاء رسالة الواتساب بنجاح مع الإرفاق.');
+                    }
+                },
+                error: function() {
+                    frappe.msgprint('حدث خطأ أثناء إنشاء رسالة الواتساب أو إرفاق الملف.');
+                },
+                freeze: true,
+                freeze_message: 'يرجى الانتظار حتى يتم إرسال الرسالة...'
+            });
         });
     }
 });
-
 
 frappe.ui.form.on('Quotation', {
     refresh: function(frm) {

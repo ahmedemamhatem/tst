@@ -2,7 +2,7 @@ import frappe
 import re
 
 @frappe.whitelist()
-def create_wh_massage_with_attachment(quotation_name, send_message):
+def create_wh_massage_with_attachment(quotation_name, doctype):
     user = frappe.session.user
 
     # Get Employee info
@@ -11,18 +11,19 @@ def create_wh_massage_with_attachment(quotation_name, send_message):
     )
     if not employee or not employee[0].cell_number:
         frappe.throw("يرجى تحديث رقم الجوال في ملف الموظف مع رمز الدولة.")
-
     cell_number = employee[0].cell_number.strip()
-    
-    # Validate: starts with +, at least 10-15 digits, only numbers after +
+
+    # Validate phone number
+    import re
     if not re.fullmatch(r"\+\d{10,15}", cell_number):
         frappe.throw("يرجى تحديث رقم الجوال في ملف الموظف مع رمز الدولة (مثال: +9665xxxxxxx).")
 
     employee_signature = employee[0].custom_email_signature or ""
 
     # Get Quotation and customer name
-    quotation = frappe.get_doc("Quotation", quotation_name)
+    quotation = frappe.get_doc(doctype, quotation_name)
     customer_name = getattr(quotation, "customer_name", None) or getattr(quotation, "customer", "")
+
     template_name = quotation.get("custom_quotation_templet")
     if not template_name:
         frappe.throw("لا يوجد قالب عرض أسعار محدد.")
@@ -31,29 +32,33 @@ def create_wh_massage_with_attachment(quotation_name, send_message):
     if not print_format:
         frappe.throw("لا يوجد نموذج طباعة محدد في قالب عرض الأسعار.")
 
-    # Prepare message: Dear customer + user message + signature
-    full_message = f"عميلنا العزيز {customer_name}\n\n{send_message}\n\n{employee_signature}"
+    # Prepare message: Dear customer, DocType, Doc Name, Signature
+    full_message = (
+        f"عميلنا العزيز {customer_name}\n\n"
+        f"نوع المستند: {doctype}\n"
+        f"رقم المستند: {quotation_name}\n\n"
+        f"{employee_signature}"
+    )
 
     # Generate PDF
     pdf_content = frappe.get_print(
-        "Quotation", quotation.name, print_format=print_format, as_pdf=True
+        doctype, quotation_name, print_format=print_format, as_pdf=True
     )
 
     # Create WH Massage
     wh_massage = frappe.new_doc("WH Massage")
     wh_massage.phone = cell_number
     wh_massage.send_message = full_message
-    wh_massage.reference_doctype = "Quotation"
-    wh_massage.reference_name = quotation.name
+    wh_massage.reference_doctype = doctype
+    wh_massage.reference_name = quotation_name
     wh_massage.status = "Pending"
     wh_massage.type = "out"
     wh_massage.insert()
-    wh_massage.reload()
 
     # Attach PDF to WH Massage
     file_doc = frappe.get_doc({
         "doctype": "File",
-        "file_name": f"{quotation.name}.pdf",
+        "file_name": f"{quotation_name}.pdf",
         "attached_to_doctype": "WH Massage",
         "attached_to_name": wh_massage.name,
         "content": pdf_content,
