@@ -33,7 +33,7 @@ def monkey_patch_reorder_item():
     import erpnext.stock.reorder_item
     import frappe.model.workflow
 
-    frappe.model.workflow.apply_workflow = apply_workflow
+    # frappe.model.workflow.apply_workflow = apply_workflow
     erpnext.stock.reorder_item._reorder_item = _reorder_item
 
 
@@ -41,43 +41,42 @@ class WorkflowPermissionError(frappe.ValidationError):
     pass
 
 
-class ValidateReportsTo:
-    def __init__(self, doc):
-        self.doc = doc
+# class ValidateReportsTo:
+#     def __init__(self, doc):
+#         self.doc = doc
 
-    def validate_reports_to(self):
-        employee = frappe.db.exists("Employee", {"user_id": self.doc.owner})
-        if not employee:
-            return
+#     def validate_reports_to(self):
+#         employee = frappe.db.exists("Employee", {"user_id": self.doc.owner})
+#         if not employee:
+#             return
 
-        employee_doc = frappe.get_doc("Employee", employee)
-        if not employee_doc.reports_to:
-            return
-        if employee_doc.reports_to:
+#         employee_doc = frappe.get_doc("Employee", employee)
+#         if not employee_doc.reports_to:
+#             return
+#         if employee_doc.reports_to:
 
-            def get_allowed_users_to_approve(employee_doc):
-                allowed_users_to_approve = []
-                if employee_doc.reports_to:
-                    reports_to = frappe.get_doc("Employee", employee_doc.reports_to)
-                    if reports_to.user_id:
-                        allowed_users_to_approve.append(reports_to.user_id)
-                    if reports_to.reports_to:
-                        allowed_users_to_approve.extend(
-                            get_allowed_users_to_approve(reports_to)
-                        )
-                return allowed_users_to_approve
+#             def get_allowed_users_to_approve(employee_doc):
+#                 allowed_users_to_approve = []
+#                 if employee_doc.reports_to:
+#                     reports_to = frappe.get_doc("Employee", employee_doc.reports_to)
+#                     if reports_to.user_id:
+#                         allowed_users_to_approve.append(reports_to.user_id)
+#                     if reports_to.reports_to:
+#                         allowed_users_to_approve.extend(
+#                             get_allowed_users_to_approve(reports_to)
+#                         )
+#                 return allowed_users_to_approve
 
-            allowed_users_to_approve = get_allowed_users_to_approve(employee_doc)
-            if not allowed_users_to_approve:
-                return
-            if frappe.session.user not in allowed_users_to_approve:
-                frappe.throw(
-                    _(
-                        "You are not allowed to approve this document. Please contact your manager, user to approve{0}"
-                    ).format(employee_doc.reports_to),
-                    WorkflowPermissionError,
-                )
-
+#             allowed_users_to_approve = get_allowed_users_to_approve(employee_doc)
+#             if not allowed_users_to_approve:
+#                 return
+#             if frappe.session.user not in allowed_users_to_approve:
+#                 frappe.throw(
+#                     _(
+#                         "You are not allowed to approve this document. Please contact your manager, user to approve{0}"
+#                     ).format(employee_doc.reports_to),
+#                     WorkflowPermissionError,
+#                 )
 
 
 def alert_supervisor_on_item_shortfall(doc, method):
