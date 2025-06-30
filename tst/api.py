@@ -29,6 +29,32 @@ def set_reports_to_user(doc, method=None):
             )
         doc.reports_to_user = reports_to_user_id
 
+        # Share the document with the user in reports_to_user field
+        share_document_with_user(doc, reports_to_user_id)
+
+def share_document_with_user(doc, user_id):
+    """Manually create a DocShare record to share the document with the specified user."""
+    if not frappe.db.exists("User", user_id):
+        return
+    
+    # Check if the DocShare record already exists
+    if frappe.db.exists("DocShare", {"user": user_id, "share_doctype": doc.doctype, "share_name": doc.name}):
+        return  # Avoid creating duplicate shares
+
+    # Create a new DocShare document
+    docshare = frappe.get_doc({
+        "doctype": "DocShare",
+        "user": user_id,
+        "share_doctype": doc.doctype,
+        "share_name": doc.name,
+        "read": 1,      
+        "write": 1,     
+        "submit": 1,    
+        "share": 1      
+    })
+    docshare.insert(ignore_permissions=True)  
+    frappe.db.commit()  
+
 @frappe.whitelist()
 def upload_serials_from_file(file_url, docname, row_idx, doctype):
     """
