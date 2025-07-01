@@ -7,6 +7,9 @@ from erpnext.stock.utils import get_stock_balance
 
 @frappe.whitelist()
 def set_reports_to_user(doc, method=None):
+    # Don't share on first save (doc is new)
+    is_new = getattr(doc, "_is_new", False)
+
     if not getattr(doc, "reports_to_user", None):
         owner = getattr(doc, "owner", None)
         if not owner:
@@ -24,9 +27,10 @@ def set_reports_to_user(doc, method=None):
         
         doc.reports_to_user = reports_to_user_id
 
-        # ✅ Share only if the document is newly created
-        if doc._is_new:
+        # ✅ Share only if it's NOT a new document
+        if not is_new:
             share_document_with_user(doc, reports_to_user_id)
+
 
 
 def share_document_with_user(doc, user_id):
