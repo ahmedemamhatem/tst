@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"iFeVNGdHPu\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Purchase</span>\",\"col\":12}},{\"id\":\"1P9AImDnZf\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Material Request\",\"col\":3}},{\"id\":\"IJGOWcn-Mr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Asset Custody Request\",\"col\":3}},{\"id\":\"GGtSsjOnuI\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":3}},{\"id\":\"s5g_-YvH-F\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Request for Quotation\",\"col\":3}},{\"id\":\"7iZ3-SfNFj\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Supplier Quotation\",\"col\":3}},{\"id\":\"5JqUOlzjpO\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Order\",\"col\":3}},{\"id\":\"grDXYGQq0O\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Supplier Scorecard\",\"col\":3}},{\"id\":\"7268IoBjpX\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Supplier\",\"col\":3}}]",
+ "content": "[{\"id\":\"iFeVNGdHPu\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Purchase</span>\",\"col\":12}},{\"id\":\"1P9AImDnZf\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Material Request\",\"col\":3}},{\"id\":\"0Qzvsb26s5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Asset Custody Request\",\"col\":3}},{\"id\":\"IJGOWcn-Mr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Asset Custody Request\",\"col\":3}},{\"id\":\"GGtSsjOnuI\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":3}},{\"id\":\"s5g_-YvH-F\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Request for Quotation\",\"col\":3}},{\"id\":\"7iZ3-SfNFj\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Supplier Quotation\",\"col\":3}},{\"id\":\"5JqUOlzjpO\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Order\",\"col\":3}},{\"id\":\"grDXYGQq0O\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Supplier Scorecard\",\"col\":3}},{\"id\":\"7268IoBjpX\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Supplier\",\"col\":3}}]",
  "creation": "2025-06-28 22:05:47.986117",
  "custom_blocks": [],
  "docstatus": 0,
@@ -13,7 +13,7 @@
  "is_hidden": 0,
  "label": "Purchase",
  "links": [],
- "modified": "2025-06-29 10:49:57.277879",
+ "modified": "2025-06-29 19:17:03.729775",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Purchase",
@@ -35,6 +35,14 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "label": "Asset Custody Request",
+   "link_to": "Asset Custody Request",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
    "label": "Material Request",
    "link_to": "Material Request",
    "stats_filter": "[]",
@@ -45,14 +53,6 @@
    "doc_view": "List",
    "label": "Item",
    "link_to": "Item",
-   "stats_filter": "[]",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Asset Custody Request",
-   "link_to": "Asset Custody Request",
    "stats_filter": "[]",
    "type": "DocType"
   },

@@ -33,13 +33,21 @@ doc_events = {
             "tst.override.alert_supervisor_on_item_shortfall",
             "tst.override.validate_quotation_discount_limits",
             "tst.api.set_reports_to_user",
+            "tst.api.share_lead_with_reports_to_user",
+        ],
+        "after_insert": [
+            "tst.api.share_lead_with_reports_to_user"     
         ]
     },
     "Sales Order": {"validate": "tst.override.validate_items_are_saleable"},
-    "Lead": {
+   "Lead": {
         "validate": [
-            "tst.triggers.crm.lead.lead.validate",
-            "tst.api.set_reports_to_user",
+            "tst.triggers.crm.lead.lead.validate",        
+            "tst.api.set_reports_to_user",  
+            "tst.api.share_lead_with_reports_to_user" ,              
+        ],
+        "after_insert": [
+            "tst.api.share_lead_with_reports_to_user"     
         ]
     },
     "Appointment": {
