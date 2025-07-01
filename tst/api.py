@@ -10,27 +10,24 @@ def set_reports_to_user(doc, method=None):
     if not getattr(doc, "reports_to_user", None):
         owner = getattr(doc, "owner", None)
         if not owner:
-            frappe.throw(
-                f"لا يمكن حفظ المستند لأن الحقل 'المالك' غير محدد."
-            )
+            frappe.throw("لا يمكن حفظ المستند لأن الحقل 'المالك' غير محدد.")
+        
         emp = frappe.get_value("Employee", {"user_id": owner}, ["name", "reports_to"])
         if not emp:
-            frappe.throw(
-                f"لا يمكن العثور على موظف مرتبط بالمستخدم '{owner}'."
-            )
+            frappe.throw(f"لا يمكن العثور على موظف مرتبط بالمستخدم '{owner}'.")
         if not emp[1]:
-            frappe.throw(
-                f"يجب تحديد المدير للموظف '{emp[0]}'."
-            )
+            frappe.throw(f"يجب تحديد المدير للموظف '{emp[0]}'.")
+        
         reports_to_user_id = frappe.get_value("Employee", emp[1], "user_id")
         if not reports_to_user_id:
-            frappe.throw(
-                f"الموظف المدير '{emp[1]}' ليس لديه مستخدم مرتبط."
-            )
+            frappe.throw(f"الموظف المدير '{emp[1]}' ليس لديه مستخدم مرتبط.")
+        
         doc.reports_to_user = reports_to_user_id
 
-        # Share the document with the user in reports_to_user field
-        share_document_with_user(doc, reports_to_user_id)
+        # ✅ Share only if the document is newly created
+        if doc._is_new:
+            share_document_with_user(doc, reports_to_user_id)
+
 
 def share_document_with_user(doc, user_id):
     """Manually create a DocShare record to share the document with the specified user."""
