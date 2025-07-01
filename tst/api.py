@@ -27,9 +27,14 @@ def set_reports_to_user(doc, method=None):
         
         doc.reports_to_user = reports_to_user_id
 
-        # ✅ Share only if it's NOT a new document
+        # ✅ Try to share only if it's not a new doc
         if not is_new:
-            share_document_with_user(doc, reports_to_user_id)
+            try:
+                share_document_with_user(doc, reports_to_user_id)
+            except Exception as e:
+                frappe.log_error(f"Failed to share {doc.doctype} {doc.name} with {reports_to_user_id}: {e}")
+                pass  # Silently ignore error
+
 
 
 
