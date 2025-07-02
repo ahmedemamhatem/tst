@@ -33,7 +33,7 @@ def share_lead_with_reports_to_user(doc, method=None):
         try:
             share_document_with_user(doc, doc.reports_to_user)
         except Exception as e:
-            frappe.log_error(f"Error sharing Lead {doc.name} with {doc.reports_to_user}: {e}")
+            pass
 
 
 def share_document_with_user(doc, user):
@@ -51,11 +51,7 @@ def share_document_with_user(doc, user):
         )
 
     except Exception as e:
-        # Avoid title truncation
-        title = f"Error sharing {doc.doctype} {doc.name} with {user}"
-        if len(title) > 140:
-            title = title[:137] + "..."
-        frappe.log_error(title=title, message=str(e))
+        pass
 
 @frappe.whitelist()
 def upload_serials_from_file(file_url, docname, row_idx, doctype):
