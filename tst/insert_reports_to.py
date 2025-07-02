@@ -15,44 +15,27 @@ def get_target_doctypes():
     return [d.name for d in doctypes if d.name not in exclude]
 
 def ensure_reports_to_user_field(doctype):
+    """
+    Ensure the 'reports_to_user' field exists as a Link to User,
+    is read-only, ignores user permissions, and is visible.
+    If field exists with the wrong type, delete and recreate it.
+    """
     cf = frappe.get_value(
         "Custom Field",
         {"dt": doctype, "fieldname": "reports_to_user"},
         "name"
     )
+
     if cf:
         doc = frappe.get_doc("Custom Field", cf)
-        changed = False
         if doc.fieldtype != "Link":
-            doc.fieldtype = "Link"
-            changed = True
-        if doc.options != "User":
-            doc.options = "User"
-            changed = True
-        if not doc.read_only:
-            doc.read_only = 1
-            changed = True
-        if doc.ignore_user_permissions !=1:
-            doc.ignore_user_permissions = 1
-            changed = True
-        if doc.hidden:
-            doc.hidden = 0
-            changed = True
-        if doc.insert_after != "owner":
-            doc.insert_after = "owner"
-            changed = True
-        if not doc.no_copy:
-            doc.no_copy = 1
-            changed = True
-        if not doc.print_hide:
-            doc.print_hide = 1
-            changed = True
-        if changed:
-            doc.save()
+            # Delete the old field if type is wrong
+            print(f"Deleting reports_to_user field in {doctype} due to fieldtype mismatch ({doc.fieldtype} -> Link)")
+            doc.delete()
             frappe.db.commit()
-        else:
-            print(f"reports_to_user field already correctly configured in {doctype}.")
-    else:
+            cf = None  # So it falls through to creation below
+
+    if not cf:
         cf_doc = frappe.get_doc({
             "doctype": "Custom Field",
             "dt": doctype,
@@ -69,6 +52,41 @@ def ensure_reports_to_user_field(doctype):
         })
         cf_doc.save()
         frappe.db.commit()
+        print(f"Created reports_to_user field in {doctype}.")
+        return  # Early return; nothing more to do
+
+    # If field is already correct type, update its properties if needed
+    doc = frappe.get_doc("Custom Field", cf)
+    changed = False
+
+    if doc.options != "User":
+        doc.options = "User"
+        changed = True
+    if not doc.read_only:
+        doc.read_only = 1
+        changed = True
+    if not doc.ignore_user_permissions:
+        doc.ignore_user_permissions = 1
+        changed = True
+    if doc.hidden:
+        doc.hidden = 0
+        changed = True
+    if doc.insert_after != "owner":
+        doc.insert_after = "owner"
+        changed = True
+    if not doc.no_copy:
+        doc.no_copy = 1
+        changed = True
+    if not doc.print_hide:
+        doc.print_hide = 1
+        changed = True
+
+    if changed:
+        doc.save()
+        frappe.db.commit()
+        print(f"Updated reports_to_user field in {doctype}.")
+    else:
+        print(f"reports_to_user field already correctly configured in {doctype}.")
 
 def get_records_to_update(doctype, start, batch_size):
     return frappe.get_all(
