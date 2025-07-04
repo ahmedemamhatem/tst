@@ -1,4 +1,103 @@
 frappe.ui.form.on('Quotation', {
+    refresh: function(frm) {
+        frm.add_custom_button('إرسال واتساب', function() {
+            const allowed_states = ["Supervisor Approved", "موافقه المشرف"];
+            if (!allowed_states.includes(frm.doc.workflow_state)) {
+                frappe.msgprint({
+                    title: __('خطأ'),
+                    message: __('لا يمكنك إرسال الرسالة إلا بعد موافقة المشرف.'),
+                    indicator: 'red'
+                });
+                return;
+            }
+            // Call backend directly, no prompt
+            frappe.call({
+                method: "tst.whatsapp.create_wh_massage_with_attachment",
+                args: {
+                    quotation_name: frm.doc.name,
+                    doctype: frm.doctype // Pass doctype as well
+                },
+                callback: function(r) {
+                    if (!r.exc) {
+                        frappe.msgprint(r.message.msg || 'تم إنشاء رسالة الواتساب بنجاح مع الإرفاق.');
+                    }
+                },
+                error: function() {
+                    frappe.msgprint('حدث خطأ أثناء إنشاء رسالة الواتساب أو إرفاق الملف.');
+                },
+                freeze: true,
+                freeze_message: 'يرجى الانتظار حتى يتم إرسال الرسالة...'
+            });
+        });
+    }
+});
+
+frappe.ui.form.on('Quotation', {
+    refresh: function(frm) {
+        if (!frm.is_new()) {
+            frm.add_custom_button('إرسال البريد الإلكتروني  ', function() {
+
+                // Check workflow state
+                const allowed_states = ["Supervisor Approved", "موافقه المشرف"];
+                if (!allowed_states.includes(frm.doc.workflow_state)) {
+                    frappe.msgprint({
+                        title: __('خطأ'),
+                        message: __('لا يمكنك إرسال البريد إلا بعد موافقة المشرف.'),
+                        indicator: 'red'
+                    });
+                    return;
+                }
+
+                let send_email = function(email) {
+                    frappe.call({
+                        method: "tst.email.send_quotation_with_signature", // حدّث المسار حسب تطبيقك
+                        args: {
+                            quotation_name: frm.doc.name,
+                            recipient: email
+                        },
+                        callback: function(r) {
+                            if (!r.exc) {
+                                frappe.msgprint(__('تم إرسال البريد الإلكتروني بنجاح!'));
+                            }
+                        },
+                        error: function() {
+                            frappe.msgprint(__('حدث خطأ أثناء إرسال البريد الإلكتروني.'));
+                        }
+                    });
+                };
+
+                // If contact_email exists, confirm, else prompt
+                if(frm.doc.contact_email) {
+                    frappe.confirm(
+                        __('هل تريد الإرسال إلى {0}؟', [frm.doc.contact_email]),
+                        function() {
+                            send_email(frm.doc.contact_email);
+                        },
+                        function() {
+                            // المستخدم ألغى العملية
+                        }
+                    );
+                } else {
+                    frappe.prompt([
+                        {
+                            fieldname: 'recipient',
+                            label: 'البريد الإلكتروني للمستلم',
+                            fieldtype: 'Data',
+                            reqd: 1
+                        }
+                    ], function(values) {
+                        if(values.recipient) {
+                            send_email(values.recipient);
+                        }
+                    }, __('إدخال البريد الإلكتروني'), __('إرسال'));
+                }
+            });
+        }
+    }
+});
+
+
+frappe.ui.form.on('Quotation', {
     party_name: function(frm) {
         if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
             frappe.db.get_doc('Lead', frm.doc.party_name).then(function(lead_doc) {

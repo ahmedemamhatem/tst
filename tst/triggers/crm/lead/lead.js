@@ -1,4 +1,8 @@
-
+// === Check if all tabs are completed ===
+function areAllTabsCompleted(frm) {
+    const tabsToCheck = ["Company Information", "Customer Analysis"]; // Add all relevant tab labels here
+    return tabsToCheck.every(tab => isTabCompleted(frm, tab));
+}
 
 // === Utility: Hide Tab by fieldname ===
 function hide_tab(frm, tab_fieldname) {
@@ -128,6 +132,7 @@ function add_create_lead_visit_button(frm) {
 }
 // === Utility: Add "Make Quotation" button ===
 function add_make_quotation_button(frm) {
+    
     frm.remove_custom_button(__('Quotation'), __('Create')); 
 }
 

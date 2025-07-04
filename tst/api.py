@@ -7,29 +7,51 @@ from erpnext.stock.utils import get_stock_balance
 
 @frappe.whitelist()
 def set_reports_to_user(doc, method=None):
+    # Don't share on first save (doc is new)
+    is_new = getattr(doc, "_is_new", False)
+
     if not getattr(doc, "reports_to_user", None):
         owner = getattr(doc, "owner", None)
         if not owner:
-            frappe.throw(
-                f"لا يمكن حفظ المستند لأن الحقل 'المالك' غير محدد."
-            )
+            frappe.throw("لا يمكن حفظ المستند لأن الحقل 'المالك' غير محدد.")
+        
         emp = frappe.get_value("Employee", {"user_id": owner}, ["name", "reports_to"])
         if not emp:
-            frappe.throw(
-                f"لا يمكن العثور على موظف مرتبط بالمستخدم '{owner}'."
-            )
+            frappe.throw(f"لا يمكن العثور على موظف مرتبط بالمستخدم '{owner}'.")
         if not emp[1]:
-            frappe.throw(
-                f"يجب تحديد المدير للموظف '{emp[0]}'."
-            )
+            frappe.throw(f"يجب تحديد المدير للموظف '{emp[0]}'.")
+        
         reports_to_user_id = frappe.get_value("Employee", emp[1], "user_id")
         if not reports_to_user_id:
-            frappe.throw(
-                f"الموظف المدير '{emp[1]}' ليس لديه مستخدم مرتبط."
-            )
+            frappe.throw(f"الموظف المدير '{emp[1]}' ليس لديه مستخدم مرتبط.")
+        
         doc.reports_to_user = reports_to_user_id
 
 
+def share_lead_with_reports_to_user(doc, method=None):
+    if getattr(doc, "reports_to_user", None):
+        try:
+            share_document_with_user(doc, doc.reports_to_user)
+        except Exception as e:
+            pass
+
+
+def share_document_with_user(doc, user):
+    try:
+        # Check if DocType is submittable
+        is_submittable = frappe.get_cached_value("DocType", doc.doctype, "is_submittable")
+
+        frappe.share.add(
+            doctype=doc.doctype,
+            name=doc.name,
+            user=user,
+            read=1,
+            write=1,
+            submit=1 if is_submittable else 0
+        )
+
+    except Exception as e:
+        pass
 
 @frappe.whitelist()
 def upload_serials_from_file(file_url, docname, row_idx, doctype):

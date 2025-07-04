@@ -14,6 +14,9 @@ from tst.override import monkey_patch_reorder_item
 
 monkey_patch_reorder_item()
 
+after_migrate = [
+    "tst.insert_reports_to.run"
+]
 override_doctype_class = {"Lead": "tst.triggers.crm.lead.lead.CustomLead"}
 # ------------------
 # Document Events (doc_events)
@@ -33,13 +36,24 @@ doc_events = {
             "tst.override.alert_supervisor_on_item_shortfall",
             "tst.override.validate_quotation_discount_limits",
             "tst.api.set_reports_to_user",
+            "tst.api.share_lead_with_reports_to_user",
+        ],
+        "after_insert": [
+            "tst.api.set_reports_to_user", 
+            "tst.api.share_lead_with_reports_to_user" ,
+            
         ]
     },
     "Sales Order": {"validate": "tst.override.validate_items_are_saleable"},
-    "Lead": {
+   "Lead": {
         "validate": [
-            "tst.triggers.crm.lead.lead.validate",
-            "tst.api.set_reports_to_user",
+            "tst.triggers.crm.lead.lead.validate",        
+            "tst.api.set_reports_to_user",  
+            "tst.api.share_lead_with_reports_to_user" ,              
+        ],
+        "after_insert": [
+            "tst.api.set_reports_to_user",  
+            "tst.api.share_lead_with_reports_to_user"     
         ]
     },
     "Appointment": {
@@ -65,11 +79,6 @@ doc_events = {
             "tst.triggers.stock.material_request.material_request.set_department_in_items",
         ],
         "on_submit": "tst.triggers.stock.material_request.material_request.on_submit",
-    },
-    "Stock Entry": {
-        "after_insert": "tst.triggers.stock.stock_entry.stock_entry.after_insert",
-        "validate": "tst.triggers.stock.stock_entry.stock_entry.validate",
-        "on_submit": "tst.triggers.stock.stock_entry.stock_entry.on_submit",
     },
 }
 
