@@ -101,6 +101,7 @@ frappe.ui.form.on('Quotation', {
         if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
             frappe.db.get_doc('Lead', frm.doc.party_name).then(function(lead_doc) {
                 frm.set_value('custom_number_of_cars', lead_doc.custom_number_of_cars);
+                frm.reload_doc();
             });
         }
     },
@@ -111,6 +112,7 @@ frappe.ui.form.on('Quotation', {
             });
         } else {
             frm.set_value('custom_number_of_cars', null);
+            frm.reload_doc();
         }
     },
     refresh: function(frm) {
@@ -118,6 +120,7 @@ frappe.ui.form.on('Quotation', {
         if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
             frappe.db.get_doc('Lead', frm.doc.party_name).then(function(lead_doc) {
                 frm.set_value('custom_number_of_cars', lead_doc.custom_number_of_cars);
+                frm.reload_doc();
             });
         }
     }
@@ -138,6 +141,7 @@ frappe.ui.form.on('Quotation', {
         if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
             frappe.db.get_doc('Lead', frm.doc.party_name).then(function (lead_doc) {
                 frm.set_value('custom_number_of_cars', lead_doc.custom_number_of_cars);
+                frm.reload_doc();
             });
         }
     }
@@ -156,6 +160,7 @@ frappe.ui.form.on('Quotation', {
     custom_quotation_templet: function (frm) {
         frm.clear_table('items');
         frm.refresh_field('items');
+        frm.reload_doc();
         if (!frm.doc.custom_quotation_templet) return;
 
         frappe.call({
@@ -175,6 +180,7 @@ frappe.ui.form.on('Quotation', {
                         }
                     });
                     frm.refresh_field('items');
+                    frm.reload_doc();
                 } else {
                     frappe.msgprint(__('No items found in the selected quotation template.'));
                 }
