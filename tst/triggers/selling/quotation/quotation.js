@@ -1,8 +1,6 @@
 frappe.ui.form.on('Quotation', {
     onload(frm) {
-        if (frm.doc.docstatus !== 0) {
-            toggle_print_and_email_buttons(frm);
-        }
+        toggle_print_and_email_buttons(frm);
     },
 
     refresh(frm) {
@@ -11,15 +9,9 @@ frappe.ui.form.on('Quotation', {
             frm.remove_custom_button(__('Set as Lost'));
         }, 300);
 
-        // Skip rest if still draft
-        if (frm.doc.docstatus === 0) {
-            console.log("Quotation is in Draft. Skipping custom buttons and logic.");
-            return;
-        }
-
         toggle_print_and_email_buttons(frm);
 
-        // WhatsApp Button
+        // WhatsApp Button — always available
         frm.add_custom_button('إرسال واتساب', function () {
             const allowed_states = ["Supervisor Approved", "موافقه المشرف"];
             if (!allowed_states.includes(frm.doc.workflow_state) && frappe.session.user !== "Administrator") {
@@ -50,7 +42,7 @@ frappe.ui.form.on('Quotation', {
             });
         });
 
-        // Email Button
+        // Email Button — always available
         frm.add_custom_button('إرسال البريد الإلكتروني  ', function () {
             const allowed_states = ["Supervisor Approved", "موافقه المشرف"];
             if (!allowed_states.includes(frm.doc.workflow_state) && frappe.session.user !== "Administrator") {
@@ -101,7 +93,7 @@ frappe.ui.form.on('Quotation', {
             }
         });
 
-        // Pull custom number of cars from Lead if available
+        // Auto-load number of cars if linked to Lead
         if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
             frappe.db.get_doc('Lead', frm.doc.party_name).then((lead_doc) => {
                 frm.set_value('custom_number_of_cars', lead_doc.custom_number_of_cars);
@@ -162,13 +154,12 @@ frappe.ui.form.on('Quotation', {
     }
 });
 
-// Button visibility control
+// Show/hide print/email buttons based on approval state
 function toggle_print_and_email_buttons(frm) {
     const valid_states = ["Supervisor Approved", "موافقه المشرف"];
     const workflow_state = frm.doc.workflow_state?.trim();
     const print_titles = ["Print", "طباعة"];
     const email_titles = ["Email", "البريد الإلكتروني"];
-
     const action = valid_states.includes(workflow_state) ? "show" : "hide";
 
     if (frm.page && frm.page.wrapper) {
@@ -188,19 +179,17 @@ function toggle_print_and_email_buttons(frm) {
     });
 }
 
-// Listview Button Control
+// Hide Print/Email from List View if showing draft
 frappe.listview_settings['Quotation'] = {
     refresh(listview) {
         let draft_filter = listview.filter_area?.filter_list?.some(filter =>
             filter.fieldname === "docstatus" && (filter.value === 0 || filter.value === "0")
         );
-
         let has_draft_row = listview.data.some(row => row.docstatus === 0 || row.docstatus === "0");
 
         if (draft_filter || has_draft_row) {
             listview.page.btn_print?.hide();
             listview.page.btn_email?.hide();
-
             listview.page.wrapper
                 .find('.btn[data-original-title="Print"], .btn[data-original-title="Email"]')
                 .hide();
@@ -214,3 +203,11 @@ frappe.listview_settings['Quotation'] = {
             .hide();
     }
 };
+// Hide Print/Email from List View if showing draft
+frappe.listview_settings['Quotation'].onload = function (listview) {
+    listview.page.btn_print?.hide();
+    listview.page.btn_email?.hide();
+    listview.page.wrapper
+        .find('.btn[data-original-title="Print"], .btn[data-original-title="Email"]')
+        .hide();
+}
