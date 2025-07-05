@@ -2,7 +2,7 @@ frappe.ui.form.on('Quotation', {
     refresh: function(frm) {
         frm.add_custom_button('إرسال واتساب', function() {
             const allowed_states = ["Supervisor Approved", "موافقه المشرف"];
-            if (!allowed_states.includes(frm.doc.workflow_state)) {
+            if (!allowed_states.includes(frm.doc.workflow_state) && frappe.session.user !== "Administrator") {
                 frappe.msgprint({
                     title: __('خطأ'),
                     message: __('لا يمكنك إرسال الرسالة إلا بعد موافقة المشرف.'),
@@ -32,14 +32,13 @@ frappe.ui.form.on('Quotation', {
     }
 });
 
+
 frappe.ui.form.on('Quotation', {
     refresh: function(frm) {
         if (!frm.is_new()) {
             frm.add_custom_button('إرسال البريد الإلكتروني  ', function() {
-
-                // Check workflow state
                 const allowed_states = ["Supervisor Approved", "موافقه المشرف"];
-                if (!allowed_states.includes(frm.doc.workflow_state)) {
+                if (!allowed_states.includes(frm.doc.workflow_state) && frappe.session.user !== "Administrator") {
                     frappe.msgprint({
                         title: __('خطأ'),
                         message: __('لا يمكنك إرسال البريد إلا بعد موافقة المشرف.'),

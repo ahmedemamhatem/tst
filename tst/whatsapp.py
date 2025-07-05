@@ -62,7 +62,7 @@ def create_wh_massage_with_attachment(quotation_name, doctype):
         "attached_to_doctype": "WH Massage",
         "attached_to_name": wh_massage.name,
         "content": pdf_content,
-        "is_private": 1,
+        "is_private": 0,
     })
     file_doc.save(ignore_permissions=True)
 
