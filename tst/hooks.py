@@ -82,20 +82,6 @@ doc_events = {
     },
 }
 
-# ------------------
-# Doctype JS Includes
-# ------------------
-doctype_js = {
-    "Lead": "triggers/crm/lead/lead.js",
-    "Appointment": "triggers/crm/appointment/appointment.js",
-    "Quotation": "triggers/selling/quotation/quotation.js",
-    "Purchase Invoice": "triggers/buying/purchase_invoice/purchase_invoice.js",
-    "Purchase Receipt": "public/js/upload_serials_pr.js",
-    "Stock Reconciliation": "public/js/upload_serials_str.js",
-    "Employee": "public/js/employee.js",
-    "Sales Order": "triggers/selling/sales_order/sales_order.js",
-    "Stock Entry": "triggers/stock/stock_entry/stock_entry.js",
-}
 
 # ------------------
 # Fixtures
