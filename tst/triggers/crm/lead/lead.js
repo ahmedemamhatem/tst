@@ -132,8 +132,19 @@ function add_create_lead_visit_button(frm) {
 }
 // === Utility: Add "Make Quotation" button ===
 function add_make_quotation_button(frm) {
-    
+    // Always remove to prevent duplicates/misplacement
     frm.remove_custom_button(__('Quotation'), __('Create')); 
+
+    // Only add if "Customer Information" tab is completed
+    if (isTabCompleted(frm, "Customer Information")) {
+        frm.add_custom_button(__('Quotation'), function() {
+            // Your logic to make a Quotation
+            frappe.model.open_mapped_doc({
+                method: "erpnext.crm.doctype.lead.lead.make_quotation",
+                frm: frm
+            });
+        }, __('Create'));
+    }
 }
 
 // === Utility: Dynamically observe and clean buttons ===
