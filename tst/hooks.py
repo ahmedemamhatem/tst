@@ -45,6 +45,8 @@ doc_events = {
         ]
     },
     "Sales Order": {"validate": "tst.override.validate_items_are_saleable"},
+    "Sales Invoice": {
+        "before_validate": "tst.invoice_bundel.fill_items_from_product_bundles"},
    "Lead": {
         "validate": [
             "tst.triggers.crm.lead.lead.validate",        
@@ -128,6 +130,7 @@ doctype_js = {
     "Employee": "public/js/employee.js",
     "Sales Order": "triggers/selling/sales_order/sales_order.js",
     "Stock Entry": "triggers/stock/stock_entry/stock_entry.js",
+    "Sales Invoice": "triggers/stock/stock_entry/sales_invoice.js",
 }
 
 # ------------------
