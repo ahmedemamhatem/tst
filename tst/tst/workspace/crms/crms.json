@@ -53,7 +53,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-06-29 12:58:22.925863",
+ "modified": "2025-07-05 16:16:51.958290",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "CRMs",
@@ -85,7 +85,7 @@
   },
   {
    "color": "Grey",
-   "doc_view": "List",
+   "doc_view": "Report Builder",
    "label": "Lead Visit",
    "link_to": "Lead Visit",
    "stats_filter": "[]",

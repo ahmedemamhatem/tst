@@ -14,9 +14,9 @@ from tst.override import monkey_patch_reorder_item
 
 monkey_patch_reorder_item()
 
-after_migrate = [
-    "tst.insert_reports_to.run"
-]
+# after_migrate = [
+#     "tst.insert_reports_to.run"
+# ]
 override_doctype_class = {"Lead": "tst.triggers.crm.lead.lead.CustomLead"}
 # ------------------
 # Document Events (doc_events)
@@ -45,6 +45,8 @@ doc_events = {
         ]
     },
     "Sales Order": {"validate": "tst.override.validate_items_are_saleable"},
+    "Sales Invoice": {
+        "before_validate": "tst.invoice_bundel.fill_items_from_product_bundles"},
    "Lead": {
         "validate": [
             "tst.triggers.crm.lead.lead.validate",        
@@ -82,20 +84,6 @@ doc_events = {
     },
 }
 
-# ------------------
-# Doctype JS Includes
-# ------------------
-doctype_js = {
-    "Lead": "triggers/crm/lead/lead.js",
-    "Appointment": "triggers/crm/appointment/appointment.js",
-    "Quotation": "triggers/selling/quotation/quotation.js",
-    "Purchase Invoice": "triggers/buying/purchase_invoice/purchase_invoice.js",
-    "Purchase Receipt": "public/js/upload_serials_pr.js",
-    "Stock Reconciliation": "public/js/upload_serials_str.js",
-    "Employee": "public/js/employee.js",
-    "Sales Order": "triggers/selling/sales_order/sales_order.js",
-    "Stock Entry": "triggers/stock/stock_entry/stock_entry.js",
-}
 
 # ------------------
 # Fixtures
@@ -142,6 +130,7 @@ doctype_js = {
     "Employee": "public/js/employee.js",
     "Sales Order": "triggers/selling/sales_order/sales_order.js",
     "Stock Entry": "triggers/stock/stock_entry/stock_entry.js",
+    "Sales Invoice": "triggers/stock/stock_entry/sales_invoice.js",
 }
 
 # ------------------
