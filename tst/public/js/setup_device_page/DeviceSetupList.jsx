@@ -36,14 +36,14 @@ const { Text } = Typography;
 const { Panel } = Collapse;
 
 const statusOptions = [
-    { value: __('all'), label: __('All') },
-    { value: __('Pending'), label: __('Pending') },
-    { value: __('Done Installation Ready for Server Setup'), label: __('Done Installation') },
-    { value: __('Active'), label: __('Active') },
-    { value: __('Inactive'), label: __('Inactive') },
-    { value: __('Broken'), label: __('Broken') },
-    { value: __('Archived'), label: __('Archived') },
-    { value: __('Suspended'), label: __('Suspended') }
+    { value: 'all', label: __('All') },
+    { value: 'Pending', label: __('Pending') },
+    { value: 'Done Installation Ready for Server Setup', label: __('Done Installation') },
+    { value: 'Active', label: __('Active') },
+    { value: 'Inactive', label: __('Inactive') },
+    { value: 'Broken', label: __('Broken') },
+    { value: 'Archived', label: __('Archived') },
+    { value: 'Suspended', label: __('Suspended') }
 ];
 
 const statusTagColors = {
