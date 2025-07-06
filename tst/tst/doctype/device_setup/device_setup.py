@@ -12,6 +12,7 @@ class DeviceSetup(Document):
         if device_setup := frappe.db.get_value(
             "Device Setup",
             {
+                "name": ["!=", self.name],
                 "serial_no": self.serial_no,
                 "status": ["not in", ["Inactive", "Broken", "Archived", "Suspended"]],
             },

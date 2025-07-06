@@ -3,6 +3,8 @@ import frappe
 import pandas as pd
 import io
 from erpnext.stock.utils import get_stock_balance
+from frappe import _
+from tst.tst.doctype.device_setup.device_setup import DeviceSetup
 
 
 @frappe.whitelist()
@@ -14,17 +16,17 @@ def set_reports_to_user(doc, method=None):
         owner = getattr(doc, "owner", None)
         if not owner:
             frappe.throw("لا يمكن حفظ المستند لأن الحقل 'المالك' غير محدد.")
-        
+
         emp = frappe.get_value("Employee", {"user_id": owner}, ["name", "reports_to"])
         if not emp:
             frappe.throw(f"لا يمكن العثور على موظف مرتبط بالمستخدم '{owner}'.")
         if not emp[1]:
             frappe.throw(f"يجب تحديد المدير للموظف '{emp[0]}'.")
-        
+
         reports_to_user_id = frappe.get_value("Employee", emp[1], "user_id")
         if not reports_to_user_id:
             frappe.throw(f"الموظف المدير '{emp[1]}' ليس لديه مستخدم مرتبط.")
-        
+
         doc.reports_to_user = reports_to_user_id
 
 
@@ -39,7 +41,9 @@ def share_lead_with_reports_to_user(doc, method=None):
 def share_document_with_user(doc, user):
     try:
         # Check if DocType is submittable
-        is_submittable = frappe.get_cached_value("DocType", doc.doctype, "is_submittable")
+        is_submittable = frappe.get_cached_value(
+            "DocType", doc.doctype, "is_submittable"
+        )
 
         frappe.share.add(
             doctype=doc.doctype,
@@ -47,11 +51,12 @@ def share_document_with_user(doc, user):
             user=user,
             read=1,
             write=1,
-            submit=1 if is_submittable else 0
+            submit=1 if is_submittable else 0,
         )
 
     except Exception as e:
         pass
+
 
 @frappe.whitelist()
 def upload_serials_from_file(file_url, docname, row_idx, doctype):
@@ -127,18 +132,6 @@ def upload_serials_from_file(file_url, docname, row_idx, doctype):
     # Step 6: Return serials string
     serials_str = "\n".join(serials)
     return {"serials": serials_str}
-
-
-def get_fields(doctype, fields=None):
-    if fields is None:
-        fields = []
-    meta = frappe.get_meta(doctype)
-    fields.extend(meta.get_search_fields())
-
-    if meta.title_field and meta.title_field.strip() not in fields:
-        fields.insert(1, meta.title_field.strip())
-
-    return unique(fields)
 
 
 @frappe.whitelist()
@@ -238,3 +231,260 @@ def serial_no_query(doctype, txt, searchfield, start, page_len, filters, as_dict
             "warehouse": tuple(warehouse),
         },
     )
+
+
+from tst.tst.doctype.site.site import Site
+from typing import cast
+
+import requests
+
+
+@frappe.whitelist()
+def check_user(customerID: str) -> frappe._dict[str, str]:
+    available_sites = frappe.db.get_all("Site", {"status": "Active"}, pluck="name")
+    if not available_sites:
+        frappe.throw(_("No active sites found."))
+
+    if not customerID or not isinstance(customerID, str):
+        frappe.throw(_("Invalid Customer ID provided."))
+    if not customerID.isalnum():
+        frappe.throw(_("Customer ID must be alphanumeric."))
+
+    response = frappe._dict(
+        {
+            "user_server": [],
+            "message": "",
+            "status": "success",
+            "error": None,
+        }
+    )
+
+    for site in available_sites:
+        site_doc: Site = cast(Site, frappe.get_cached_doc("Site", site))
+
+        params = {
+            "CustomerID": customerID,
+            "ServerIP": site_doc.server,
+        }
+        headers = {
+            "APIKey": site_doc.api_key,
+        }
+
+        request = requests.get(
+            f"http://{site_doc.server}/ERPAPIs/API.asmx/CheckUser",
+            params=params,
+            headers=headers,
+        )
+        request_response = request.json()
+        if request.status_code != 200:
+            frappe.throw(
+                _(
+                    "Failed to connect to the server at {server}. "
+                    "Please check the server IP and try again."
+                ).format(server=site_doc.server)
+            )
+
+        if request_response.get("status") == "1":
+            response.user_server.append(
+                {
+                    "server": site_doc.server,
+                    "UserID": request_response["data"].get("UserID"),
+                    "UserName": request_response["data"].get("UserName"),
+                    "LoginName": request_response["data"].get("LoginName"),
+                    "Password": request_response["data"].get("Password"),
+                    "CustomerID": request_response["data"].get("CustomerID"),
+                }
+            )
+        elif request_response.get("status") == "0":
+            response.status = "error"
+            response.error = request_response.get("message")
+            frappe.throw(
+                _("Error from server {server}: {error_message}").format(
+                    server=site_doc.server,
+                    error_message=response.error or "Unknown error",
+                )
+            )
+    return response
+
+
+@frappe.whitelist()
+def create_user(
+    DeviceSetupId: str,
+    Username: str,
+    UserLogin: str,
+    Password: str,
+    CustomerID: str,
+    UserType: str,
+    ServerIP: str,
+) -> frappe._dict[str, str]:
+    if (
+        not Username
+        or not UserLogin
+        or not Password
+        or not CustomerID
+        or not UserType
+        or not ServerIP
+    ):
+        frappe.throw(_("All parameters are required."))
+
+    site_doc: Site = cast(Site, frappe.get_cached_doc("Site", {"server": ServerIP}))
+
+    params = {
+        "Username": Username,
+        "UserLogin": UserLogin,
+        "Password": Password,
+        "CustomerID": CustomerID,
+        "UserType": UserType,
+        "ServerIP": ServerIP,
+    }
+
+    headers = {
+        "APIKey": site_doc.api_key,
+    }
+
+    request = requests.get(
+        f"http://{site_doc.server}/ERPAPIs/API.asmx/CreateUser",
+        params=params,
+        headers=headers,
+    )
+    request_response = request.json()
+
+    if request.status_code != 200:
+        frappe.throw(
+            _(
+                "Failed to connect to the server at {server}. "
+                "Please check the server IP and try again."
+                "Server response: {error_message}"
+            ).format(
+                server=site_doc.server,
+                error_message=request_response.get("message", "Unknown error"),
+            )
+        )
+
+    if request_response.get("status") == "1":
+        device_setup_doc: DeviceSetup = cast(
+            DeviceSetup, frappe.get_doc("Device Setup", DeviceSetupId)
+        )
+        device_setup_doc.response = str(request_response)
+        device_setup_doc.username = Username
+        device_setup_doc.userlogin = UserLogin
+        device_setup_doc.password = Password
+        device_setup_doc.user_id = str(
+            request_response["data"].get("userid")
+            if request_response["data"].get("userid")[0]
+            else ""
+        )
+        device_setup_doc.customer_id = CustomerID
+        device_setup_doc.user_type = UserType
+        device_setup_doc.site = site_doc.name
+        device_setup_doc.save()
+        device_setup_doc.submit()
+        return frappe._dict(
+            {
+                "message": _("User created successfully."),
+                "userID": request_response["data"].get("userid"),
+            }
+        )
+    else:
+        frappe.throw(
+            _("Error from server {server}: {error_message}").format(
+                server=site_doc.server,
+                error_message=request_response,
+            )
+        )
+
+
+@frappe.whitelist()
+def add_device(
+    DeviceSetupId: str,
+    CustomerID: str,
+    UserID: str,
+    UserName: str,
+    UserType: str,
+    LoginNAME: str,
+    Password: str,
+    ServerIP: str,
+) -> frappe._dict[str, str]:
+    if not all(
+        [
+            DeviceSetupId,
+            CustomerID,
+            UserID,
+            UserName,
+            UserType,
+            LoginNAME,
+            Password,
+            ServerIP,
+        ]
+    ):
+        frappe.throw(_("All parameters are required."))
+
+    site_doc: Site = cast(Site, frappe.get_cached_doc("Site", {"server": ServerIP}))
+    device_setup: DeviceSetup = cast(
+        DeviceSetup, frappe.get_doc("Device Setup", DeviceSetupId)
+    )
+    """
+    
+        "UserName": UserName,
+        "UserType": UserType,
+        "LoginNAME": LoginNAME,
+        "Password": Password,
+    """
+    device_setup.username = UserName
+    device_setup.userlogin = LoginNAME
+    device_setup.password = Password
+    device_setup.user_id = UserID
+    device_setup.customer_id = CustomerID
+    device_setup.user_type = UserType
+    device_setup.site = site_doc.name
+
+    params = {
+        "CustomerID": str(CustomerID),
+        "UserID": str(UserID),
+        "SerialNumber": str(device_setup.serial_no),
+        "VehicleName": str(device_setup.vehicle_name),
+        "VehicleType": str(device_setup.vehicle_type),
+        "ICCID": str(device_setup.iccid),
+        "DeviceType": str(device_setup.device_type),
+        "CreateDate": str(device_setup.create_date),
+        "Odometer": str(device_setup.odometer),
+        "ServerIP": str(ServerIP),
+    }
+
+    headers = {
+        "APIKey": site_doc.api_key,
+    }
+
+    request = requests.get(
+        f"http://{site_doc.server}/ERPAPIs/API.asmx/AddDevice",
+        params=params,
+        headers=headers,
+    )
+    request_response = request.json()
+
+    if request.status_code != 200:
+        frappe.throw(
+            _(
+                "Failed to connect to the server at {server}. "
+                "Please check the server IP and try again."
+            ).format(server=site_doc.server)
+        )
+
+    if request_response.get("status") == "1":
+        device_setup.response = str(request_response)
+        device_setup.status = "Active"
+        device_setup.save()
+        device_setup.submit()
+        return frappe._dict(
+            {
+                "message": _("Device successfully added to user."),
+                "status": "success",
+            }
+        )
+    else:
+        frappe.throw(
+            _("Error from server {server}: {error_message}").format(
+                server=site_doc.server,
+                error_message=request_response,
+            )
+        )

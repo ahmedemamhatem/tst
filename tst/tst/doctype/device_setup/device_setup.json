@@ -24,18 +24,31 @@
   "full_name",
   "chassie_no",
   "license_plate",
+  "device_details_section",
+  "vehicle_name",
+  "vehicle_type",
+  "iccid",
+  "column_break_mrfk",
+  "device_type",
+  "create_date",
+  "odometer",
   "user_section",
-  "user_id",
   "username",
-  "column_break_iivt",
+  "userlogin",
   "password",
+  "column_break_iivt",
+  "customer_id",
+  "user_type",
+  "section_break_uthw",
+  "user_id",
   "section_break_yvax",
   "site",
   "domain",
   "column_break_qror",
   "site_name",
   "api_key",
-  "api_secret",
+  "section_break_ecjo",
+  "response",
   "section_break_hktx",
   "amended_from"
  ],
@@ -211,12 +224,6 @@
    "label": "API KEY"
   },
   {
-   "fetch_from": "site.api_secret",
-   "fieldname": "api_secret",
-   "fieldtype": "Data",
-   "label": "API SECRET"
-  },
-  {
    "fieldname": "user_id",
    "fieldtype": "Data",
    "label": "User ID"
@@ -232,6 +239,74 @@
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "label": "Posting Date"
+  },
+  {
+   "fieldname": "userlogin",
+   "fieldtype": "Data",
+   "label": "UserLogin"
+  },
+  {
+   "fieldname": "customer_id",
+   "fieldtype": "Data",
+   "label": "Customer ID"
+  },
+  {
+   "fieldname": "user_type",
+   "fieldtype": "Data",
+   "label": "User Type"
+  },
+  {
+   "fieldname": "section_break_uthw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "device_details_section",
+   "fieldtype": "Section Break",
+   "label": "Device Details"
+  },
+  {
+   "fieldname": "vehicle_name",
+   "fieldtype": "Data",
+   "label": "Vehicle Name"
+  },
+  {
+   "fieldname": "vehicle_type",
+   "fieldtype": "Data",
+   "label": "Vehicle Type"
+  },
+  {
+   "fieldname": "iccid",
+   "fieldtype": "Data",
+   "label": "ICCID"
+  },
+  {
+   "fieldname": "column_break_mrfk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "device_type",
+   "fieldtype": "Data",
+   "label": "Device Type"
+  },
+  {
+   "fieldname": "create_date",
+   "fieldtype": "Date",
+   "label": "Create Date"
+  },
+  {
+   "fieldname": "odometer",
+   "fieldtype": "Data",
+   "label": "OdoMeter"
+  },
+  {
+   "fieldname": "section_break_ecjo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "response",
+   "fieldtype": "Small Text",
+   "label": "Response",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -239,7 +314,7 @@
  "is_submittable": 1,
  "links": [],
  "make_attachments_public": 1,
- "modified": "2025-06-27 19:18:59.355474",
+ "modified": "2025-07-06 23:13:11.117214",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Device Setup",

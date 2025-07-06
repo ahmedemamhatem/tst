@@ -10,16 +10,7 @@ class SetupDevicePage {
 	}
 
 	init() {
-		this.setup_page_actions();
 		this.setup_app();
-	}
-
-	setup_page_actions() {
-		this.primary_btn = this.page.set_primary_action(__("Refresh"), () => {
-			if (this.deviceSetupListRef) {
-				this.deviceSetupListRef.refresh();
-			}
-		});
 	}
 
 	setup_app() {
