@@ -14,9 +14,9 @@ from tst.override import monkey_patch_reorder_item
 
 monkey_patch_reorder_item()
 
-after_migrate = [
-    "tst.insert_reports_to.run"
-]
+# after_migrate = [
+#     "tst.insert_reports_to.run"
+# ]
 override_doctype_class = {"Lead": "tst.triggers.crm.lead.lead.CustomLead"}
 # ------------------
 # Document Events (doc_events)
