@@ -174,7 +174,6 @@ New Device,جهاز جديد
 Next: {0},التالي: {0}
 No active sites found.,لم يتم العثور على مواقع نشطة.
 No delivery addresses found in the items.,لم يتم العثور على عناوين التسليم في العناصر.
-No items found in the selected quotation template.,لم يتم العثور على عناصر في قالب الاقتباس المحدد.
 No serials found in the file.,لم يتم العثور على أرقام تسلسلية في الملف.
 No submitted Device Setups found for this Sales Order,لم يتم العثور على إعدادات الجهاز المقدمة لهذا أمر البيع
 Not a valid Workflow Action,ليس إجراء سير عمل صالح
@@ -229,11 +228,6 @@ Purchase Order,أمر الشراء
 Purchase User,مستخدم الشراء
 Qty,الكمية
 Quantity,الكمية
-Quotation,اقتباس
-Quotation Item Shortfall Alert: {0},تنبيه نقص عنصر الاقتباس: {0}
-Quotation Table,جدول الاقتباس
-Quotation Template,قالب الاقتباس
-Quotation Templet Item,عنصر قالب الاقتباس
 Reason,سبب
 Recovering,استرداد
 Reference,مرجع
@@ -290,7 +284,6 @@ Subject,الموضوع
 Suburb,الضاحية
 Supervisor Discount,خصم المشرف
 Supervisor Discount Role,دور خصم المشرف
-Supplier Quotation Mandatory,اقتباس المورد إلزامي
 Suspended,معلق
 System Manager,مدير النظام
 TST Selling Settings,إعدادات بيع TST
