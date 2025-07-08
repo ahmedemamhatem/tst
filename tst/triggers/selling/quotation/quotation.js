@@ -1,27 +1,47 @@
 frappe.ui.form.on('Quotation', {
     onload(frm) {
-        toggle_print_and_email_buttons(frm);
+        // Hide default Print and Email buttons on form load
+        hide_default_print_email(frm);
     },
 
     refresh(frm) {
-        // Remove "Set as Lost" after load
+        // Remove "Set as Lost" button after a short delay
         setTimeout(() => {
             frm.remove_custom_button(__('Set as Lost'));
         }, 300);
 
-        toggle_print_and_email_buttons(frm);
+        // Hide default Print and Email buttons every refresh
+        hide_default_print_email(frm);
 
-        // WhatsApp Button — always available
-        frm.add_custom_button('إرسال واتساب', function () {
-            const allowed_states = ["Supervisor Approved", "موافقه المشرف"];
-            if (!allowed_states.includes(frm.doc.workflow_state) && frappe.session.user !== "Administrator") {
-                frappe.msgprint({
-                    title: __('خطأ'),
-                    message: __('لا يمكنك إرسال الرسالة إلا بعد موافقة المشرف.'),
-                    indicator: 'red'
-                });
+        // Custom button: Print Quotation as PDF (Arabic)
+        frm.add_custom_button('طباعة عرض السعر', function () {
+            if (!frm.doc.custom_quotation_templet) {
+                frappe.msgprint('يرجى اختيار قالب عرض السعر أولاً.');
                 return;
             }
+            // Fetch Quotation Template to get the print format
+            frappe.db.get_doc('Quotation Template', frm.doc.custom_quotation_templet)
+                .then(template => {
+                    if (!template || !template.print_format) {
+                        frappe.msgprint('لم يتم تحديد نموذج طباعة في قالب عرض السعر المحدد.');
+                        return;
+                    }
+                    // Build PDF download URL
+                    let url = '/api/method/frappe.utils.print_format.download_pdf'
+                        + `?doctype=${encodeURIComponent(frm.doctype)}`
+                        + `&name=${encodeURIComponent(frm.doc.name)}`
+                        + `&format=${encodeURIComponent(template.print_format)}`
+                        + `&letterhead=${encodeURIComponent(frm.doc.letter_head || "None")}`
+                        + `&no_letterhead=0`
+                        + `&_lang=${encodeURIComponent(frappe.boot.lang || 'ar')}`;
+                    // Open PDF in a new tab
+                    window.open(url, '_blank');
+                });
+        });
+
+        // Custom button: Send via WhatsApp (Arabic)
+        frm.add_custom_button('إرسال واتساب', function () {
+            if (!can_send(frm)) return; // Permission check
 
             frappe.call({
                 method: "tst.whatsapp.create_wh_massage_with_attachment",
@@ -31,7 +51,7 @@ frappe.ui.form.on('Quotation', {
                 },
                 callback(r) {
                     if (!r.exc) {
-                        frappe.msgprint(r.message.msg || 'تم إنشاء رسالة الواتساب بنجاح مع الإرفاق.');
+                        frappe.msgprint(r.message.msg || 'تم إنشاء رسالة الواتساب بنجاح مع المرفق.');
                     }
                 },
                 error() {
@@ -42,17 +62,9 @@ frappe.ui.form.on('Quotation', {
             });
         });
 
-        // Email Button — always available
-        frm.add_custom_button('إرسال البريد الإلكتروني  ', function () {
-            const allowed_states = ["Supervisor Approved", "موافقه المشرف"];
-            if (!allowed_states.includes(frm.doc.workflow_state) && frappe.session.user !== "Administrator") {
-                frappe.msgprint({
-                    title: __('خطأ'),
-                    message: __('لا يمكنك إرسال البريد إلا بعد موافقة المشرف.'),
-                    indicator: 'red'
-                });
-                return;
-            }
+        // Custom button: Send Email (Arabic)
+        frm.add_custom_button('إرسال البريد الإلكتروني', function () {
+            if (!can_send(frm)) return; // Permission check
 
             const send_email = (email) => {
                 frappe.call({
@@ -63,18 +75,19 @@ frappe.ui.form.on('Quotation', {
                     },
                     callback(r) {
                         if (!r.exc) {
-                            frappe.msgprint(__('تم إرسال البريد الإلكتروني بنجاح!'));
+                            frappe.msgprint('تم إرسال البريد الإلكتروني بنجاح!');
                         }
                     },
                     error() {
-                        frappe.msgprint(__('حدث خطأ أثناء إرسال البريد الإلكتروني.'));
+                        frappe.msgprint('حدث خطأ أثناء إرسال البريد الإلكتروني.');
                     }
                 });
             };
 
+            // Use contact_email if available, otherwise prompt for email
             if (frm.doc.contact_email) {
                 frappe.confirm(
-                    __('هل تريد الإرسال إلى {0}؟', [frm.doc.contact_email]),
+                    `هل تريد الإرسال إلى ${frm.doc.contact_email}؟`,
                     () => send_email(frm.doc.contact_email)
                 );
             } else {
@@ -89,38 +102,35 @@ frappe.ui.form.on('Quotation', {
                     if (values.recipient) {
                         send_email(values.recipient);
                     }
-                }, __('إدخال البريد الإلكتروني'), __('إرسال'));
+                }, 'إدخال البريد الإلكتروني', 'إرسال');
             }
         });
 
-        // Auto-load number of cars if linked to Lead
+        // Auto-load number of cars from Lead if linked
         if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
-            frappe.db.get_doc('Lead', frm.doc.party_name).then((lead_doc) => {
-                frm.set_value('custom_number_of_cars', lead_doc.custom_number_of_cars);
-            });
+            update_number_of_cars_from_lead(frm, frm.doc.party_name);
         }
     },
 
+    // When party_name changes, reload number of cars if Lead is selected
     party_name(frm) {
         if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
-            frappe.db.get_doc('Lead', frm.doc.party_name).then((lead_doc) => {
-                frm.set_value('custom_number_of_cars', lead_doc.custom_number_of_cars);
-                frm.reload_doc();
-            });
+            update_number_of_cars_from_lead(frm, frm.doc.party_name, true);
         }
     },
 
+    // When quotation_to changes, reload or clear number of cars accordingly
     quotation_to(frm) {
         if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
-            frappe.db.get_doc('Lead', frm.doc.party_name).then((lead_doc) => {
-                frm.set_value('custom_number_of_cars', lead_doc.custom_number_of_cars);
-            });
+            update_number_of_cars_from_lead(frm, frm.doc.party_name);
         } else {
             frm.set_value('custom_number_of_cars', null);
+            frm.refresh_field('custom_number_of_cars');
             frm.reload_doc();
         }
     },
 
+    // When changing the quotation template, reload items
     custom_quotation_templet(frm) {
         frm.clear_table('items');
         frm.refresh_field('items');
@@ -144,70 +154,78 @@ frappe.ui.form.on('Quotation', {
                     });
                     frm.refresh_field('items');
                 } else {
-                    frappe.msgprint(__('No items found in the selected quotation template.'));
+                    frappe.msgprint('لم يتم العثور على عناصر في قالب عرض السعر المحدد.');
                 }
             },
             error() {
-                frappe.msgprint(__('Could not fetch template items. Please check your permissions or network connection.'));
+                frappe.msgprint('تعذر جلب عناصر القالب. يرجى مراجعة الصلاحيات أو الاتصال بالشبكة.');
             }
         });
     }
 });
 
-// Show/hide print/email buttons based on approval state
-function toggle_print_and_email_buttons(frm) {
-    const valid_states = ["Supervisor Approved", "موافقه المشرف"];
-    const workflow_state = frm.doc.workflow_state?.trim();
-    const print_titles = ["Print", "طباعة"];
-    const email_titles = ["Email", "البريد الإلكتروني"];
-    const action = valid_states.includes(workflow_state) ? "show" : "hide";
-
-    if (frm.page && frm.page.wrapper) {
-        [...print_titles, ...email_titles].forEach(title => {
-            frm.page.wrapper.find(`.btn[data-original-title="${title}"]`)[action]();
+// Helper: Check if user is allowed to send WhatsApp/Email
+function can_send(frm) {
+    const allowed_states = ["Supervisor Approved", "موافقه المشرف"];
+    if (!allowed_states.includes(frm.doc.workflow_state) && frappe.session.user !== "Administrator") {
+        frappe.msgprint({
+            title: 'خطأ',
+            message: 'لا يمكنك تنفيذ هذه العملية إلا بعد موافقة المشرف.',
+            indicator: 'red'
         });
+        return false;
     }
+    return true;
+}
 
+// Helper: Update "number of cars" field from Lead document
+function update_number_of_cars_from_lead(frm, lead_name, reload=false) {
+    frappe.db.get_doc('Lead', lead_name).then((lead_doc) => {
+        frm.set_value('custom_number_of_cars', lead_doc.custom_number_of_cars);
+        if (reload) frm.reload_doc();
+    });
+}
+
+// Hide default Print and Email buttons on the form
+function hide_default_print_email(frm) {
     frappe.after_ajax(() => {
         setTimeout(() => {
+            if (frm.page && frm.page.wrapper) {
+                frm.page.wrapper.find('.btn[data-original-title="Print"], .btn[data-original-title="Email"], .btn[data-label="Print"], .btn[data-label="Email"]').hide();
+            }
             if (frm.page && frm.page.menu) {
-                [...print_titles, ...email_titles].forEach(text => {
-                    frm.page.menu.find(`a:contains("${text}")`).closest("li")[action]();
-                });
+                frm.page.menu.find('a:contains("Print"), a:contains("Email")').closest("li").hide();
             }
         }, 300);
     });
 }
 
-// Hide Print/Email from List View if showing draft
+// Hide default Print and Email buttons in the Quotation list view
 frappe.listview_settings['Quotation'] = {
     refresh(listview) {
-        let draft_filter = listview.filter_area?.filter_list?.some(filter =>
-            filter.fieldname === "docstatus" && (filter.value === 0 || filter.value === "0")
-        );
-        let has_draft_row = listview.data.some(row => row.docstatus === 0 || row.docstatus === "0");
-
-        if (draft_filter || has_draft_row) {
-            listview.page.btn_print?.hide();
-            listview.page.btn_email?.hide();
+        if (listview.page && listview.page.btn_print) {
+            listview.page.btn_print.hide();
+        }
+        if (listview.page && listview.page.btn_email) {
+            listview.page.btn_email.hide();
+        }
+        if (listview.page && listview.page.wrapper) {
             listview.page.wrapper
-                .find('.btn[data-original-title="Print"], .btn[data-original-title="Email"]')
+                .find('.btn[data-original-title="Print"], .btn[data-original-title="Email"], .btn[data-label="Print"], .btn[data-label="Email"]')
                 .hide();
         }
     },
     onload(listview) {
-        listview.page.btn_print?.hide();
-        listview.page.btn_email?.hide();
-        listview.page.wrapper
-            .find('.btn[data-original-title="Print"], .btn[data-original-title="Email"]')
-            .hide();
+        if (listview.page && listview.page.btn_print) {
+            listview.page.btn_print.hide();
+        }
+        if (listview.page && listview.page.btn_email) {
+            listview.page.btn_email.hide();
+        }
+        if (listview.page && listview.page.wrapper) {
+            listview.page.wrapper
+                .find('.btn[data-original-title="Print"], .btn[data-original-title="Email"], .btn[data-label="Print"], .btn[data-label="Email"]')
+                .hide();
+        }
     }
 };
-// Hide Print/Email from List View if showing draft
-frappe.listview_settings['Quotation'].onload = function (listview) {
-    listview.page.btn_print?.hide();
-    listview.page.btn_email?.hide();
-    listview.page.wrapper
-        .find('.btn[data-original-title="Print"], .btn[data-original-title="Email"]')
-        .hide();
-}
