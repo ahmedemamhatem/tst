@@ -1,7 +1,6 @@
 import frappe
 from frappe import _
 
-
 @frappe.whitelist()
 def validate(doc, method):
     """
@@ -51,6 +50,19 @@ def validate(doc, method):
                 frappe.throw("بالنسبة للموردين خارج السعودية، لا يمكن أن يكون نوع أمر الشراء داخلياً.")
             else:
                 frappe.throw("For suppliers outside Saudi Arabia, PO Type cannot be marked as Internal.")
+
+    # === NEW SECTION: Validate item default supplier ===
+    for item in doc.items:
+        default_supplier = frappe.db.get_value("Item", item.item_code, "custom_default_supplier")
+        if default_supplier and doc.supplier and default_supplier != doc.supplier:
+            if user_lang == "ar":
+                frappe.throw(
+                    f"المورد الافتراضي للصنف {item.item_code} هو {default_supplier} ويختلف عن المورد المحدد في هذا الأمر."
+                )
+            else:
+                frappe.throw(
+                    f"The default supplier for item {item.item_code} is {default_supplier}, which does not match the supplier in this order."
+                )
 
 
 @frappe.whitelist()
