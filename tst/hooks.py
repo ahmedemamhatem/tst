@@ -10,13 +10,17 @@ app_license = "mit"
 # ------------------
 # Import and Initialization
 # ------------------
+
 from tst.override import monkey_patch_reorder_item
 
 monkey_patch_reorder_item()
 
-# after_migrate = [
-#     "tst.insert_reports_to.run"
-# ]
+# doctype_js = {
+#     "Employee": "public/js/employee_list.js"
+# }
+after_migrate = [
+    "tst.api.update_all_employee_percent"
+]
 override_doctype_class = {"Lead": "tst.triggers.crm.lead.lead.CustomLead"}
 # ------------------
 # Document Events (doc_events)
@@ -28,6 +32,9 @@ doc_events = {
         "after_insert": "tst.triggers.stock.stock_entry.stock_entry.after_insert",
         "validate": "tst.triggers.stock.stock_entry.stock_entry.validate",
         "on_submit": "tst.override.update_item_status_from_doc",
+    },
+    "Employee": {
+        "validate": "tst.api.update_employee_percent"
     },
     "Quotation": {
         "validate": [
