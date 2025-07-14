@@ -1,5 +1,32 @@
 // Quotation Client Script
 
+frappe.ui.form.on("Quotation", {
+    onload: function(frm) {
+        update_from_lead(frm);
+    },
+    party_name: function(frm) {
+        update_from_lead(frm);
+    }
+});
+
+function update_from_lead(frm) {
+    if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
+        frappe.db.get_doc("Lead", frm.doc.party_name)
+            .then(lead => {
+                if (lead && lead.custom_customer_name) {
+                    frm.set_value("customer_name", lead.custom_customer_name);
+                    frm.set_value("title", lead.custom_customer_name);
+                    // 🔐 Save after values are set
+                    frm.save();
+                }
+            })
+            .catch(err => {
+                console.error("❌ Failed to fetch Lead:", err);
+            });
+    }
+}
+
+
 frappe.ui.form.on('Quotation', {
     onload(frm) {
         always_hide_print_and_email(frm);
