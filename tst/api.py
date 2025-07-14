@@ -6,6 +6,72 @@ from erpnext.stock.utils import get_stock_balance
 from frappe import _
 from tst.tst.doctype.device_setup.device_setup import DeviceSetup
 
+import frappe
+
+def update_all_employee_percent():
+    """
+    Update the 'custom_fields_filled_percent' for all Employee records,
+    and return a summary list (employee, percent, total, filled).
+    """
+    employees = frappe.get_all("Employee", pluck="name")
+    results = []
+    for emp in employees:
+        doc = frappe.get_doc("Employee", emp)
+        percent, total, filled = update_employee_percent(doc)
+        doc.save(ignore_permissions=True)
+        results.append({
+            "employee": emp,
+            "percent": percent,
+            "total": total,
+            "filled": filled
+        })
+    frappe.db.commit()
+    return results
+
+def update_employee_percent(doc, method=None):
+    """
+    For the given Employee doc, calculate the percent of fields filled
+    for fields that are under certain Tab Breaks.
+    Updates doc.custom_fields_filled_percent and returns (percent, total, filled).
+    """
+    # List the tabs you want to include (case, spacing, and spelling must match exactly)
+    INCLUDED_TABS = {
+        "Overview",
+        "Joining",
+        "Address & Contacts",
+        "Attendance & Leaves",
+        "Salary",
+        "Personal"
+    }
+
+    meta = frappe.get_meta("Employee")
+    fields_in_tabs = []
+    current_tab = None
+
+    for f in meta.fields:
+        if f.fieldtype == "Tab Break":
+            current_tab = f.label
+        if (
+            f.fieldtype not in (
+                "Section Break", "Column Break", "Tab Break", "HTML",
+                "Table", "Button", "Image", "Fold"
+            )
+            and f.fieldname
+            and current_tab in INCLUDED_TABS
+        ):
+            fields_in_tabs.append(f.fieldname)
+
+    total = len(fields_in_tabs)
+    filled = 0
+    for field in fields_in_tabs:
+        value = getattr(doc, field, None)
+        if value not in (None, '', [], {}) and not (isinstance(value, str) and value.strip() == ''):
+            filled += 1
+
+    percent = round((filled / total) * 100) if total else 0
+    doc.custom_fields_filled_percent = percent
+    return percent, total, filled
+
 
 @frappe.whitelist()
 def set_reports_to_user(doc, method=None):
