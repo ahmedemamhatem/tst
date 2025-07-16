@@ -6,7 +6,34 @@ from erpnext.stock.utils import get_stock_balance
 from frappe import _
 from tst.tst.doctype.device_setup.device_setup import DeviceSetup
 
-import frappe
+def set_custom_creator(doc, method):
+    if doc.owner:
+        user = frappe.get_doc("User", doc.owner)
+        if user.full_name:
+            doc.custom_creator = user.full_name
+
+
+def update_custom_creator():
+    update_custom_creator_for_doctype("Lead")
+    update_custom_creator_for_doctype("Quotation")
+def update_custom_creator_for_doctype(doctype):
+    print(f"Updating {doctype}...")
+    docs = frappe.get_all(doctype, fields=["name", "owner"])
+    updated_count = 0
+
+    for d in docs:
+        if d.owner:
+            try:
+                user = frappe.get_doc("User", d.owner)
+                full_name = user.full_name or ""
+                frappe.db.set_value(doctype, d.name, "custom_creator", full_name)
+                updated_count += 1
+            except Exception as e:
+                print(f"Error for {doctype} {d.name}: {str(e)}")
+        else:
+            print(f"No owner for {doctype} {d.name}")
+
+    frappe.db.commit()
 
 def update_all_employee_percent():
     """
