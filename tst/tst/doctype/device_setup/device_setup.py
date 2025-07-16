@@ -15,6 +15,7 @@ class DeviceSetup(Document):
                 "name": ["!=", self.name],
                 "serial_no": self.serial_no,
                 "status": ["not in", ["Inactive", "Broken", "Archived", "Suspended"]],
+                "docstatus": ["!=", 2],
             },
         ):
             frappe.throw(

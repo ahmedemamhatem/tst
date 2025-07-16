@@ -18,9 +18,7 @@ monkey_patch_reorder_item()
 # doctype_js = {
 #     "Employee": "public/js/employee_list.js"
 # }
-after_migrate = [
-    "tst.api.update_all_employee_percent"
-]
+after_migrate = ["tst.api.update_all_employee_percent"]
 override_doctype_class = {"Lead": "tst.triggers.crm.lead.lead.CustomLead"}
 # ------------------
 # Document Events (doc_events)
@@ -33,9 +31,7 @@ doc_events = {
         "validate": "tst.triggers.stock.stock_entry.stock_entry.validate",
         "on_submit": "tst.override.update_item_status_from_doc",
     },
-    "Employee": {
-        "validate": "tst.api.update_employee_percent"
-    },
+    "Employee": {"validate": "tst.api.update_employee_percent"},
     "Quotation": {
         "validate": [
             "tst.override.set_main_warehouse_qty",
@@ -47,25 +43,30 @@ doc_events = {
             "tst.api.share_lead_with_reports_to_user",
         ],
         "after_insert": [
-            "tst.api.set_reports_to_user", 
-            "tst.api.share_lead_with_reports_to_user" ,
-            
-        ]
+            "tst.api.set_reports_to_user",
+            "tst.api.share_lead_with_reports_to_user",
+        ],
     },
     "Sales Order": {"validate": "tst.override.validate_items_are_saleable"},
     "Sales Invoice": {
-        "before_validate": "tst.invoice_bundel.fill_items_from_product_bundles"},
-   "Lead": {
+        "before_validate": "tst.invoice_bundel.fill_items_from_product_bundles"
+    },
+    "Lead": {
         "validate": [
-            "tst.triggers.crm.lead.lead.validate",        
-            "tst.api.set_reports_to_user",  
-            "tst.api.set_custom_creator",  
-            "tst.api.share_lead_with_reports_to_user" ,              
+            "tst.triggers.crm.lead.lead.validate",
+            "tst.api.set_reports_to_user",
+            "tst.api.set_custom_creator",
+            "tst.api.share_lead_with_reports_to_user",
         ],
         "after_insert": [
-            "tst.api.set_reports_to_user",  
-            "tst.api.share_lead_with_reports_to_user"     
-        ]
+            "tst.api.set_reports_to_user",
+            "tst.api.share_lead_with_reports_to_user",
+        ],
+    },
+    "Customer": {
+        "validate": "tst.triggers.crm.customer.customer.validate",
+        "after_insert": "tst.triggers.crm.customer.customer.after_insert",
+        "on_update": "tst.triggers.crm.customer.customer.on_update",
     },
     "Appointment": {
         "after_insert": "tst.triggers.crm.appointment.appointment.after_insert",

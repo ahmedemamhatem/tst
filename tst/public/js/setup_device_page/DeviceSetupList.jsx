@@ -112,7 +112,7 @@ const DeviceSetupList = forwardRef((props, ref) => {
             args: {
                 doctype: 'Device Setup',
                 fields: [
-                    'name', 'serial_no', 'item_name', 'customer_name', 'status',
+                    'name', 'serial_no', 'item_name', 'customer_name', 'status', 'customer_id',
                     'posting_date', 'username', 'customer', 'response',
                     'vehicle_name', 'vehicle_type', 'iccid', 'device_type',
                     'create_date', 'odometer', 'user_type', 'user_id', 'userlogin', "docstatus"
@@ -154,7 +154,7 @@ const DeviceSetupList = forwardRef((props, ref) => {
 
         if (type === 'check') {
             form.setFieldsValue({
-                customerID: device.customer,
+                customerID: device.customer_id,
                 customerName: device.customer_name,
                 userType: device.user_type || '2' // Default to End User
             });
@@ -269,6 +269,7 @@ const DeviceSetupList = forwardRef((props, ref) => {
     const handleCheckUser = async () => {
         try {
             const values = await form.validateFields(['customerID', 'userType']);
+            console.log('Checking user with values:', values);
             setCheckLoading(true);
 
             frappe.call({
@@ -341,6 +342,7 @@ const DeviceSetupList = forwardRef((props, ref) => {
                     setIsModalVisible(false);
                     setIsResponseModalVisible(true);
                 } else {
+
                     setApiResponse({
                         status: 'error',
                         message: response.message?.error || "Failed to add device to user",
@@ -403,6 +405,7 @@ const DeviceSetupList = forwardRef((props, ref) => {
                                         ServerIP: values.server
                                     },
                                     callback: (addDeviceResponse) => {
+                                        console.log('Add Device Response:', addDeviceResponse);
                                         if (addDeviceResponse.message && addDeviceResponse.message.status === "success") {
                                             setApiResponse(prev => ({
                                                 ...prev,
@@ -771,6 +774,7 @@ const DeviceSetupList = forwardRef((props, ref) => {
                         <Form.Item
                             name="customerID"
                             label={__('Customer ID')}
+                            initialValue={selectedDevice?.customer_id || ''}
                             rules={[{ required: true, message: __('Please input customer ID!') }]}
                         >
                             <Input />
@@ -778,6 +782,7 @@ const DeviceSetupList = forwardRef((props, ref) => {
 
                         <Form.Item
                             name="customerName"
+                            initialValue={selectedDevice?.customer_name || ''}
                             label={__('Customer Name')}
                         >
                             <Input disabled />

@@ -196,8 +196,9 @@
   {
    "fetch_from": "appointment.custom_customer",
    "fieldname": "customer",
-   "fieldtype": "Data",
-   "label": " Customer "
+   "fieldtype": "Link",
+   "label": " Customer ",
+   "options": "Customer"
   },
   {
    "fetch_from": "appointment.customer_name",
@@ -246,9 +247,11 @@
    "label": "UserLogin"
   },
   {
+   "fetch_from": "customer.custom_customer_id",
    "fieldname": "customer_id",
    "fieldtype": "Data",
-   "label": "Customer ID"
+   "label": "Customer ID",
+   "read_only": 1
   },
   {
    "fieldname": "user_type",
@@ -314,7 +317,7 @@
  "is_submittable": 1,
  "links": [],
  "make_attachments_public": 1,
- "modified": "2025-07-06 23:13:11.117214",
+ "modified": "2025-07-16 16:35:23.693082",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Device Setup",

@@ -6,6 +6,7 @@ from erpnext.stock.utils import get_stock_balance
 from frappe import _
 from tst.tst.doctype.device_setup.device_setup import DeviceSetup
 
+
 def set_custom_creator(doc, method):
     if doc.owner:
         user = frappe.get_doc("User", doc.owner)
@@ -16,6 +17,8 @@ def set_custom_creator(doc, method):
 def update_custom_creator():
     update_custom_creator_for_doctype("Lead")
     update_custom_creator_for_doctype("Quotation")
+
+
 def update_custom_creator_for_doctype(doctype):
     print(f"Updating {doctype}...")
     docs = frappe.get_all(doctype, fields=["name", "owner"])
@@ -35,6 +38,7 @@ def update_custom_creator_for_doctype(doctype):
 
     frappe.db.commit()
 
+
 def update_all_employee_percent():
     """
     Update the 'custom_fields_filled_percent' for all Employee records,
@@ -46,14 +50,12 @@ def update_all_employee_percent():
         doc = frappe.get_doc("Employee", emp)
         percent, total, filled = update_employee_percent(doc)
         doc.save(ignore_permissions=True)
-        results.append({
-            "employee": emp,
-            "percent": percent,
-            "total": total,
-            "filled": filled
-        })
+        results.append(
+            {"employee": emp, "percent": percent, "total": total, "filled": filled}
+        )
     frappe.db.commit()
     return results
+
 
 def update_employee_percent(doc, method=None):
     """
@@ -68,7 +70,7 @@ def update_employee_percent(doc, method=None):
         "Address & Contacts",
         "Attendance & Leaves",
         "Salary",
-        "Personal"
+        "Personal",
     }
 
     meta = frappe.get_meta("Employee")
@@ -79,9 +81,16 @@ def update_employee_percent(doc, method=None):
         if f.fieldtype == "Tab Break":
             current_tab = f.label
         if (
-            f.fieldtype not in (
-                "Section Break", "Column Break", "Tab Break", "HTML",
-                "Table", "Button", "Image", "Fold"
+            f.fieldtype
+            not in (
+                "Section Break",
+                "Column Break",
+                "Tab Break",
+                "HTML",
+                "Table",
+                "Button",
+                "Image",
+                "Fold",
             )
             and f.fieldname
             and current_tab in INCLUDED_TABS
@@ -92,7 +101,9 @@ def update_employee_percent(doc, method=None):
     filled = 0
     for field in fields_in_tabs:
         value = getattr(doc, field, None)
-        if value not in (None, '', [], {}) and not (isinstance(value, str) and value.strip() == ''):
+        if value not in (None, "", [], {}) and not (
+            isinstance(value, str) and value.strip() == ""
+        ):
             filled += 1
 
     percent = round((filled / total) * 100) if total else 0
@@ -351,7 +362,6 @@ def check_user(customerID: str) -> frappe._dict[str, str]:
             "error": None,
         }
     )
-
     for site in available_sites:
         site_doc: Site = cast(Site, frappe.get_cached_doc("Site", site))
 
@@ -471,7 +481,6 @@ def create_user(
         device_setup_doc.user_type = UserType
         device_setup_doc.site = site_doc.name
         device_setup_doc.save()
-        device_setup_doc.submit()
         return frappe._dict(
             {
                 "message": _("User created successfully."),
@@ -479,11 +488,11 @@ def create_user(
             }
         )
     else:
-        frappe.throw(
-            _("Error from server {server}: {error_message}").format(
-                server=site_doc.server,
-                error_message=request_response,
-            )
+        return frappe._dict(
+            {
+                "status": "error",
+                "message": request_response.get("message", "Unknown error"),
+            }
         )
 
 
@@ -553,8 +562,20 @@ def add_device(
         params=params,
         headers=headers,
     )
-    request_response = request.json()
-
+    try:
+        request_response = request.json()
+    except ValueError:
+        # Not a valid JSON
+        frappe.log_error(
+            f"Non-JSON response from {site_doc.server}: {request.text}",
+            "Invalid JSON Response",
+        )
+        return frappe._dict(
+            {
+                "status": "error",
+                "message": f"Server returned invalid JSON: {request.text}",
+            }
+        )
     if request.status_code != 200:
         frappe.throw(
             _(
