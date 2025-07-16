@@ -362,6 +362,14 @@ frappe.ui.form.on('Lead', {
     company_name: function(frm) {
         toggle_create_dropdown(frm);
     },
+    custom_cr_number: function(frm) {
+        frm.set_df_property("custom_tax_id", "reqd", 0);
+        frm.set_df_property("custom_cr_number", "reqd", 1);
+    },
+    custom_tax_id: function(frm) {
+        frm.set_df_property("custom_cr_number", "reqd", 0);
+        frm.set_df_property("custom_tax_id", "reqd", 1);
+    },
     validate: function (frm) {
         if (frm.doc.type === "Company") {
             if (frm.doc.custom_cr_number && !/^\d{10}$/.test(frm.doc.custom_cr_number)) {
