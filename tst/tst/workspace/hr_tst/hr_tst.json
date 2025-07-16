@@ -1,0 +1,244 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"46lnr60DXr\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">HR tst</span>\",\"col\":12}},{\"id\":\"7BadgKZ5Rf\",\"type\":\"card\",\"data\":{\"card_name\":\"\u0627\u0644\u062a\u0648\u0638\u064a\u0641\",\"col\":4}},{\"id\":\"iIOM-Lp4-S\",\"type\":\"card\",\"data\":{\"card_name\":\"\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0627\u0633\u0627\u0633\u064a\u0647\",\"col\":4}},{\"id\":\"eN5-Usx_4w\",\"type\":\"card\",\"data\":{\"card_name\":\"\u0627\u0644\u0646\u0645\u0627\u0630\u062c \u0627\u0644\u0627\u062f\u0627\u0631\u064a\u0647\",\"col\":4}}]",
+ "creation": "2025-07-13 19:31:06.182759",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "color-review-points",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "HR tst",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "\u0627\u0644\u0646\u0645\u0627\u0630\u062c \u0627\u0644\u0627\u062f\u0627\u0631\u064a\u0647",
+   "link_count": 8,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Employee Evaluation",
+   "link_count": 0,
+   "link_to": "Employee Evaluation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Internal Disciplinary Investigation",
+   "link_count": 0,
+   "link_to": "Internal Disciplinary Investigation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Promotion and Salary Adjustment",
+   "link_count": 0,
+   "link_to": "Promotion and Salary Adjustment",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Late or Absence Record",
+   "link_count": 0,
+   "link_to": "Late or Absence Record",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Employee Data Change Request",
+   "link_count": 0,
+   "link_to": "Employee Data Change Request",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "General Announcement",
+   "link_count": 0,
+   "link_to": "General Announcement",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Warning Notice",
+   "link_count": 0,
+   "link_to": "Warning Notice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Leave Application",
+   "link_count": 0,
+   "link_to": "Leave Application",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "\u0627\u0644\u062a\u0648\u0638\u064a\u0641",
+   "link_count": 5,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "\u0637\u0644\u0628 \u062a\u0648\u0638\u064a\u0641",
+   "link_count": 0,
+   "link_to": "Job Requisition",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "\u0627\u0639\u0644\u0627\u0646 \u0648\u0638\u064a\u0641\u064a",
+   "link_count": 0,
+   "link_to": "Job Opening",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "\u062a\u0642\u062f\u064a\u0645 \u0639\u0644\u064a \u0627\u0644\u0648\u0638\u064a\u0641\u0647",
+   "link_count": 0,
+   "link_to": "Job Applicant",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "\u0645\u0642\u0627\u0628\u0644\u0647 \u062a\u0639\u064a\u0646",
+   "link_count": 0,
+   "link_to": "Interview",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "\u0639\u0631\u0636 \u0639\u0645\u0644",
+   "link_count": 0,
+   "link_to": "Job Offer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0627\u0633\u0627\u0633\u064a\u0647",
+   "link_count": 5,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "\u0645\u0648\u0638\u0641",
+   "link_count": 0,
+   "link_to": "Employee",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "\u0642\u0633\u0645",
+   "link_count": 0,
+   "link_to": "Sections",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "\u0627\u062f\u0627\u0631\u0629",
+   "link_count": 0,
+   "link_to": "Department",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "\u0641\u0631\u0639",
+   "link_count": 0,
+   "link_to": "Branch",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "\u0645\u0633\u0645\u064a \u0648\u0638\u064a\u0641\u064a",
+   "link_count": 0,
+   "link_to": "Designation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-07-15 10:03:46.048552",
+ "modified_by": "Administrator",
+ "module": "Tst",
+ "name": "HR tst",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "HR User"
+  },
+  {
+   "role": "HR Manager"
+  }
+ ],
+ "sequence_id": 44.0,
+ "shortcuts": [],
+ "title": "HR tst"
+}
