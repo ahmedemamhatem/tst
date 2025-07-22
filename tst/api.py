@@ -7,6 +7,48 @@ from frappe import _
 from tst.tst.doctype.device_setup.device_setup import DeviceSetup
 
 
+@frappe.whitelist()
+def get_repack_bom_details(repack_bom_name):
+    if not frappe.has_permission("Repack BOM", "read"):
+        frappe.throw("You do not have permission to access this resource.")
+
+    # Fetch the Repack BOM document
+    repack_bom = frappe.get_doc("Repack BOM", repack_bom_name)
+
+    # Ensure the document exists
+    if not repack_bom:
+        frappe.throw(f"Repack BOM {repack_bom_name} not found.")
+
+    # Prepare the response with main item and child items
+    response = {
+        "main_item": {
+            "item_code": repack_bom.main_item,
+            "qty": repack_bom.qty,
+            "uom": repack_bom.uom,
+            "default_warehouse": repack_bom.default_warehouse
+        },
+        "child_items": []
+    }
+
+    # Add child items from the BOM
+    for child in repack_bom.table_wlal:
+        conversion_factor = frappe.db.get_value(
+            "UOM Conversion Detail",
+            {"parent": child.item_code, "uom": child.uom},
+            "conversion_factor"
+        ) or 1  # Default to 1 if no conversion factor is found
+
+        response["child_items"].append({
+            "item_code": child.item_code,
+            "qty": child.quantity,
+            "uom": child.uom,
+            "default_warehouse": child.default_warehouse,
+            "conversion_factor": conversion_factor
+        })
+
+    return response
+
+
 def set_custom_creator(doc, method):
     if doc.owner:
         user = frappe.get_doc("User", doc.owner)
