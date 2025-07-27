@@ -1,0 +1,22 @@
+{
+ "content": null,
+ "creation": "2025-07-27 12:46:31.711828",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2025-07-27 12:48:13.558484",
+ "modified_by": "Administrator",
+ "module": "Tst",
+ "name": "weekly-installation",
+ "owner": "Administrator",
+ "page_name": "weekly-installation",
+ "roles": [
+  {
+   "role": ""
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0
+}
