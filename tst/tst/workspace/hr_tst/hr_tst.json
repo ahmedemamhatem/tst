@@ -221,7 +221,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-07-15 10:03:46.048552",
+ "modified": "2025-07-25 23:42:13.797074",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "HR tst",
@@ -236,6 +236,9 @@
   },
   {
    "role": "HR Manager"
+  },
+  {
+   "role": "System Manager"
   }
  ],
  "sequence_id": 44.0,
