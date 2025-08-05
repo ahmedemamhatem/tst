@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2025-07-27 12:48:13.558484",
+ "modified": "2025-08-04 19:05:12.182492",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "weekly-installation",
@@ -12,7 +12,7 @@
  "page_name": "weekly-installation",
  "roles": [
   {
-   "role": ""
+   "role": "All"
   }
  ],
  "script": null,

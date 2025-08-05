@@ -215,3 +215,108 @@ function hide_listview_print_email(listview) {
         });
     }
 }
+
+
+
+frappe.ui.form.on('Quotation', {
+  custom_add_to_item_table: async function(frm) {
+    let bundle = frm.doc.custom_subscription_bundle;
+    let months = frm.doc.custom_no_of_months;
+    let monthly_rate = frm.doc.custom_monthly_rate;
+
+    if (!bundle || !months || !monthly_rate) {
+      frappe.msgprint(__('Please select all fields: Product Bundle, No of Months, and Monthly Rate'));
+      return;
+    }
+
+    frappe.call({
+      method: "frappe.client.get",
+      args: {
+        doctype: "Product Bundle",
+        name: bundle
+      },
+      callback: async function(r) {
+        if (!r.message) {
+          frappe.msgprint(__('No such Product Bundle found.'));
+          return;
+        }
+
+        const bundle_items = r.message.items || [];
+        const bundle_name = r.message.bundle_name || r.message.name || bundle;
+
+        if (bundle_items.length === 0) {
+          frappe.msgprint(__('No items found in the selected Product Bundle.'));
+          return;
+        }
+
+        let custom_subscription_data = `Subscription for ${months} month${months == 1 ? '' : 's'} in ${bundle_name}`;
+
+        // Helper to get Item Name and UOM if missing
+        const get_item_details = async (item_code, current_item_name, current_uom) => {
+          let result = {
+            item_name: current_item_name || "",
+            uom: current_uom || ""
+          };
+          if (!item_code) return result;
+
+          if (!result.item_name || !result.uom) {
+            try {
+              let resp = await frappe.db.get_doc('Item', item_code);
+              if (!result.item_name) result.item_name = resp.item_name || "";
+              if (!result.uom) result.uom = resp.stock_uom || "";
+            } catch (e) {
+              // leave as is if cannot fetch
+            }
+          }
+          return result;
+        };
+
+        // Track if we filled the first empty row
+        let first_row_filled = false;
+
+        for (let b_item of bundle_items) {
+          let item_code = b_item.item_code;
+          let details = await get_item_details(item_code, b_item.item_name, b_item.uom);
+
+          if (!item_code || !details.item_name || !details.uom) {
+            frappe.msgprint(__('Cannot add item: Missing Item Code, Item Name, or UOM for bundle row with item code: {0}', [item_code || '(no item code)']));
+            continue;
+          }
+
+          let custom_rate_percent = parseFloat(b_item.custom_rate_percent ?? b_item.rate_percent ?? 0);
+          let calculated_rate = months * monthly_rate * (custom_rate_percent / 100);
+
+          // Check if the first row is empty and hasn't been filled yet
+          let items = frm.doc.items || [];
+          if (!first_row_filled && items.length > 0 && !items[0].item_code) {
+            // Fill the first empty row
+            frappe.model.set_value(items[0].doctype, items[0].name, 'item_code', item_code);
+            frappe.model.set_value(items[0].doctype, items[0].name, 'item_name', details.item_name);
+            frappe.model.set_value(items[0].doctype, items[0].name, 'uom', details.uom);
+            frappe.model.set_value(items[0].doctype, items[0].name, 'qty', 1);
+            frappe.model.set_value(items[0].doctype, items[0].name, 'rate', calculated_rate);
+            frappe.model.set_value(items[0].doctype, items[0].name, 'custom_subscription', 1);
+            frappe.model.set_value(items[0].doctype, items[0].name, 'custom_subscription_data', custom_subscription_data);
+            frappe.model.set_value(items[0].doctype, items[0].name, 'description', b_item.description);
+            first_row_filled = true;
+          } else {
+            // Add new row as usual
+            frm.add_child('items', {
+              item_code: item_code,
+              item_name: details.item_name,
+              uom: details.uom,
+              qty: 1,
+              rate: calculated_rate,
+              custom_subscription: 1,
+              custom_subscription_data: custom_subscription_data,
+              description: b_item.description
+            });
+          }
+        }
+
+        frm.refresh_field('items');
+        frappe.msgprint(__('All items from Product Bundle have been added to the quotation.'));
+      }
+    });
+  }
+});
