@@ -6,7 +6,51 @@ from erpnext.stock.utils import get_stock_balance
 from frappe import _
 from tst.tst.doctype.device_setup.device_setup import DeviceSetup
 
+def get_employee_fields_included_tabs():
+    """Return a sorted list of Employee doctype fields in the specified tabs, excluding unwanted types."""
+    INCLUDED_TABS = {
+        "Overview",
+        "Joining",
+        "Address & Contacts",
+        "Attendance & Leaves",
+        "Salary",
+        "Personal",
+    }
 
+    # These field types will be skipped
+    EXCLUDED_FIELD_TYPES = (
+        "Section Break",
+        "Column Break",
+        "Tab Break",
+        "HTML",
+        "Table",
+        "Button",
+        "Image",
+        "Fold",
+    )
+
+    meta = frappe.get_meta("Employee")
+    fields_in_tabs = []
+    current_tab = None
+
+    for f in meta.fields:
+        if f.fieldtype == "Tab Break":
+            current_tab = f.label
+        if (
+            f.fieldtype not in EXCLUDED_FIELD_TYPES
+            and f.fieldname
+            and current_tab in INCLUDED_TABS
+        ):
+            fields_in_tabs.append({
+                "fieldname": f.fieldname,
+                "label": f.label,
+                "fieldtype": f.fieldtype,
+                "tab": current_tab
+            })
+
+    return fields_in_tabs
+
+    
 @frappe.whitelist()
 def get_repack_bom_details(repack_bom_name):
     if not frappe.has_permission("Repack BOM", "read"):
