@@ -74,23 +74,23 @@ def check_required_items(doc):
         required_qty = item.get("qty")
 
         # 1. Check technician's warehouse first
-        tech_qty = get_stock_qty(item_code, technician_warehouse)
-        allocated_qty = min(tech_qty, required_qty)
-        remaining_needed = required_qty - allocated_qty
+        # tech_qty = get_stock_qty(item_code, technician_warehouse)
+        # allocated_qty = min(tech_qty, required_qty)
+        # remaining_needed = required_qty - allocated_qty
 
-        # 2. Check assistant technicians' warehouses
-        if remaining_needed > 0:
-            for tech in installation_order.sub_installation_order_technician:
-                if not tech.warehouse:
-                    continue
+        # # 2. Check assistant technicians' warehouses
+        # if remaining_needed > 0:
+        #     for tech in installation_order.sub_installation_order_technician:
+        #         if not tech.warehouse:
+        #             continue
 
-                wh_qty = get_stock_qty(item_code, tech.warehouse)
-                allocate = min(wh_qty, remaining_needed)
-                if allocate > 0:
-                    remaining_needed -= allocate
+        #         wh_qty = get_stock_qty(item_code, tech.warehouse)
+        #         allocate = min(wh_qty, remaining_needed)
+        #         if allocate > 0:
+        #             remaining_needed -= allocate
 
         # 3. Create MR for remaining quantity
-        if remaining_needed > 0:
+        if required_qty > 0:
             source_warehouse = get_best_source_warehouse(
                 item_code, technician_warehouse
             )
@@ -101,7 +101,7 @@ def check_required_items(doc):
             material_requests.setdefault(source_warehouse, []).append(
                 {
                     "item_code": item_code,
-                    "qty": remaining_needed,
+                    "qty": required_qty,
                     "schedule_date": nowdate(),
                     "from_warehouse": source_warehouse,
                     "warehouse": technician_warehouse,
@@ -281,7 +281,7 @@ def validate(self, method=None):
         if not self.custom_choose_serial_and_batch_bundle:
             frappe.throw(_("Please add at least one Serial No or Batch Bundle."))
         create_device_setup(self)
-        create_delivery_note(self)
+        # create_delivery_note(self)
 
 
 def validate_item_serial_qty_to_so_qty(self):
