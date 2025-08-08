@@ -13,52 +13,13 @@ frappe.ui.form.on("Technician Location", "show_location", function (frm, cdt, cd
 
 frappe.ui.form.on("Appointment", {
     refresh: function (frm) {
-        frm.set_query("custom_serial_no", function () {
-            return {
-                query: "tst.api.serial_no_query",
-                filters: {
-                    "custom_installation_order": frm.doc.custom_installation_order,
-                    "warehouse": frm.doc.custom_technician_warehouse,
-                }
-            };
-        });
-        frm.fields_dict.custom_choose_serial_and_batch_bundle.grid.wrapper.find(".grid-add-row").remove();
-
-
         // Add custom button
         addCustomStatusButton(frm);
     },
     after_save: function (frm) {
         frm.doc.calendar_event = '';
     },
-    custom_append_device: function (frm) {
-        if (!frm.doc.custom_serial_no) {
-            frappe.msgprint("Please select a Serial and Batch Bundle and Serial No before appending.");
-            return;
-        }
-        let found = false
-        if (frm.doc.custom_serial_no) {
-            frm.doc.custom_choose_serial_and_batch_bundle.forEach(element => {
-                if (element.serial_no == frm.doc.custom_serial_no) {
-                    frappe.msgprint(__("Serial No Already Exists in Table"))
-                    found = true
-
-                }
-            });
-            if (!found) {
-                let device_row = frm.add_child("custom_choose_serial_and_batch_bundle");
-                device_row.serial_no = frm.doc.custom_serial_no;
-                frm.refresh_field("custom_choose_serial_and_batch_bundle");
-                frm.doc.custom_serial_no = "";
-                frm.doc.custom_item_code = "";
-                frm.doc.custom_item_name = "";
-
-                frm.refresh_field("custom_serial_no");
-                frm.refresh_field("custom_item_code");
-                frm.refresh_field("custom_item_name");
-            }
-        }
-    },
+    
     getCurrentLocation: function (frm) {
 
         return new Promise((resolve) => {
@@ -109,15 +70,51 @@ function addCustomStatusButton(frm) {
     };
 
     // Remove existing button if it exists
-    if (frm.custom_next_status_button) {
+    if (frm.custom_next_status_button ) {
         cur_frm.remove_custom_button(__(frm.custom_next_status_button));
 
     }
-
+    if (frm.doc.status != 'Closed') {
+        // add button to cancel appointment
+        frm.add_custom_button(__('Cancel Appointment'), function () {
+            frappe.confirm(
+                __('Are you sure you want to cancel this appointment?'),
+                function () {
+                    // If confirmed, update the status and perform any additional actions
+                    updateStatus(frm, 'Cancelled', 'Closed');
+                }
+            );
+        });
+    }else {
+        // reopent appointment button
+        frm.add_custom_button(__('Reopen Appointment'), function () {
+            frappe.confirm(
+                __('Are you sure you want to reopen this appointment?'),
+                function () {
+                    // If confirmed, update the status and perform any additional actions
+                    updateStatus(frm, 'Pending', 'Open');
+                }
+            );
+        });
+    }
     // Add new button
+    if(frm.doc.custom_appointment_status != 'Done Installation' && frm.doc.status != 'Closed' ) {
     frm.add_custom_button(__('Next: {0}', [nextStatus]), function () {
-        promptForStatusUpdate(frm);
-    }).addClass(statusColors[nextStatus] || 'btn-default');
+            promptForStatusUpdate(frm);
+        }).addClass(statusColors[nextStatus] || 'btn-default');
+    }
+
+    if (frm.doc.custom_appointment_status == 'Start Installation') {
+        frm.add_custom_button(
+        __('Start Installing Device'),() => {
+        
+            frappe.model.open_mapped_doc({
+                method: 'tst.triggers.crm.appointment.appointment.make_vehicle_appointment',
+                frm: frm,
+            })
+        }
+    ).addClass('btn-primary');
+}
 
     // Store reference to the button for later removal
     frm.custom_next_status_button = frm.page.btn_primary;
@@ -151,7 +148,7 @@ function promptForStatusUpdate(frm) {
 }
 
 // Modify the updateStatus function to update the button after status change
-function updateStatus(frm, nextStatus) {
+function updateStatus(frm, nextStatus, status = 'Open') {
     frappe.call({
         method: 'frappe.client.set_value',
         freeze: 1,
@@ -173,8 +170,10 @@ function updateStatus(frm, nextStatus) {
 
                     frm.refresh_field("custom_technician_location");
 
-                    // Update the custom button
-                    addCustomStatusButton(frm);
+                    frm.doc.status = status;
+                    frm.refresh_field("status");
+                    frm.save();
+                    
                 });
             }
         },

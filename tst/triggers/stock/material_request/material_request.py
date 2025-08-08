@@ -35,7 +35,8 @@ def set_department_in_items(doc, method=None):
         "Employee", {"user_id": doc.owner}, ["name", "department"], as_dict=True
     )
     if not employee:
-        frappe.throw("No Employee found for user {}".format(doc.owner))
+        return
+        # frappe.throw("No Employee found for user {}".format(doc.owner))
     if not employee.get("department"):
         frappe.throw("Department not set for Employee '{}'.".format(employee["name"]))
 
