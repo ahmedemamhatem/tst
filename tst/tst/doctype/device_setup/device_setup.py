@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form
+from tst.triggers.crm.appointment.appointment import create_delivery_note
 
 
 class DeviceSetup(Document):
@@ -30,7 +31,8 @@ class DeviceSetup(Document):
         self.update_serial_no()
 
     def on_submit(self):
-        pass
+        if self.status == "Active":
+            create_delivery_note(self)
 
     def on_cancel(self):
         self.clear_serial_no_references()
@@ -70,3 +72,13 @@ class DeviceSetup(Document):
             ]
 
             serial_no_doc.save()
+
+
+def get_appointment_doc(appointment):
+    if not appointment:
+        frappe.throw(_("Appointment Required"))
+
+    appointment_doc = frappe.get_doc("Appointment", appointment)
+
+    if appointment_doc:
+        return appointment_doc

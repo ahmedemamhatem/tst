@@ -6,6 +6,7 @@ from erpnext.stock.utils import get_stock_balance
 from frappe import _
 from tst.tst.doctype.device_setup.device_setup import DeviceSetup
 
+
 def get_employee_fields_included_tabs():
     """Return a sorted list of Employee doctype fields in the specified tabs, excluding unwanted types."""
     INCLUDED_TABS = {
@@ -41,16 +42,18 @@ def get_employee_fields_included_tabs():
             and f.fieldname
             and current_tab in INCLUDED_TABS
         ):
-            fields_in_tabs.append({
-                "fieldname": f.fieldname,
-                "label": f.label,
-                "fieldtype": f.fieldtype,
-                "tab": current_tab
-            })
+            fields_in_tabs.append(
+                {
+                    "fieldname": f.fieldname,
+                    "label": f.label,
+                    "fieldtype": f.fieldtype,
+                    "tab": current_tab,
+                }
+            )
 
     return fields_in_tabs
 
-    
+
 @frappe.whitelist()
 def get_repack_bom_details(repack_bom_name):
     if not frappe.has_permission("Repack BOM", "read"):
@@ -69,26 +72,31 @@ def get_repack_bom_details(repack_bom_name):
             "item_code": repack_bom.main_item,
             "qty": repack_bom.qty,
             "uom": repack_bom.uom,
-            "default_warehouse": repack_bom.default_warehouse
+            "default_warehouse": repack_bom.default_warehouse,
         },
-        "child_items": []
+        "child_items": [],
     }
 
     # Add child items from the BOM
     for child in repack_bom.table_wlal:
-        conversion_factor = frappe.db.get_value(
-            "UOM Conversion Detail",
-            {"parent": child.item_code, "uom": child.uom},
-            "conversion_factor"
-        ) or 1  # Default to 1 if no conversion factor is found
+        conversion_factor = (
+            frappe.db.get_value(
+                "UOM Conversion Detail",
+                {"parent": child.item_code, "uom": child.uom},
+                "conversion_factor",
+            )
+            or 1
+        )  # Default to 1 if no conversion factor is found
 
-        response["child_items"].append({
-            "item_code": child.item_code,
-            "qty": child.quantity,
-            "uom": child.uom,
-            "default_warehouse": child.default_warehouse,
-            "conversion_factor": conversion_factor
-        })
+        response["child_items"].append(
+            {
+                "item_code": child.item_code,
+                "qty": child.quantity,
+                "uom": child.uom,
+                "default_warehouse": child.default_warehouse,
+                "conversion_factor": conversion_factor,
+            }
+        )
 
     return response
 
@@ -682,6 +690,9 @@ def add_device(
             }
         )
     else:
+        device_setup.status = "Broken"
+        device_setup.save()
+        frappe.db.commit()
         frappe.throw(
             _("Error from server {server}: {error_message}").format(
                 server=site_doc.server,

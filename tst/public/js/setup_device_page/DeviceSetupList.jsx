@@ -117,6 +117,9 @@ const DeviceSetupList = forwardRef((props, ref) => {
                     'vehicle_name', 'vehicle_type', 'iccid', 'device_type',
                     'create_date', 'odometer', 'user_type', 'user_id', 'userlogin', "docstatus"
                 ],
+                filters: [
+                    ['docstatus', '!=', '2']
+                ],
                 limit: 100,
                 order_by: 'creation desc'
             },
@@ -269,7 +272,6 @@ const DeviceSetupList = forwardRef((props, ref) => {
     const handleCheckUser = async () => {
         try {
             const values = await form.validateFields(['customerID', 'userType']);
-            console.log('Checking user with values:', values);
             setCheckLoading(true);
 
             frappe.call({
@@ -405,7 +407,6 @@ const DeviceSetupList = forwardRef((props, ref) => {
                                         ServerIP: values.server
                                     },
                                     callback: (addDeviceResponse) => {
-                                        console.log('Add Device Response:', addDeviceResponse);
                                         if (addDeviceResponse.message && addDeviceResponse.message.status === "success") {
                                             setApiResponse(prev => ({
                                                 ...prev,
@@ -477,7 +478,6 @@ const DeviceSetupList = forwardRef((props, ref) => {
             }
         } catch (error) {
             parseError = error.message;
-            console.error('Failed to parse response:', error);
         }
 
         return (

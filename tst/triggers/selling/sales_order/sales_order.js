@@ -115,7 +115,6 @@ function address_filter(frm) {
                 customer: frm.doc.customer
             },
             callback: function(response) {
-                // console.log(response.message)
                 const address_list = response.message[0] || [];
                 const contact_list = response.message[1] || [];
 
@@ -151,13 +150,3 @@ function create_installation_order(frm, address,parent_address) {
     });
 }
 
-
-// frappe.ui.form.on("Sales Order Item",{
-//     custom_address:function(frm){
-//         console.log("testststss")
-//         if (frm.doc.customer){
-//             address_filter(frm)
-//         }
-//     },
-    
-// })

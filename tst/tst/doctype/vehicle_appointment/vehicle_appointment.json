@@ -1,0 +1,305 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-08 17:43:14.270157",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "vehicle_section",
+  "vehicle",
+  "column_break_cmwl",
+  "appointment",
+  "vehicle_data_section",
+  "first_number",
+  "column_break_jaex",
+  "second_number",
+  "column_break_brwo",
+  "third_number",
+  "column_break_fcxw",
+  "fourth_number",
+  "column_break_zjvg",
+  "first_letter",
+  "column_break_pkan",
+  "second_letter",
+  "column_break_ezgw",
+  "third_letter",
+  "section_break_myzj",
+  "vehicle_name",
+  "vehicle_type",
+  "column_break_aayy",
+  "chassie_number",
+  "section_break_slcv",
+  "serial_number",
+  "append_device",
+  "column_break_anme",
+  "item_code",
+  "item_name",
+  "section_break_ckqg",
+  "choose_serial_and_batch_bundle",
+  "section_break_gevb",
+  "installation_order",
+  "warehouse",
+  "sales_order",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "vehicle_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Vehicle Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle_data_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Data"
+  },
+  {
+   "fetch_from": "vehicle.first_number",
+   "fieldname": "first_number",
+   "fieldtype": "Data",
+   "label": "\u0627\u0644\u0631\u0642\u0645 \u0627\u0644\u0627\u0648\u0644",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_jaex",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.second_number",
+   "fieldname": "second_number",
+   "fieldtype": "Data",
+   "label": "\u0627\u0644\u0631\u0642\u0645 \u0627\u0644\u062b\u0627\u0646\u064a",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_brwo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.third_number",
+   "fieldname": "third_number",
+   "fieldtype": "Data",
+   "label": "\u0627\u0644\u0631\u0642\u0645 \u0627\u0644\u062b\u0627\u0644\u062b",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_fcxw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.fourth_number",
+   "fieldname": "fourth_number",
+   "fieldtype": "Data",
+   "label": "\u0627\u0644\u0631\u0642\u0645 \u0627\u0644\u0631\u0627\u0628\u0639",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_zjvg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.first_letter",
+   "fieldname": "first_letter",
+   "fieldtype": "Data",
+   "label": "\u0627\u0644\u062d\u0631\u0641 \u0627\u0644\u0627\u0648\u0644",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_pkan",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.second_letter",
+   "fieldname": "second_letter",
+   "fieldtype": "Data",
+   "label": "\u0627\u0644\u062d\u0631\u0641 \u0627\u0644\u062b\u0627\u0646\u064a",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ezgw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.third_letter",
+   "fieldname": "third_letter",
+   "fieldtype": "Data",
+   "label": "\u0627\u0644\u062d\u0631\u0641 \u0627\u0644\u062b\u0627\u0644\u062b",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_myzj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "vehicle.vehicle_name",
+   "fieldname": "vehicle_name",
+   "fieldtype": "Data",
+   "label": "Vehicle Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle.vehicle_type",
+   "fieldname": "vehicle_type",
+   "fieldtype": "Data",
+   "label": "Vehicle Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_cmwl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "appointment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Appointment",
+   "options": "Appointment"
+  },
+  {
+   "fieldname": "section_break_slcv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "serial_number",
+   "fieldtype": "Link",
+   "label": "Serial Number",
+   "options": "Serial No"
+  },
+  {
+   "fieldname": "column_break_anme",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "serial_number.item_code",
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name"
+  },
+  {
+   "fieldname": "append_device",
+   "fieldtype": "Button",
+   "label": "Append Device"
+  },
+  {
+   "fieldname": "section_break_ckqg",
+   "fieldtype": "Section Break",
+   "label": "Serials"
+  },
+  {
+   "fieldname": "choose_serial_and_batch_bundle",
+   "fieldtype": "Table",
+   "options": "Choose Serial and Batch Bundle"
+  },
+  {
+   "fieldname": "column_break_aayy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.chassie_number",
+   "fieldname": "chassie_number",
+   "fieldtype": "Data",
+   "label": "Chassie Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_gevb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "appointment.custom_installation_order",
+   "fieldname": "installation_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Installation Order",
+   "options": "Installation Order"
+  },
+  {
+   "fetch_from": "appointment.custom_technician_warehouse",
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Vehicle Appointment",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "appointment.custom_sales_order",
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [
+  {
+   "link_doctype": "Device Setup",
+   "link_fieldname": "vehicle_appointment"
+  }
+ ],
+ "modified": "2025-08-08 23:11:44.838239",
+ "modified_by": "Administrator",
+ "module": "Tst",
+ "name": "Vehicle Appointment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

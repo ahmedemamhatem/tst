@@ -1,0 +1,205 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{first_number}{second_number}{third_number}{fourth_number}-{first_letter}{second_letter}{third_letter}",
+ "creation": "2025-08-08 17:47:06.893280",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "vehicel_plate_section",
+  "first_number",
+  "column_break_shqo",
+  "second_number",
+  "column_break_gzar",
+  "third_number",
+  "column_break_hxbk",
+  "fourth_number",
+  "column_break_mpyh",
+  "column_break_gkcx",
+  "column_break_diqo",
+  "plate_letters_section",
+  "first_letter",
+  "column_break_mbau",
+  "second_letter",
+  "column_break_whhs",
+  "third_letter",
+  "section_break_szjz",
+  "vehicle_name",
+  "vehicle_type",
+  "column_break_whus",
+  "chassie_number"
+ ],
+ "fields": [
+  {
+   "fieldname": "vehicel_plate_section",
+   "fieldtype": "Section Break",
+   "label": "Plate Numbers"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "first_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "\u0627\u0644\u0631\u0642\u0645 \u0627\u0644\u0627\u0648\u0644",
+   "placeholder": "\u0631\u0642\u0645",
+   "width": "10"
+  },
+  {
+   "fieldname": "column_break_shqo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "second_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "\u0627\u0644\u0631\u0642\u0645 \u0627\u0644\u062b\u0627\u0646\u064a",
+   "placeholder": "\u0631\u0642\u0645"
+  },
+  {
+   "fieldname": "column_break_gzar",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "third_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "\u0627\u0644\u0631\u0642\u0645 \u0627\u0644\u062b\u0627\u0644\u062b",
+   "placeholder": "\u0631\u0642\u0645"
+  },
+  {
+   "fieldname": "column_break_hxbk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "fourth_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "\u0627\u0644\u0631\u0642\u0645 \u0627\u0644\u0631\u0627\u0628\u0639",
+   "placeholder": "\u0631\u0642\u0645"
+  },
+  {
+   "fieldname": "column_break_mpyh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "first_letter",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "\u0627\u0644\u062d\u0631\u0641 \u0627\u0644\u0627\u0648\u0644",
+   "placeholder": "\u062d\u0631\u0641"
+  },
+  {
+   "fieldname": "column_break_gkcx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "second_letter",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "\u0627\u0644\u062d\u0631\u0641 \u0627\u0644\u062b\u0627\u0646\u064a",
+   "placeholder": "\u062d\u0631\u0641"
+  },
+  {
+   "fieldname": "column_break_diqo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "third_letter",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "\u0627\u0644\u062d\u0631\u0641 \u0627\u0644\u062b\u0627\u0644\u062b",
+   "placeholder": "\u062d\u0631\u0641"
+  },
+  {
+   "fieldname": "plate_letters_section",
+   "fieldtype": "Section Break",
+   "label": "Plate Letters"
+  },
+  {
+   "fieldname": "column_break_mbau",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_whhs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_szjz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "vehicle_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle Name",
+   "reqd": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "description": "\u064a\u062c\u0628 \u0627\u0646 \u064a\u0643\u0648\u0646 \u0631\u0642\u0645",
+   "fieldname": "vehicle_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_whus",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "description": "\u0631\u0642\u0645 \u0627\u0644\u0634\u0627\u0633\u064a\u0647",
+   "fieldname": "chassie_number",
+   "fieldtype": "Data",
+   "label": "Chassie Number"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-08-08 18:13:06.614639",
+ "modified_by": "Administrator",
+ "module": "Tst",
+ "name": "Vehicle Data",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
+}

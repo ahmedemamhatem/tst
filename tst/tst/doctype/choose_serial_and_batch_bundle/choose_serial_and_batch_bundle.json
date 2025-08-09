@@ -10,13 +10,7 @@
   "item_code",
   "item_name",
   "warehouse",
-  "column_break_kiap",
-  "vehicle",
-  "license_plate",
-  "chassie_no",
-  "attachment",
-  "section_break_jwkg",
-  "attachments"
+  "column_break_kiap"
  ],
  "fields": [
   {
@@ -52,48 +46,13 @@
   {
    "fieldname": "column_break_kiap",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "vehicle",
-   "fieldtype": "Data",
-   "label": "Vehicle"
-  },
-  {
-   "columns": 2,
-   "fieldname": "license_plate",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": " License Plate "
-  },
-  {
-   "columns": 2,
-   "fieldname": "attachment",
-   "fieldtype": "Attach",
-   "in_list_view": 1,
-   "label": "Attachment"
-  },
-  {
-   "fieldname": "section_break_jwkg",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "attachments",
-   "fieldtype": "Small Text",
-   "label": "attachments"
-  },
-  {
-   "columns": 2,
-   "fieldname": "chassie_no",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Chassie No"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-25 13:40:35.344610",
+ "modified": "2025-08-08 18:11:42.928004",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Choose Serial and Batch Bundle",

@@ -1,0 +1,35 @@
+{
+ "add_total_row": 0,
+ "add_translate_data": 0,
+ "columns": [],
+ "creation": "2025-08-08 23:25:15.639024",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "json": "{\"filters\":[],\"fields\":[[\"name\",\"Serial No\"],[\"item_code\",\"Serial No\"],[\"warehouse\",\"Serial No\"],[\"status\",\"Serial No\"],[\"company\",\"Serial No\"],[\"item_name\",\"Serial No\"],[\"custom_full_name\",\"Serial No\"],[\"employee\",\"Serial No\"],[\"custom_customer_name\",\"Serial No\"],[\"custom_customer\",\"Serial No\"],[\"custom_sales_order\",\"Serial No\"],[\"serial_no\",\"Serial No\"],[\"custom_technician\",\"Serial No\"],[\"custom_user_id\",\"Serial No\"],[\"custom_username\",\"Serial No\"],[\"custom_vehicle_appointment\",\"Serial No\"],[\"custom_vehicle_data\",\"Serial No\"],[\"custom_vehicle_name\",\"Serial No\"],[\"custom_vehicle_type\",\"Serial No\"],[\"custom_posting_date\",\"Serial No\"],[\"custom_password\",\"Serial No\"]],\"order_by\":\"`tabSerial No`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"item_code\":120,\"warehouse\":120,\"status\":120,\"company\":120,\"item_name\":120,\"custom_full_name\":120,\"employee\":120,\"custom_customer_name\":120,\"custom_customer\":120,\"custom_sales_order\":120,\"serial_no\":120,\"custom_technician\":120,\"custom_user_id\":120,\"custom_username\":120,\"custom_vehicle_appointment\":120,\"custom_vehicle_data\":120,\"custom_vehicle_name\":120,\"custom_vehicle_type\":120,\"custom_posting_date\":120,\"custom_password\":120},\"group_by\":null}",
+ "letterhead": null,
+ "modified": "2025-08-08 23:25:52.545715",
+ "modified_by": "Administrator",
+ "module": "Tst",
+ "name": "Device Serial Details",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Serial No",
+ "report_name": "Device Serial Details",
+ "report_type": "Report Builder",
+ "roles": [
+  {
+   "role": "Item Manager"
+  },
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Stock User"
+  }
+ ],
+ "timeout": 0
+}

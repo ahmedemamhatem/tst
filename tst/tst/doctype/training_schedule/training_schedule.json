@@ -67,10 +67,9 @@
   },
   {
    "fieldname": "session",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Session",
-   "options": "Training Session",
    "read_only": 1
   },
   {
@@ -101,12 +100,13 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-14 06:00:29.478989",
+ "modified": "2025-08-09 01:10:20.397426",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Training Schedule",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

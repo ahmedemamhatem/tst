@@ -16,7 +16,6 @@ frappe.ui.form.on('Quotation', {
             },
             callback: function (r) {
                 // Log the full return data for debugging
-                console.log('Quotation Templet Items return:', r);
 
                 if (r.exc) {
                     frappe.msgprint(__('Could not fetch template items. Permission denied or server error.'));

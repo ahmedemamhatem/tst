@@ -51,6 +51,7 @@ from erpnext.stock.get_item_details import (
     get_price_list_rate,
 )
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
+from frappe.model.mapper import get_mapped_doc
 
 
 @frappe.whitelist()
@@ -74,23 +75,23 @@ def check_required_items(doc):
         required_qty = item.get("qty")
 
         # 1. Check technician's warehouse first
-        tech_qty = get_stock_qty(item_code, technician_warehouse)
-        allocated_qty = min(tech_qty, required_qty)
-        remaining_needed = required_qty - allocated_qty
+        # tech_qty = get_stock_qty(item_code, technician_warehouse)
+        # allocated_qty = min(tech_qty, required_qty)
+        # remaining_needed = required_qty - allocated_qty
 
-        # 2. Check assistant technicians' warehouses
-        if remaining_needed > 0:
-            for tech in installation_order.sub_installation_order_technician:
-                if not tech.warehouse:
-                    continue
+        # # 2. Check assistant technicians' warehouses
+        # if remaining_needed > 0:
+        #     for tech in installation_order.sub_installation_order_technician:
+        #         if not tech.warehouse:
+        #             continue
 
-                wh_qty = get_stock_qty(item_code, tech.warehouse)
-                allocate = min(wh_qty, remaining_needed)
-                if allocate > 0:
-                    remaining_needed -= allocate
+        #         wh_qty = get_stock_qty(item_code, tech.warehouse)
+        #         allocate = min(wh_qty, remaining_needed)
+        #         if allocate > 0:
+        #             remaining_needed -= allocate
 
         # 3. Create MR for remaining quantity
-        if remaining_needed > 0:
+        if required_qty > 0:
             source_warehouse = get_best_source_warehouse(
                 item_code, technician_warehouse
             )
@@ -101,7 +102,7 @@ def check_required_items(doc):
             material_requests.setdefault(source_warehouse, []).append(
                 {
                     "item_code": item_code,
-                    "qty": remaining_needed,
+                    "qty": required_qty,
                     "schedule_date": nowdate(),
                     "from_warehouse": source_warehouse,
                     "warehouse": technician_warehouse,
@@ -274,110 +275,6 @@ def create_whatsapp_message_for_material_request(
 @frappe.whitelist()
 def validate(self, method=None):
     self.calendar_event = ""
-    validate_item_serial_qty_to_so_qty(self)
-
-    handle_attachments(self)
-    if self.custom_appointment_status == "Done Installation":
-        if not self.custom_choose_serial_and_batch_bundle:
-            frappe.throw(_("Please add at least one Serial No or Batch Bundle."))
-        create_device_setup(self)
-        create_delivery_note(self)
-
-
-def validate_item_serial_qty_to_so_qty(self):
-    if not self.custom_sales_order:
-        frappe.throw(_("Sales Order is required to validate serial numbers."))
-    total_qty = frappe.db.get_value(
-        "Sales Order",
-        self.custom_sales_order,
-        "total_qty",
-    )
-    if len(self.custom_choose_serial_and_batch_bundle) > total_qty:
-        frappe.throw(
-            _(
-                "The number of Serial No  entries exceeds the total quantity in Sales Order."
-            )
-        )
-
-
-def create_device_setup(self):
-    for row in self.custom_choose_serial_and_batch_bundle:
-        device_setup = frappe.new_doc("Device Setup")
-        device_setup.status = "Done Installation Ready for Server Setup"
-        device_setup.appointment = self.name
-        if device_setup_name := frappe.db.get_value(
-            "Device Setup",
-            {
-                # "appointment": self.name,
-                "serial_no": row.serial_no,
-                # "status": ["not in", ["Inactive", "Broken", "Archived", "Suspended"]],
-                # "docstatus": 1,
-            },
-        ):
-            frappe.msgprint(
-                _(
-                    f"There is a Device Setup Still Open {get_link_to_form('Device Setup', device_setup_name)} Serial NO: {row.serial_no}"
-                )
-            )
-            continue
-        device_setup.serial_no = row.serial_no
-        device_setup.attachments = row.attachments
-        device_setup.chassie_no = row.chassie_no
-        device_setup.license_plate = row.license_plate
-        device_setup.save()
-    self.status = "Closed"
-    frappe.msgprint(_("Sent to Server Setup Team"))
-
-
-def handle_attachments(self):
-    for row in self.custom_choose_serial_and_batch_bundle:
-        validate_license_chassie_no(row)
-        if row.attachment:
-            # Add to existing attachments if any
-            if row.attachments:
-                row.attachments += "\n" + row.attachment
-            else:
-                row.attachments = row.attachment
-
-            # Get the Serial No document
-            serial_no_doc = frappe.get_doc("Serial No", row.serial_no)
-
-            # Copy attachment to Serial No
-            copy_attachment_to_serial_no(row.attachment, serial_no_doc)
-
-            # Reset the attachment field
-            row.attachment = None
-            frappe.msgprint(_("File Attached Successfully"))
-
-
-def validate_license_chassie_no(row):
-    if not (row.license_plate or row.chassie_no):
-        frappe.throw(
-            _("Has to include license plate or chassie number")
-            + f" row index {row.idx}"
-        )
-
-
-def copy_attachment_to_serial_no(attachment_url, serial_no_doc):
-    """Copy attachment from current doc to Serial No document"""
-    from frappe.utils.file_manager import save_file
-
-    # Get the file data from the attachment
-    file_name = attachment_url.split("/")[-1]
-    file_data = frappe.get_doc("File", {"file_url": attachment_url})
-
-    # Save the file to the Serial No document
-    save_file(
-        fname=file_name,
-        content=file_data.get_content(),
-        dt="Serial No",
-        dn=serial_no_doc.name,
-        folder="Home/Attachments",
-        is_private=0,
-    )
-
-    # Commit to ensure the file is saved before proceeding
-    frappe.db.commit()
 
 
 @frappe.whitelist()
@@ -386,7 +283,7 @@ def on_submit(doc, method=None):
 
 
 # def make_delivery_note(source_name, target_doc=None, kwargs=None):
-def create_delivery_note(doc):
+def create_delivery_note(device_setup):
     """
     Create Delivery Note from Sales Order.
 
@@ -395,48 +292,43 @@ def create_delivery_note(doc):
     :param kwargs: Additional arguments for customization
     :return: Name of the created Delivery Note
     """
+
     delivery_note = frappe.new_doc("Delivery Note")
     sb_entries = {}
-    for row in doc.custom_choose_serial_and_batch_bundle:
-        if sb_entries.get(row.item_code):
-            sb_entries[row.item_code].append(row)
-        else:
-            sb_entries[row.item_code] = [row]
-    so = frappe.get_doc("Sales Order", doc.custom_sales_order)
+    so = frappe.get_doc("Sales Order", device_setup.sales_order)
     delivery_note.customer = so.customer
     delivery_note.posting_date = frappe.utils.nowdate()
     delivery_note.posting_time = frappe.utils.nowtime()
-    for row in sb_entries:
-        item_row = {}
-        item_row["item_code"] = row
-        item_row["qty"] = len(sb_entries[row])
-        item_row["warehouse"] = doc.custom_technician_warehouse
-        serial_and_batch_bundle = frappe.new_doc("Serial and Batch Bundle")
-        serial_and_batch_bundle.update(
-            {
-                "item_code": row,
-                "type_of_transaction": "Outward",
-                "warehouse": doc.custom_technician_warehouse,
-                "has_serial_no": 1,
-                "has_batch_no": 0,
-                "voucher_type": "Delivery Note",
-                "voucher_no": delivery_note.name,
-            }
-        )
-        for sb_row in sb_entries[row]:
-            serial_and_batch_bundle.append(
-                "entries",
-                {
-                    "serial_no": sb_row.serial_no,
-                    "qty": -1,
-                    "warehouse": sb_row.warehouse,
-                },
-            )
-        serial_and_batch_bundle.save()
-        item_row["serial_and_batch_bundle"] = serial_and_batch_bundle.name
-        item_row["use_serial_batch_fields"] = 1
-        delivery_note.append("items", item_row)
-    delivery_note.custom_appointment = doc.name
+    item_row = {}
+    item_row["item_code"] = device_setup.item_code
+    item_row["qty"] = 1
+    item_row["warehouse"] = device_setup.warehouse
+    serial_and_batch_bundle = frappe.new_doc("Serial and Batch Bundle")
+    serial_and_batch_bundle.update(
+        {
+            "item_code": item_row["item_code"],
+            "type_of_transaction": "Outward",
+            "warehouse": device_setup.warehouse,
+            "has_serial_no": 1,
+            "has_batch_no": 0,
+            "voucher_type": "Delivery Note",
+            "voucher_no": delivery_note.name,
+        }
+    )
+    serial_and_batch_bundle.append(
+        "entries",
+        {
+            "serial_no": device_setup.serial_no,
+            "qty": -1,
+            "warehouse": device_setup.warehouse,
+        },
+    )
+    serial_and_batch_bundle.save()
+    item_row["serial_and_batch_bundle"] = serial_and_batch_bundle.name
+    item_row["use_serial_batch_fields"] = 1
+    delivery_note.append("items", item_row)
+    delivery_note.custom_device_setup = device_setup.name
+    delivery_note.custom_appointment = device_setup.appointment
 
     if delivery_note:
         delivery_note.save()
@@ -1444,3 +1336,23 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 @frappe.whitelist()
 def get_stock_reservation_status():
     return frappe.db.get_single_value("Stock Settings", "enable_stock_reservation")
+
+
+@frappe.whitelist()
+def make_vehicle_appointment(source_name, target_doc=None):
+    doc = get_mapped_doc(
+        "Appointment",
+        source_name,
+        {
+            "Appointment": {
+                "doctype": "Vehicle Appointment",
+                "field_map": {
+                    "name": "appointment",
+                    "custom_installation_order": "installation_order",
+                    "custom_technician_warehouse": "warehouse",
+                    "custom_sales_order": "sales_order",
+                },
+            }
+        },
+    )
+    return doc

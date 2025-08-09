@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"QbsZWYzHur\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Device Setup</b></span>\",\"col\":12}},{\"id\":\"GEIO13sBpK\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Setup Devices Page\",\"col\":4}},{\"id\":\"kb3XPLg8lb\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h2\\\">Back Desk</span>\",\"col\":12}},{\"id\":\"WU4F-HUcIQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Order\",\"col\":4}},{\"id\":\"LW1baIVQ8N\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Whatsapp Message\",\"col\":3}},{\"id\":\"hfYt0bYH4f\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"JiuSi0ubOg\",\"type\":\"card\",\"data\":{\"card_name\":\"Technical Support\",\"col\":4}},{\"id\":\"SFFCBSYLzo\",\"type\":\"card\",\"data\":{\"card_name\":\"Device Setup\",\"col\":4}},{\"id\":\"lzoinAWoJ8\",\"type\":\"card\",\"data\":{\"card_name\":\"Training\",\"col\":4}}]",
+ "content": "[{\"id\":\"QbsZWYzHur\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Device Setup</b></span>\",\"col\":12}},{\"id\":\"GEIO13sBpK\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Setup Devices Page\",\"col\":4}},{\"id\":\"kb3XPLg8lb\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h2\\\">Back Desk</span>\",\"col\":12}},{\"id\":\"WU4F-HUcIQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Order\",\"col\":4}},{\"id\":\"LW1baIVQ8N\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Whatsapp Message\",\"col\":3}},{\"id\":\"hfYt0bYH4f\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"JiuSi0ubOg\",\"type\":\"card\",\"data\":{\"card_name\":\"Technical Support\",\"col\":4}},{\"id\":\"SFFCBSYLzo\",\"type\":\"card\",\"data\":{\"card_name\":\"Device Setup\",\"col\":4}},{\"id\":\"lzoinAWoJ8\",\"type\":\"card\",\"data\":{\"card_name\":\"Training\",\"col\":4}},{\"id\":\"QDCwQefzfS\",\"type\":\"card\",\"data\":{\"card_name\":\"Device Reports\",\"col\":4}}]",
  "creation": "2025-06-03 19:26:37.116486",
  "custom_blocks": [],
  "docstatus": 0,
@@ -526,9 +526,29 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Device Reports",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Device Serial Details",
+   "link_count": 0,
+   "link_to": "Device Serial Details",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Serial No",
+   "type": "Link"
   }
  ],
- "modified": "2025-07-16 19:38:48.169623",
+ "modified": "2025-08-08 23:26:44.429605",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Technical Support",
