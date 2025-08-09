@@ -877,30 +877,24 @@ def validate_items_are_saleable(self, method):
                 )
 
 def calculate_bundle_valuation(doc, method):
-    """
-    On validate of Product Bundle, calculate valuation_rate, valuation_amount for items,
-    set total_valuation_amount on the doc,
-    and ensure custom_rate_percent adds up to 100.
-    """
     total_valuation = 0
     total_rate_percent = 0
     for item in getattr(doc, "items", []):
-        # Pass warehouse if you have it per item: item.warehouse
         valuation_rate = get_item_valuation_rate(item.item_code)
         item.custom_valuation_rate = valuation_rate
         item.custom_total = (valuation_rate or 0) * (item.qty or 0)
         total_valuation += item.custom_total
 
-        # Sum the custom_rate_percent for validation
-        total_rate_percent += (item.custom_rate_percent or 0)
+        # Convert string to float before summing
+        total_rate_percent += float(item.custom_rate_percent or 0)
 
     doc.custom_total = total_valuation
 
-    # Validate that the total rate percent is exactly 100
     if round(total_rate_percent, 6) != 100:
         frappe.throw(
             _("The sum of 'Rate Percent' for all bundle items must be exactly 100%. Currently: {0}%").format(total_rate_percent)
         )
+
 
 
 def get_item_valuation_rate(item_code, warehouse=None):
