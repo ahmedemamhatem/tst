@@ -1,4 +1,28 @@
-// Quotation Client Script
+frappe.ui.form.on('Quotation', {
+  onload(frm) {
+    // block frm.set_value on non-draft (silent)
+    const orig_set_value = frm.set_value.bind(frm);
+    frm.set_value = function(key, val) {
+      if (frm.doc.docstatus !== 0) return Promise.resolve();
+      return orig_set_value(key, val);
+    };
+
+    // block low-level model.set_value on this doc (silent)
+    const orig_model_set_value = frappe.model.set_value;
+    frappe.model.set_value = function(doctype, name, fieldname, value, opts) {
+      try {
+        if (cur_frm && cur_frm.doc &&
+            cur_frm.doc.doctype === doctype &&
+            cur_frm.doc.name === name &&
+            cur_frm.doc.docstatus !== 0) {
+          return Promise.resolve();
+        }
+      } catch (e) {}
+      return orig_model_set_value.apply(this, arguments);
+    };
+  }
+});
+
 
 frappe.ui.form.on("Quotation", {
     onload: function(frm) {
@@ -10,20 +34,26 @@ frappe.ui.form.on("Quotation", {
 });
 
 function update_from_lead(frm) {
-    if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
-        frappe.db.get_doc("Lead", frm.doc.party_name)
-            .then(lead => {
-                if (lead && lead.custom_customer_name) {
-                    frm.set_value("customer_name", lead.custom_customer_name);
-                    frm.set_value("title", lead.custom_customer_name);
-                    // 🔐 Save after values are set
-                    frm.save();
-                }
-            })
-            .catch(err => {
-                console.error("❌ Failed to fetch Lead:", err);
-            });
-    }
+  // Only on drafts
+  if (frm.doc.docstatus !== 0) return;
+
+  if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
+    frappe.db.get_doc("Lead", frm.doc.party_name).then(lead => {
+      if (!lead || !lead.custom_customer_name) return;
+
+      const updates = {};
+      if (frm.doc.customer_name !== lead.custom_customer_name) {
+        updates.customer_name = lead.custom_customer_name;
+      }
+      if (frm.doc.title !== lead.custom_customer_name) {
+        updates.title = lead.custom_customer_name;
+      }
+      if (Object.keys(updates).length) {
+        frm.set_value(updates);
+      }
+      
+    });
+  }
 }
 
 
@@ -219,10 +249,21 @@ function hide_listview_print_email(listview) {
 
 
 frappe.ui.form.on('Quotation', {
+  refresh(frm) {
+    // Show the button only in Draft
+    frm.toggle_display('custom_add_to_item_table', frm.doc.docstatus === 0);
+  },
+
   custom_add_to_item_table: async function(frm) {
-    let bundle = frm.doc.custom_subscription_bundle;
-    let months = frm.doc.custom_no_of_months;
-    let monthly_rate = frm.doc.custom_monthly_rate;
+    // Guard: only allow on Draft
+    if (frm.doc.docstatus !== 0) {
+      frappe.msgprint(__('This Quotation is not in Draft. You cannot add items.'));
+      return;
+    }
+
+    const bundle = frm.doc.custom_subscription_bundle;
+    const months = Number(frm.doc.custom_no_of_months);
+    const monthly_rate = Number(frm.doc.custom_monthly_rate);
 
     if (!bundle || !months || !monthly_rate) {
       frappe.msgprint(__('Please select all fields: Product Bundle, No of Months, and Monthly Rate'));
@@ -241,7 +282,7 @@ frappe.ui.form.on('Quotation', {
           return;
         }
 
-        const bundle_items = r.message.items || [];
+        const bundle_items = (r.message.items || []).filter(i => i.item_code);
         const bundle_name = r.message.bundle_name || r.message.name || bundle;
 
         if (bundle_items.length === 0) {
@@ -249,7 +290,16 @@ frappe.ui.form.on('Quotation', {
           return;
         }
 
-        let custom_subscription_data = `Subscription for ${months} month${months == 1 ? '' : 's'} in ${bundle_name}`;
+        // Abort if any bundle item already exists in the items table
+        const existing_codes = new Set((frm.doc.items || []).map(d => d.item_code).filter(Boolean));
+        const incoming_codes = bundle_items.map(b => b.item_code);
+        const duplicates = incoming_codes.filter(code => existing_codes.has(code));
+        if (duplicates.length) {
+          frappe.msgprint(__('These items already exist in the Items table: {0}. No items were added.', [duplicates.join(', ')]));
+          return;
+        }
+
+        const custom_subscription_data = `Subscription for ${months} month${months === 1 ? '' : 's'} in ${bundle_name}`;
 
         // Helper to get Item Name and UOM if missing
         const get_item_details = async (item_code, current_item_name, current_uom) => {
@@ -275,19 +325,19 @@ frappe.ui.form.on('Quotation', {
         let first_row_filled = false;
 
         for (let b_item of bundle_items) {
-          let item_code = b_item.item_code;
-          let details = await get_item_details(item_code, b_item.item_name, b_item.uom);
+          const item_code = b_item.item_code;
+          const details = await get_item_details(item_code, b_item.item_name, b_item.uom);
 
           if (!item_code || !details.item_name || !details.uom) {
             frappe.msgprint(__('Cannot add item: Missing Item Code, Item Name, or UOM for bundle row with item code: {0}', [item_code || '(no item code)']));
             continue;
           }
 
-          let custom_rate_percent = parseFloat(b_item.custom_rate_percent ?? b_item.rate_percent ?? 0);
-          let calculated_rate = months * monthly_rate * (custom_rate_percent / 100);
+          const custom_rate_percent = parseFloat(b_item.custom_rate_percent ?? b_item.rate_percent ?? 0) || 0;
+          const calculated_rate = months * monthly_rate * (custom_rate_percent / 100);
 
           // Check if the first row is empty and hasn't been filled yet
-          let items = frm.doc.items || [];
+          const items = frm.doc.items || [];
           if (!first_row_filled && items.length > 0 && !items[0].item_code) {
             // Fill the first empty row
             frappe.model.set_value(items[0].doctype, items[0].name, 'item_code', item_code);
