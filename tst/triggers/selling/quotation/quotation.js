@@ -282,13 +282,37 @@ frappe.ui.form.on('Quotation', {
           return;
         }
 
-        const bundle_items = (r.message.items || []).filter(i => i.item_code);
+        let bundle_items = (r.message.items || []).filter(i => i.item_code);
         const bundle_name = r.message.bundle_name || r.message.name || bundle;
         const bundle_desc = r.message.description || bundle_name; // Use description if available
 
         if (bundle_items.length === 0) {
           frappe.msgprint(__('لا توجد عناصر في حزمة المنتج المحددة.'));
           return;
+        }
+
+        // Remove Selling Prices for bundle items
+        for (let b_item of bundle_items) {
+          if (!b_item.item_code) continue;
+
+          try {
+            const price_records = await frappe.db.get_list('Item Price', {
+              filters: {
+                item_code: b_item.item_code,
+                selling: 1
+              },
+              fields: ['name']
+            });
+
+            if (price_records.length > 0) {
+              for (let pr of price_records) {
+                await frappe.db.delete_doc('Item Price', pr.name);
+              }
+              frappe.msgprint(__('تم حذف سعر البيع للعنصر {0}', [b_item.item_code]));
+            }
+          } catch (err) {
+            console.error(`Error deleting price for ${b_item.item_code}`, err);
+          }
         }
 
         // Abort if any bundle item already exists in the items table

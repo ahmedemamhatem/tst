@@ -11,10 +11,7 @@ class LeadVisit(Document):
     def before_save(self):
         if self.latitude and self.longitude:
             try:
-                # Initialize geolocator with user agent
                 geolocator = Nominatim(user_agent="frappe_map")
-
-                # Reverse geocode to get location details in Arabic
                 location = geolocator.reverse(
                     f"{self.latitude}, {self.longitude}", language="ar"
                 )
@@ -22,11 +19,8 @@ class LeadVisit(Document):
                     getattr(location, "raw", {}).get("address", {}) if location else {}
                 )
 
-                # Extract address components in Arabic
-                road = addr.get("road") or ""  # Default: Unknown in Arabic
-                city = (
-                    addr.get("city") or addr.get("state") or ""  # Default: Unknown
-                )
+                road = addr.get("road") or ""
+                city = addr.get("city") or addr.get("state") or ""
                 state = addr.get("state") or ""
                 country = addr.get("country") or ""
                 postcode = addr.get("postcode") or ""
@@ -35,7 +29,6 @@ class LeadVisit(Document):
                 county = addr.get("county") or ""
                 municipality = addr.get("municipality") or ""
 
-                # Save detailed fields to the document
                 self.city = self.city or city
                 self.state = self.state or state
                 self.country = self.country or country
@@ -49,7 +42,6 @@ class LeadVisit(Document):
                     location.address if location else ""
                 )
 
-                # Format a compact, prioritized address string (Arabic)
                 address_parts = [
                     road,
                     neighborhood,
@@ -60,10 +52,9 @@ class LeadVisit(Document):
                     country,
                 ]
                 formatted = ", ".join([p for p in address_parts if p])
-                self.address = self.address or formatted[:140]  # Truncate if needed
+                self.address = self.address or formatted[:140]
 
             except Exception as e:
-                # Log error and notify the user
                 frappe.log_error(
                     message=f"Failed to fetch Arabic address: {str(e)}",
                     title="Geolocation Error",
@@ -73,3 +64,58 @@ class LeadVisit(Document):
                         "Unable to fetch Arabic address. Please check the logs for more details."
                     )
                 )
+
+    def after_insert(self):
+        self._share_with_creator_reporters()
+
+    def validate(self):
+        # Optional: only re-share if needed during update
+        self._share_with_creator_reporters()
+
+    def _share_with_creator_reporters(self):
+        """Share this document with all managers of the creator."""
+        if self.is_new():
+            return
+        try:
+            creator_user = self.owner
+            reporters = self._get_all_reporters(creator_user)
+
+            for user_id in reporters:
+                self._share_document_with_user(user_id)
+
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "LeadVisit Share Error")
+
+    def _get_all_reporters(self, start_user_id):
+        """Return a list of user_ids for all managers up the chain."""
+        reporters = []
+        visited = set()
+
+        current_emp = frappe.db.get_value(
+            "Employee", {"user_id": start_user_id}, ["name", "reports_to"], as_dict=True
+        )
+
+        while current_emp and current_emp.reports_to and current_emp.reports_to not in visited:
+            visited.add(current_emp.reports_to)
+
+            manager = frappe.db.get_value(
+                "Employee", current_emp.reports_to,
+                ["name", "user_id", "reports_to"], as_dict=True
+            )
+            if manager and manager.user_id:
+                reporters.append(manager.user_id)
+
+            current_emp = manager
+
+        return reporters
+
+    def _share_document_with_user(self, user_id):
+        """Share doc with a given user_id if not already shared."""
+        frappe.share.add(
+            doctype=self.doctype,
+            name=self.name,
+            user=user_id,
+            read=1,
+            write=0,
+            share=0
+        )

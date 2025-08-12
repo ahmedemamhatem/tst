@@ -28,6 +28,14 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+def skip_auto_item_price(doc, method):
+    return
+    """Skip saving Item Price if custom_user_added != 1."""
+    if not getattr(doc, "custom_user_added", None):
+        # Prevent insert silently
+        doc.flags.in_insert = False
+        return
+
 
 def monkey_patch_reorder_item():
     import erpnext.stock.reorder_item

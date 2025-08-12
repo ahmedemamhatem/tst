@@ -209,7 +209,7 @@ def update_employee_percent(doc, method=None):
 def set_reports_to_user(doc, method=None):
     # Don't share on first save (doc is new)
     is_new = getattr(doc, "_is_new", False)
-
+    
     if not getattr(doc, "reports_to_user", None):
         owner = getattr(doc, "owner", None)
         if not owner:
@@ -229,14 +229,46 @@ def set_reports_to_user(doc, method=None):
 
 
 def share_lead_with_reports_to_user(doc, method=None):
-    if getattr(doc, "reports_to_user", None):
-        try:
-            share_document_with_user(doc, doc.reports_to_user)
-        except Exception as e:
-            pass
+    if not getattr(doc, "reports_to_user", None):
+        return
+
+    try:
+        # Collect all managers in the hierarchy
+        reporters = get_all_reporters(doc.reports_to_user)
+
+        # Share the document with each reporter
+        for reporter_user in reporters:
+            share_document_with_user(doc, reporter_user)
+
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "share_lead_with_reports_to_user Error")
+
+
+def get_all_reporters(start_user_id):
+    """Return a list of user_ids for all managers up the chain starting from start_user_id."""
+    reporters = []
+    visited = set()
+
+    # Find starting employee
+    current_emp = frappe.db.get_value("Employee", {"user_id": start_user_id}, ["name", "reports_to"], as_dict=True)
+
+    while current_emp and current_emp.reports_to and current_emp.reports_to not in visited:
+        visited.add(current_emp.reports_to)
+
+        # Get manager's user_id
+        manager = frappe.db.get_value("Employee", current_emp.reports_to, ["name", "user_id", "reports_to"], as_dict=True)
+        if manager and manager.user_id:
+            reporters.append(manager.user_id)
+
+        # Move up
+        current_emp = manager
+
+    return reporters
 
 
 def share_document_with_user(doc, user):
+    if doc.is_new():
+        return
     try:
         # Check if DocType is submittable
         is_submittable = frappe.get_cached_value(

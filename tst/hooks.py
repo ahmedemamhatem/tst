@@ -25,6 +25,7 @@ override_doctype_class = {"Lead": "tst.triggers.crm.lead.lead.CustomLead"}
 # ------------------
 doc_events = {
     "Product Bundle": {"validate": "tst.override.calculate_bundle_valuation"},
+    # "Item Price": {"before_insert": "tst.override.skip_auto_item_price"},
     "Purchase Receipt": {"on_submit": "tst.override.update_item_status_from_doc"},
     "Stock Entry": {
         "after_insert": "tst.triggers.stock.stock_entry.stock_entry.after_insert",
