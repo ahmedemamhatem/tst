@@ -234,7 +234,7 @@ def share_lead_with_reports_to_user(doc, method=None):
 
     try:
         # Collect all managers in the hierarchy
-        reporters = get_all_reporters(doc.reports_to_user)
+        reporters = get_all_reporters(doc.owner)
 
         # Share the document with each reporter
         for reporter_user in reporters:

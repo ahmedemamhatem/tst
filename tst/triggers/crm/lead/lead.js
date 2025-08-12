@@ -192,11 +192,13 @@ function toggle_inner_group_button(frm) {
 }
 
 function add_make_quotation_button(frm) {
+    // Remove default Quotation button under Create
     frm.remove_custom_button(__('Quotation'), __('Create'));
 
     const has_tax_info = frm.doc.custom_tax_id && frm.doc.custom_cr_number && frm.doc.company_name;
     const has_national_info = frm.doc.custom_national_id && frm.doc.company_name;
 
+    // Add your custom Quotation button if conditions met
     if ((has_tax_info || has_national_info) && isTabCompleted(frm, "Customer Information")) {
         frm.add_custom_button(__('Quotation'), function () {
             frappe.model.open_mapped_doc({
@@ -205,6 +207,22 @@ function add_make_quotation_button(frm) {
             });
         }, __('Create'));
     }
+
+    // Add another Quotation button, hidden by default
+    let hiddenBtn = frm.add_custom_button(__(' Quotation'), function () {
+        frappe.model.open_mapped_doc({
+            method: "erpnext.crm.doctype.lead.lead.make_quotation",
+            frm: frm
+        });
+    }, __('Create'));
+
+    // Hide this button initially
+    if (hiddenBtn) {
+        hiddenBtn.toggle(false);
+    }
+
+    // You can later show it like:
+    // hiddenBtn.toggle(true);
 }
 
 function observe_and_clean_buttons(frm) {
@@ -338,6 +356,7 @@ frappe.ui.form.on('Lead', {
         toggle_create_dropdown(frm);
         bind_create_dropdown_watchers(frm);
     },
+
     refresh: function (frm) {
         handle_tab_visibility(frm);
         add_create_lead_visit_button(frm);
@@ -350,27 +369,39 @@ frappe.ui.form.on('Lead', {
         toggle_create_dropdown(frm);
         bind_create_dropdown_watchers(frm);
     },
+
     custom_tax_id: function(frm) {
         toggle_create_dropdown(frm);
-    },
-    custom_cr_number: function(frm) {
-        toggle_create_dropdown(frm);
-    },
-    custom_national_id: function(frm) {
-        toggle_create_dropdown(frm);
-    },
-    company_name: function(frm) {
-        toggle_create_dropdown(frm);
-    },
-    custom_cr_number: function(frm) {
-        frm.set_df_property("custom_tax_id", "reqd", 0);
-        frm.set_df_property("custom_cr_number", "reqd", 1);
-    },
-    custom_tax_id: function(frm) {
         frm.set_df_property("custom_cr_number", "reqd", 0);
         frm.set_df_property("custom_tax_id", "reqd", 1);
     },
-    validate: function (frm) {
+
+    custom_cr_number: function(frm) {
+        toggle_create_dropdown(frm);
+        frm.set_df_property("custom_tax_id", "reqd", 0);
+        frm.set_df_property("custom_cr_number", "reqd", 1);
+    },
+
+    custom_national_id: function(frm) {
+        toggle_create_dropdown(frm);
+    },
+
+    company_name: function(frm) {
+        toggle_create_dropdown(frm);
+    },
+
+    before_save: function(frm) {
+        if (frm.doc.custom_cr_number && !frm.doc.custom_tax_id) {
+            frm.set_df_property("custom_tax_id", "reqd", 0);
+            frm.set_df_property("custom_tax_id", "hidden", 1);
+        }
+        else if (frm.doc.custom_tax_id && !frm.doc.custom_cr_number) {
+            frm.set_df_property("custom_cr_number", "reqd", 0);
+            frm.set_df_property("custom_cr_number", "hidden", 1);
+        }
+    },
+
+    validate: function(frm) {
         if (frm.doc.type === "Company") {
             if (frm.doc.custom_cr_number && !/^\d{10}$/.test(frm.doc.custom_cr_number)) {
                 frappe.throw(__('رقم السجل التجاري يجب أن يكون مكوناً من 10 أرقام بالضبط.'));
@@ -378,10 +409,39 @@ frappe.ui.form.on('Lead', {
             if (frm.doc.custom_tax_id && !/^\d{15}$/.test(frm.doc.custom_tax_id)) {
                 frappe.throw(__('الرقم الضريبي يجب أن يكون مكوناً من 15 رقماً بالضبط.'));
             }
-        } else if (frm.doc.type === "Individual") {
+        }
+        else if (frm.doc.type === "Individual") {
             if (frm.doc.custom_national_id && !/^\d{10}$/.test(frm.doc.custom_national_id)) {
                 frappe.throw(__('رقم الهوية الوطنية يجب أن يكون مكوناً من 10 أرقام بالضبط.'));
             }
         }
     }
 });
+
+
+function set_unique_hash(frm, fieldname, callback) {
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: frm.doctype,
+            fields: [fieldname],
+            limit_page_length: 0
+        },
+        callback: function(r) {
+            if (r.message) {
+                let existing_hashes = r.message.map(doc => doc[fieldname]);
+                let hash;
+                do {
+                    hash = generate_hash();
+                } while (existing_hashes.includes(hash));
+
+                frm.set_value(fieldname, hash);
+                if (callback) callback();
+            }
+        }
+    });
+}
+
+function generate_hash() {
+    return frappe.utils.get_random(10);
+}

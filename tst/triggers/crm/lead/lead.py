@@ -2,7 +2,14 @@ import frappe
 from frappe import _
 from geopy.geocoders import Nominatim
 from erpnext.crm.doctype.lead.lead import Lead as ErpnextLead
+import frappe
+from frappe.utils import random_string
 
+def _generate_unique(fieldname, length=10):
+    while True:
+        token = random_string(length)
+        if not frappe.db.exists("Lead", {fieldname: token}):
+            return token
 
 class CustomLead(ErpnextLead):
     def check_email_id_is_unique(self):
@@ -43,12 +50,7 @@ class CustomLead(ErpnextLead):
                             ),
                             title="Duplicate Email ID"
                         )
-            else:
-                # Optionally display a success message if no duplicate is found
-                if user_lang == "ar":
-                    frappe.msgprint("البريد الإلكتروني فريد!")
-                else:
-                    frappe.msgprint("Email ID is unique!")
+            
 
 def set_custom_address(doc, method=None):
     """Set the custom address fields based on latitude and longitude."""
@@ -118,6 +120,12 @@ def validate(doc, method=None):
     check_duplicate_tax_or_national_id(doc, user_lang)
     check_duplicate_mobile_or_email(doc, user_lang)
     set_custom_address(doc)
+    if doc.type == "Company":
+        if doc.custom_cr_number and not doc.custom_tax_id:
+            # Prefer leaving it empty; but if required:
+            doc.custom_tax_id = doc.custom_tax_id or _generate_unique("custom_tax_id")
+        elif doc.custom_tax_id and not doc.custom_cr_number:
+            doc.custom_cr_number = doc.custom_cr_number or _generate_unique("custom_cr_number")
 
 
 def is_valid_number(number, user_lang):

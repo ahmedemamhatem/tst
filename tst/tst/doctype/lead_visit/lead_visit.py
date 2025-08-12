@@ -10,6 +10,12 @@ from frappe import _
 class LeadVisit(Document):
     def before_save(self):
         if self.latitude and self.longitude:
+            if any([
+                self.city, self.state, self.country, self.postal_code,
+                self.road, self.neighborhood, self.suburb,
+                self.county, self.municipality, self.address_line, self.address
+                ]):
+                return
             try:
                 geolocator = Nominatim(user_agent="frappe_map")
                 location = geolocator.reverse(
