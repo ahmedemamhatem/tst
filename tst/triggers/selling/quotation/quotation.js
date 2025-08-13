@@ -304,12 +304,6 @@ frappe.ui.form.on('Quotation', {
               fields: ['name']
             });
 
-            if (price_records.length > 0) {
-              for (let pr of price_records) {
-                await frappe.db.delete_doc('Item Price', pr.name);
-              }
-              frappe.msgprint(__('تم حذف سعر البيع للعنصر {0}', [b_item.item_code]));
-            }
           } catch (err) {
             console.error(`Error deleting price for ${b_item.item_code}`, err);
           }
