@@ -7,6 +7,8 @@
  "field_order": [
   "vehicle_section",
   "vehicle",
+  "vehicle_no",
+  "vehicle1",
   "column_break_cmwl",
   "appointment",
   "vehicle_data_section",
@@ -51,15 +53,16 @@
   {
    "fieldname": "vehicle",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Vehicle",
-   "options": "Vehicle Data",
-   "reqd": 1
+   "options": "Vehicle Data"
   },
   {
    "fieldname": "vehicle_data_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Vehicle Data"
   },
   {
@@ -147,11 +150,10 @@
    "read_only": 1
   },
   {
-   "fetch_from": "vehicle.vehicle_type",
    "fieldname": "vehicle_type",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Vehicle Type",
-   "read_only": 1
+   "options": "Vehicle Type"
   },
   {
    "fieldname": "column_break_cmwl",
@@ -256,6 +258,18 @@
    "fieldtype": "Link",
    "label": "Sales Order",
    "options": "Sales Order"
+  },
+  {
+   "fieldname": "vehicle_no",
+   "fieldtype": "HTML",
+   "label": "Vehicle No",
+   "options": "<div class=\"custom-ui\"></div>\n"
+  },
+  {
+   "fieldname": "vehicle1",
+   "fieldtype": "Data",
+   "label": "Vehicle",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -267,7 +281,7 @@
    "link_fieldname": "vehicle_appointment"
   }
  ],
- "modified": "2025-08-08 23:11:44.838239",
+ "modified": "2025-08-16 17:02:35.733104",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Vehicle Appointment",
@@ -298,7 +312,6 @@
    "write": 1
   }
  ],
- "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

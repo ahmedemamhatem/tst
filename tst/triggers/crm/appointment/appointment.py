@@ -2,6 +2,7 @@ import frappe
 from frappe import _
 from frappe.utils import nowdate, get_link_to_form
 
+from frappe.utils import now
 
 import json
 from typing import Literal
@@ -276,6 +277,15 @@ def create_whatsapp_message_for_material_request(
 def validate(self, method=None):
     self.calendar_event = ""
 
+    if self.attachment:
+        self.append("attachments",{
+            "attachment":self.attachment,
+            "attach_on": now()
+        })
+        # clear the single attachment field
+        self.single_attachment = None
+
+
 
 @frappe.whitelist()
 def on_submit(doc, method=None):
@@ -285,68 +295,88 @@ def on_submit(doc, method=None):
 # def make_delivery_note(source_name, target_doc=None, kwargs=None):
 def create_delivery_note(device_setup):
     """
-    Create Delivery Note from Sales Order.
-
-    :param source_name: Name of the Sales Order
-    :param target_doc: Optional target document to modify
-    :param kwargs: Additional arguments for customization
-    :return: Name of the created Delivery Note
+    Create Delivery Notes from Device Setup.
+    One DN for the device serial_no, and another DN for parent_item if exists.
     """
 
-    delivery_note = frappe.new_doc("Delivery Note")
-    sb_entries = {}
-    so = frappe.get_doc("Sales Order", device_setup.sales_order)
-    delivery_note.customer = so.customer
-    delivery_note.posting_date = frappe.utils.nowdate()
-    delivery_note.posting_time = frappe.utils.nowtime()
-    item_row = {}
-    item_row["item_code"] = device_setup.item_code
-    item_row["qty"] = 1
-    item_row["warehouse"] = device_setup.warehouse
-    serial_and_batch_bundle = frappe.new_doc("Serial and Batch Bundle")
-    serial_and_batch_bundle.update(
-        {
-            "item_code": item_row["item_code"],
-            "type_of_transaction": "Outward",
-            "warehouse": device_setup.warehouse,
-            "has_serial_no": 1,
-            "has_batch_no": 0,
-            "voucher_type": "Delivery Note",
-            "voucher_no": delivery_note.name,
-        }
-    )
-    serial_and_batch_bundle.append(
-        "entries",
-        {
-            "serial_no": device_setup.serial_no,
-            "qty": -1,
-            "warehouse": device_setup.warehouse,
-        },
-    )
-    serial_and_batch_bundle.save()
-    item_row["serial_and_batch_bundle"] = serial_and_batch_bundle.name
-    item_row["use_serial_batch_fields"] = 1
-    delivery_note.append("items", item_row)
-    delivery_note.custom_device_setup = device_setup.name
-    delivery_note.custom_appointment = device_setup.appointment
+    def make_dn(item_code, serial_no, warehouse, sales_order, device_setup, label):
+        # Create base DN
+        dn = frappe.new_doc("Delivery Note")
+        so = frappe.get_doc("Sales Order", sales_order)
+        dn.customer = so.customer
+        dn.posting_date = frappe.utils.nowdate()
+        dn.posting_time = frappe.utils.nowtime()
+        dn.custom_device_setup = device_setup.name
+        dn.custom_appointment = device_setup.appointment
 
-    if delivery_note:
-        delivery_note.save()
-        for item in delivery_note.items:
-            if not item.serial_and_batch_bundle:
-                continue
-            item.serial_and_batch_bundle = serial_and_batch_bundle.name
-            item.use_serial_batch_fields = 1
-        delivery_note.save()
-        delivery_note.submit()
-        frappe.msgprint(
-            _("Delivery Note created successfully: {0}").format(
-                get_link_to_form("Delivery Note", delivery_note.name)
-            )
+        # Add item row with Serial and Batch Bundle
+        item_row = {
+            "item_code": item_code,
+            "qty": 1,
+            "warehouse": warehouse,
+            "use_serial_batch_fields": 1,
+        }
+
+        # Create bundle
+        serial_and_batch_bundle = frappe.new_doc("Serial and Batch Bundle")
+        serial_and_batch_bundle.update(
+            {
+                "item_code": item_code,
+                "type_of_transaction": "Outward",
+                "warehouse": warehouse,
+                "has_serial_no": 1,
+                "has_batch_no": 0,
+                "voucher_type": "Delivery Note",
+                "voucher_no": dn.name,
+            }
         )
-        return delivery_note
-    else:
-        frappe.throw(_("Failed to create Delivery Note."))
+        serial_and_batch_bundle.append(
+            "entries",
+            {
+                "serial_no": serial_no,
+                "qty": -1,
+                "warehouse": warehouse,
+            },
+        )
+        serial_and_batch_bundle.save()
+
+        item_row["serial_and_batch_bundle"] = serial_and_batch_bundle.name
+        dn.append("items", item_row)
+
+        # Save + Submit
+        dn.save()
+        dn.submit()
+
+        frappe.msgprint(
+            _(f"{label} Delivery Note created successfully: {get_link_to_form('Delivery Note', dn.name)}")
+        )
+        return dn
+
+    # --- DN for device serial
+    device_dn = make_dn(
+        device_setup.item_code,
+        device_setup.serial_no,
+        device_setup.warehouse,
+        device_setup.sales_order,
+        device_setup,
+        "Device",
+    )
+
+    # --- DN for parent_item (if exists, e.g. SIM)
+    parent_dn = None
+    if getattr(device_setup, "parent_item", None):
+        parent_item_code = frappe.db.get_value("Serial No", device_setup.parent_item, "item_code")
+        if parent_item_code:
+            parent_dn = make_dn(
+                parent_item_code,
+                device_setup.parent_item,
+                device_setup.warehouse,
+                device_setup.sales_order,
+                device_setup,
+                "Parent Item",
+            )
+
+    return {"device_dn": device_dn.name, "parent_dn": parent_dn.name if parent_dn else None}
 
 
 @frappe.whitelist()
