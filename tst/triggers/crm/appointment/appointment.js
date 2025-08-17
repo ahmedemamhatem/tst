@@ -17,6 +17,10 @@ frappe.ui.form.on("Appointment", {
         addCustomStatusButton(frm);
     },
     after_save: function (frm) {
+
+         if (frm.doc.attachment) {
+            frm.set_value("attachment", "");
+        }
         frm.doc.calendar_event = '';
     },
     

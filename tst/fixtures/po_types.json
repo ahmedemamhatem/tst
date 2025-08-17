@@ -2,22 +2,28 @@
  {
   "docstatus": 0,
   "doctype": "PO Types",
+  "is_internal": 0,
   "modified": "2025-05-24 15:16:16.838885",
   "name": "مشتريات استهلاكية",
-  "po_type": "مشتريات استهلاكية"
+  "po_type": "مشتريات استهلاكية",
+  "supplier_quotation_mandatory": 0
  },
  {
   "docstatus": 0,
   "doctype": "PO Types",
+  "is_internal": 0,
   "modified": "2025-05-24 15:16:26.505022",
   "name": "مشتريات محلية",
-  "po_type": "مشتريات محلية"
+  "po_type": "مشتريات محلية",
+  "supplier_quotation_mandatory": 0
  },
  {
   "docstatus": 0,
   "doctype": "PO Types",
+  "is_internal": 0,
   "modified": "2025-05-24 15:16:35.919020",
   "name": "مشتريات دولية",
-  "po_type": "مشتريات دولية"
+  "po_type": "مشتريات دولية",
+  "supplier_quotation_mandatory": 0
  }
 ]
