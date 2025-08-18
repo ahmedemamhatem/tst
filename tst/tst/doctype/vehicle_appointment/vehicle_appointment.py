@@ -16,7 +16,7 @@ class VehicleAppointment(Document):
     def validate(self):
         for row in self.choose_serial_and_batch_bundle:
             if row.has_sim and not row.sim_serial:
-                frappe.throw("SIM Serian is mandatory for serial"+str(row.serial_no))
+                frappe.throw("SIM Serian is mandatory for serial" + str(row.serial_no))
         validate_item_serial_qty_to_so_qty(self)
 
 
@@ -34,6 +34,7 @@ def validate_item_serial_qty_to_so_qty(self):
                 "The number of Serial No  entries exceeds the total quantity in Sales Order."
             )
         )
+
 
 def create_device_setup(self):
     for row in self.choose_serial_and_batch_bundle:
@@ -63,8 +64,8 @@ def create_device_setup(self):
             )
             continue
         item_code = frappe.db.get_value("Serial No", serial_to_use, "item_code")
-        device_type = frappe.db.get_value("Item",item_code,"custom_device_type")
-        
+        device_type = frappe.db.get_value("Item", item_code, "custom_device_type")
+
         # Create Device Setup
         device_setup = frappe.new_doc("Device Setup")
         device_setup.status = "Installing"
@@ -75,7 +76,7 @@ def create_device_setup(self):
         device_setup.serial_no = serial_to_use
         device_setup.vehicle_appointment = self.name
         device_setup.device_type = device_type
-
+        device_setup.iccid = serial_to_use
         # if it's a SIM, attach parent device serial
         if parent_item:
             device_setup.parent_item = parent_item
@@ -85,7 +86,6 @@ def create_device_setup(self):
     # After processing all rows
     self.status = "Closed"
     frappe.msgprint(_("Sent to Server Setup Team"))
-
 
 
 def copy_attachment_to_serial_no(attachment_url, serial_no_doc):

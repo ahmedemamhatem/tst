@@ -43,6 +43,7 @@ class DeviceSetup(Document):
 
         serial_no_doc = frappe.get_doc("Serial No", self.serial_no)
         serial_no_doc.custom_device_setup = self.name
+        serial_no_doc.custom_license_plate = self.vehicle_data
         serial_no_doc.append(
             "custom_device_setup_log",
             {
