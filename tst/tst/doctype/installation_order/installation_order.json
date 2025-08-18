@@ -185,8 +185,7 @@
   {
    "fieldname": "scheduled_time",
    "fieldtype": "Datetime",
-   "label": " Scheduled Time ",
-   "reqd": 1
+   "label": " Scheduled Time "
   }
  ],
  "grid_page_length": 50,
@@ -199,7 +198,7 @@
   }
  ],
  "make_attachments_public": 1,
- "modified": "2025-06-27 19:19:00.334216",
+ "modified": "2025-08-18 18:02:37.319265",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Installation Order",
