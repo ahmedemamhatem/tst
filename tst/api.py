@@ -6,7 +6,27 @@ from erpnext.stock.utils import get_stock_balance
 from frappe import _
 from tst.tst.doctype.device_setup.device_setup import DeviceSetup
 
-
+def validate_supplier(doc, method):
+    try:
+        if doc.supplier_primary_contact:
+            contact = frappe.get_doc("Contact", doc.supplier_primary_contact)
+            # Check if this supplier already exists in the contact's links table
+            already_linked = any(
+                link.link_doctype == "Supplier" and link.link_name == doc.name
+                for link in contact.links
+            )
+            if not already_linked:
+                new_link = contact.append("links", {})
+                new_link.link_doctype = "Supplier"
+                new_link.link_name = doc.name
+                contact.save()
+    except Exception as e:
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Error in Supplier Validate Hook for {doc.name}"
+        )
+            
+            
 def get_employee_fields_included_tabs():
     """Return a sorted list of Employee doctype fields in the specified tabs, excluding unwanted types."""
     INCLUDED_TABS = {
@@ -215,16 +235,26 @@ def set_reports_to_user(doc, method=None):
         if not owner:
             frappe.throw("لا يمكن حفظ المستند لأن الحقل 'المالك' غير محدد.")
 
+        # Get the employee and their reports_to value
         emp = frappe.get_value("Employee", {"user_id": owner}, ["name", "reports_to"])
-        if not emp:
-            frappe.throw(f"لا يمكن العثور على موظف مرتبط بالمستخدم '{owner}'.")
-        if not emp[1]:
-            frappe.throw(f"يجب تحديد المدير للموظف '{emp[0]}'.")
 
+        # Check if an employee record exists
+        if not emp:
+            frappe.msgprint(f"لا يمكن العثور على موظف مرتبط بالمستخدم '{owner}'.")
+            return
+        
+        # Check if the employee has a `reports_to` value
+        if not emp[1]:
+            frappe.msgprint(f"يجب تحديد المدير للموظف '{emp[0]}'.")
+            return
+
+        # Get the user_id of the reports_to employee
         reports_to_user_id = frappe.get_value("Employee", emp[1], "user_id")
         if not reports_to_user_id:
-            frappe.throw(f"الموظف المدير '{emp[1]}' ليس لديه مستخدم مرتبط.")
+            frappe.msgprint(f"الموظف المدير '{emp[1]}' ليس لديه مستخدم مرتبط.")
+            return
 
+        # Set the `reports_to_user` field
         doc.reports_to_user = reports_to_user_id
 
 

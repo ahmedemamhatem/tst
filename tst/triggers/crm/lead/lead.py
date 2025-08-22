@@ -57,55 +57,57 @@ def set_custom_address(doc, method=None):
     # Fetch the current user's language
     user_lang = frappe.db.get_value("User", frappe.session.user, "language")
 
-    if doc.custom_longitude and doc.custom_latitude:
-        try:
-            # Initialize geolocator with user agent
-            geolocator = Nominatim(user_agent="frappe_map")
+    # Check if address fields are already populated
+    if (
+        not doc.custom_location_city and
+        not doc.custom_location_state and
+        not doc.custom_postal_code and
+        not doc.custom_location_suburb and
+        not doc.custom_location_country and
+        not doc.custom_address_line
+    ):
+        if doc.custom_longitude and doc.custom_latitude:
+            try:
+                # Initialize geolocator with user agent
+                geolocator = Nominatim(user_agent="frappe_map")
 
-            # Reverse geocode to get location details in Arabic
-            location = geolocator.reverse(
-                f"{doc.custom_latitude}, {doc.custom_longitude}", language="ar"
-            )
-            addr = getattr(location, "raw", {}).get("address", {}) if location else {}
+                # Reverse geocode to get location details in Arabic
+                location = geolocator.reverse(
+                    f"{doc.custom_latitude}, {doc.custom_longitude}", language="ar"
+                )
+                addr = getattr(location, "raw", {}).get("address", {}) if location else {}
 
-            # Extract address components in Arabic
-            road = addr.get('road') or ""
-            city = addr.get('city') or addr.get('state') or ""
-            state = addr.get('state') or ""
-            country = addr.get('country') or ""
-            postcode = addr.get('postcode') or ""
-            neighborhood = addr.get('neighbourhood') or ""
-            suburb = addr.get('suburb') or ""
-            municipality = addr.get('municipality') or ""
+                # Extract address components in Arabic
+                road = addr.get('road') or ""
+                city = addr.get('city') or addr.get('state') or ""
+                state = addr.get('state') or ""
+                country = addr.get('country') or ""
+                postcode = addr.get('postcode') or ""
+                neighborhood = addr.get('neighbourhood') or ""
+                suburb = addr.get('suburb') or ""
+                municipality = addr.get('municipality') or ""
 
-            # Save detailed fields to the document
-            doc.custom_location_city = doc.custom_location_city or city
-            doc.custom_location_state = doc.custom_location_state or state
-            doc.custom_postal_code = doc.custom_postal_code or postcode
-            doc.custom_location_suburb = doc.custom_location_suburb or suburb
-            doc.custom_location_country = doc.custom_location_country or country
-            doc.custom_location_municipality = (
-                doc.custom_location_municipality or municipality
-            )
-            doc.custom_address_line = doc.custom_address_line or (
-                location.address if location else ""
-            )
+                # Save detailed fields to the document
+                doc.custom_location_city = city
+                doc.custom_location_state = state
+                doc.custom_postal_code = postcode
+                doc.custom_location_suburb = suburb
+                doc.custom_location_country = country
+                doc.custom_location_municipality = municipality
+                doc.custom_address_line = location.address if location else ""
 
-            # Format a compact, prioritized address string
-            address_parts = [road, neighborhood, suburb, city, state, postcode, country]
-            formatted = ", ".join([p for p in address_parts if p])
-            doc.custom_address = (
-                doc.custom_address or formatted[:140]
-            )  # Truncate if needed
+                # Format a compact, prioritized address string
+                address_parts = [road, neighborhood, suburb, city, state, postcode, country]
+                formatted = ", ".join([p for p in address_parts if p])
+                doc.custom_address = formatted[:140]  # Truncate if needed
 
-        except Exception as e:
-            # Log error and notify the user
-            frappe.log_error(message=f"Failed to fetch Arabic address: {str(e)}", title="Geolocation Error")
-            if user_lang == "ar":
-                frappe.throw("تعذر استرجاع العنوان بالعربية. يرجى التحقق من السجلات لمزيد من التفاصيل.")
-            else:
-                frappe.throw("Unable to fetch Arabic address. Please check the logs for more details.")
-
+            except Exception as e:
+                # Log error and notify the user
+                frappe.log_error(message=f"Failed to fetch Arabic address: {str(e)}", title="Geolocation Error")
+                if user_lang == "ar":
+                    frappe.msgprint("تعذر استرجاع العنوان بالعربية. يرجى التحقق من السجلات لمزيد من التفاصيل.")
+                else:
+                    frappe.msgprint("Unable to fetch Arabic address. Please check the logs for more details.")
 
 def validate(doc, method=None):
     """Validate the Lead document."""

@@ -81,6 +81,10 @@ doc_events = {
     "Purchase Invoice": {
         "validate": "tst.triggers.buying.purchase_invoice.purchase_invoice.validate",
         "on_submit": "tst.triggers.buying.purchase_invoice.purchase_invoice.on_submit",
+    }, 
+    "Supplier": {
+        "validate": "tst.api.validate_supplier",
+       
     },
     "Material Request": {
         "after_insert": [
