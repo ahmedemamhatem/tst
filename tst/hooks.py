@@ -52,6 +52,9 @@ doc_events = {
     "Sales Invoice": {
         "before_validate": "tst.invoice_bundel.fill_items_from_product_bundles"
     },
+    "Request for Quotation": {
+        "before_validate": "tst.api.add_default_suppliers"
+    },
     "Lead": {
         "validate": [
             "tst.triggers.crm.lead.lead.validate",

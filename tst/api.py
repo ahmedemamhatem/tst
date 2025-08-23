@@ -6,6 +6,19 @@ from erpnext.stock.utils import get_stock_balance
 from frappe import _
 from tst.tst.doctype.device_setup.device_setup import DeviceSetup
 
+# In your_app_name/path/to/module.py
+def add_default_suppliers(doc, method):
+    # Get unique default suppliers from items table
+    default_suppliers = list(set([item.custom_default_supplier for item in doc.items if item.custom_default_supplier]))
+
+    # Add suppliers to the suppliers table if they're not already present
+    for supplier in default_suppliers:
+        if not any(row.supplier == supplier for row in doc.suppliers):
+            doc.append("suppliers", {
+                "supplier": supplier,
+                "supplier_name": supplier
+            })
+            
 def validate_supplier(doc, method):
     try:
         if doc.supplier_primary_contact:
