@@ -257,8 +257,8 @@ frappe.ui.form.on('Quotation', {
   custom_add_to_item_table: async function (frm) {
     // Guard: only allow on Draft
     if (frm.doc.docstatus !== 0) {
-      frappe.msgprint(__('هذه التسعيرة ليست في حالة المسودة، لا يمكن إضافة عناصر.'));
-      return;
+        frappe.msgprint(__('هذه التسعيرة ليست في حالة المسودة، لا يمكن إضافة عناصر.'));
+        return;
     }
 
     const bundle = frm.doc.custom_subscription_bundle;
@@ -268,127 +268,127 @@ frappe.ui.form.on('Quotation', {
 
     // Ensure all required fields are filled
     if (!bundle || !months || !monthly_rate || months <= 0 || monthly_rate <= 0 || qty <= 0) {
-      frappe.msgprint(__('الرجاء اختيار جميع الحقول: حزمة المنتج، عدد الأشهر، والسعر الشهري.'));
-      return;
+        frappe.msgprint(__('الرجاء اختيار جميع الحقول: حزمة المنتج، عدد الأشهر، والسعر الشهري.'));
+        return;
     }
 
-    // Generate `custom_subscription_data`
-    const bundle_desc = `${bundle} لمدة ${months} أشهر`;
-    const custom_subscription_data = `اشتراك لمدة ${months} أشهر في ${bundle_desc}`;
-
-    // Validate duplicates: `custom_subscription_bundle` OR `custom_subscription_data`
-    const existing_items = frm.doc.items || [];
-    const duplicate_item = existing_items.find(item => {
-      return (
-        item.custom_subscription_bundle === bundle || // Check if bundle is the same
-        item.custom_subscription_data === custom_subscription_data // Check if subscription data is the same
-      );
-    });
-
-    if (duplicate_item) {
-      frappe.msgprint(__('لا يمكن إضافة نفس حزمة المنتج أو بيانات الاشتراك الموجودة بالفعل في جدول العناصر.'));
-      return;
-    }
-
-    // Fetch the Product Bundle details
+    // Fetch the Product Bundle details, including `description`
     try {
-      const bundle_details = await frappe.call({
-        method: "frappe.client.get",
-        args: {
-          doctype: "Product Bundle",
-          name: bundle
-        }
-      });
-
-      if (!bundle_details.message) {
-        frappe.msgprint(__('لم يتم العثور على حزمة المنتج.'));
-        return;
-      }
-
-      let bundle_items = (bundle_details.message.items || []).filter(i => i.item_code);
-
-      if (bundle_items.length === 0) {
-        frappe.msgprint(__('لا توجد عناصر في حزمة المنتج المحددة.'));
-        return;
-      }
-
-      // Arabic months text
-      let months_text;
-      if (months === 1) {
-        months_text = "شهر واحد";
-      } else if (months === 2) {
-        months_text = "شهرين";
-      } else {
-        months_text = `${months} أشهر`;
-      }
-
-      // Arabic subscription description
-      const custom_subscription_data = `اشتراك لمدة ${months_text} في ${bundle_desc}`;
-
-      // Helper to get Item Name and UOM if missing
-      const get_item_details = async (item_code, current_item_name, current_uom) => {
-        let result = {
-          item_name: current_item_name || "",
-          uom: current_uom || ""
-        };
-        if (!item_code) return result;
-
-        if (!result.item_name || !result.uom) {
-          try {
-            let resp = await frappe.db.get_doc('Item', item_code);
-            if (!result.item_name) result.item_name = resp.item_name || "";
-            if (!result.uom) result.uom = resp.stock_uom || "";
-          } catch (e) {
-            // leave as is if cannot fetch
-          }
-        }
-        return result;
-      };
-
-      // Add items from the bundle
-      for (let b_item of bundle_items) {
-        const item_code = b_item.item_code;
-        const details = await get_item_details(item_code, b_item.item_name, b_item.uom);
-
-        if (!item_code || !details.item_name || !details.uom) {
-          frappe.msgprint(__('لا يمكن إضافة العنصر: بيانات ناقصة للكود: {0}', [item_code || '(بدون كود)']));
-          continue;
-        }
-
-        const custom_rate_percent = parseFloat(b_item.custom_rate_percent ?? b_item.rate_percent ?? 0) || 0;
-        const calculated_rate = months * monthly_rate * (custom_rate_percent / 100);
-
-        // Set description with the number of devices (qty)
-        const item_description = `${b_item.description || ''} لعدد اجهزة ${qty}`;
-
-        // Add new row
-        frm.add_child('items', {
-          item_code: item_code,
-          item_name: details.item_name,
-          uom: details.uom,
-          qty: qty,
-          rate: calculated_rate,
-          custom_subscription: 1,
-          custom_subscription_data: custom_subscription_data, // Add subscription data
-          custom_subscription_bundle: bundle, // Add bundle
-          description: item_description
+        const bundle_details = await frappe.call({
+            method: "frappe.client.get",
+            args: {
+                doctype: "Product Bundle",
+                name: bundle
+            }
         });
-      }
 
-      // Clear fields after adding items
-      frm.set_value('custom_subscription_bundle', null);
-      frm.set_value('custom_no_of_months', null);
-      frm.set_value('custom_monthly_rate', null);
-      frm.set_value('custom_quantity', null);
+        if (!bundle_details.message) {
+            frappe.msgprint(__('لم يتم العثور على حزمة المنتج.'));
+            return;
+        }
 
-      // Refresh the items table and save the form
-      frm.refresh_field('items');
-      await frm.save(); // Automatically save the form
+        const bundle_data = bundle_details.message;
+        const bundle_items = (bundle_data.items || []).filter(i => i.item_code);
 
-      frappe.msgprint(__('تمت إضافة جميع عناصر حزمة المنتج إلى التسعيرة وتم حفظ المستند.'));
+        if (bundle_items.length === 0) {
+            frappe.msgprint(__('لا توجد عناصر في حزمة المنتج المحددة.'));
+            return;
+        }
+
+        // Use the `description` field from the Product Bundle
+        const bundle_description = bundle_data.description || bundle;
+
+        // Arabic months text
+        let months_text;
+        if (months === 1) {
+            months_text = "شهر واحد";
+        } else if (months === 2) {
+            months_text = "شهرين";
+        } else {
+            months_text = `${months} أشهر`;
+        }
+
+        // Arabic subscription description
+        const custom_subscription_data = `اشتراك لمدة ${months_text} في ${bundle_description}`;
+
+        // Validate duplicates: `custom_subscription_bundle` OR `custom_subscription_data`
+        const existing_items = frm.doc.items || [];
+        const duplicate_item = existing_items.find(item => {
+            return (
+                item.custom_subscription_bundle === bundle || // Check if bundle is the same
+                item.custom_subscription_data === custom_subscription_data // Check if subscription data is the same
+            );
+        });
+
+        if (duplicate_item) {
+            frappe.msgprint(__('لا يمكن إضافة نفس حزمة المنتج أو بيانات الاشتراك الموجودة بالفعل في جدول العناصر.'));
+            return;
+        }
+
+        // Helper to get Item Name and UOM if missing
+        const get_item_details = async (item_code, current_item_name, current_uom) => {
+            let result = {
+                item_name: current_item_name || "",
+                uom: current_uom || ""
+            };
+            if (!item_code) return result;
+
+            if (!result.item_name || !result.uom) {
+                try {
+                    let resp = await frappe.db.get_doc('Item', item_code);
+                    if (!result.item_name) result.item_name = resp.item_name || "";
+                    if (!result.uom) result.uom = resp.stock_uom || "";
+                } catch (e) {
+                    // leave as is if cannot fetch
+                }
+            }
+            return result;
+        };
+
+        // Add items from the bundle
+        for (let b_item of bundle_items) {
+            const item_code = b_item.item_code;
+            const details = await get_item_details(item_code, b_item.item_name, b_item.uom);
+
+            if (!item_code || !details.item_name || !details.uom) {
+                frappe.msgprint(__('لا يمكن إضافة العنصر: بيانات ناقصة للكود: {0}', [item_code || '(بدون كود)']));
+                continue;
+            }
+
+            const custom_rate_percent = parseFloat(b_item.custom_rate_percent ?? b_item.rate_percent ?? 0) || 0;
+            const calculated_rate = months * monthly_rate * (custom_rate_percent / 100);
+
+            // Set description with the number of devices (qty)
+            const item_description = `${b_item.description || ''} لعدد اجهزة ${qty}`;
+
+            // Add new row
+            frm.add_child('items', {
+                item_code: item_code,
+                item_name: details.item_name,
+                uom: details.uom,
+                qty: qty,
+                rate: calculated_rate,
+                custom_subscription: 1,
+                custom_subscription_data: custom_subscription_data, // Add subscription data
+                custom_subscription_bundle: bundle, // Add bundle
+                description: item_description
+            });
+        }
+
+        // Clear fields after adding items
+        frm.set_value('custom_subscription_bundle', null);
+        frm.set_value('custom_no_of_months', null);
+        frm.set_value('custom_monthly_rate', null);
+        frm.set_value('custom_quantity', null);
+
+        // Refresh the items table and save the form
+        frm.refresh_field('items');
+        await frm.save(); // Automatically save the form
+
+        frappe.msgprint(__('تمت إضافة جميع عناصر حزمة المنتج إلى التسعيرة وتم حفظ المستند.'));
     } catch (error) {
-      frappe.msgprint(__('حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى.'));
-      console.error(error);
+        frappe.msgprint(__('حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى.'));
+        console.error(error);
     }
-  }
+}
 });
