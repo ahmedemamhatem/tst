@@ -145,6 +145,7 @@ doctype_js = {
     "Purchase Invoice": "triggers/buying/purchase_invoice/purchase_invoice.js",
     "Purchase Receipt": "public/js/upload_serials_pr.js",
     "Stock Reconciliation": "public/js/upload_serials_str.js",
+    "Request for Quotation": "public/js/rfq.js",
     "Employee": "public/js/employee.js",
     "Sales Order": "triggers/selling/sales_order/sales_order.js",
     "Stock Entry": "triggers/stock/stock_entry/stock_entry.js",
