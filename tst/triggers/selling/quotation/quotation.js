@@ -232,27 +232,44 @@ function clear_and_fetch_template_items(frm) {
     if (!frm.doc.custom_quotation_templet) return;
 
     frappe.call({
-        method: "tst.triggers.selling.quotation.quotation.get_quotation_template_items",
-        args: { template_name: frm.doc.custom_quotation_templet },
-        callback(r) {
-            if (r.message && Array.isArray(r.message) && r.message.length > 0) {
-                r.message.forEach(item => {
-                    if (item.item_code) {
-                        const child = frm.add_child("items");
-                        child.item_code = item.item_code;
-                        child.item_name = item.item_name;
-                        child.uom = item.uom;
-                    }
-                });
-                frm.refresh_field('items');
-            } else {
-                frappe.msgprint('لم يتم العثور على عناصر في قالب عرض السعر المحدد.');
-            }
-        },
-        error() {
-            frappe.msgprint('تعذر جلب عناصر القالب. يرجى مراجعة الصلاحيات أو الاتصال بالشبكة.');
+    method: "tst.triggers.selling.quotation.quotation.get_quotation_template_items",
+    args: { template_name: frm.doc.custom_quotation_templet },
+    callback(r) {
+        if (r.message && Array.isArray(r.message) && r.message.length > 0) {
+            // Clear existing items from the table to prevent duplicates
+            frm.clear_table("items");
+
+            // Loop through the fetched items and add them to the child table
+            r.message.forEach(item => {
+                if (item.item_code) {
+                    const child = frm.add_child("items");
+                    child.item_code = item.item_code;
+                    child.item_name = item.item_name;
+                    child.uom = item.uom;
+                }
+            });
+
+            // Refresh the field to update the UI with the added items
+            frm.refresh_field('items');
+        } else {
+            // Show a message if no items are found in the selected template
+            frappe.msgprint({
+                title: __('No Items Found'),
+                message: __('لم يتم العثور على عناصر في قالب عرض السعر المحدد.'),
+                indicator: 'orange'
+            });
         }
-    });
+    },
+    error: (err) => {
+        // Handle any server-side errors
+        frappe.msgprint({
+            title: __('Error'),
+            message: __('An error occurred while fetching the quotation template items.'),
+            indicator: 'red'
+        });
+        console.error(err); // Log the error for debugging
+    }
+});
 }
 
 
