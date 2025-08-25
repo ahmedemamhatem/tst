@@ -274,7 +274,6 @@ function clear_and_fetch_template_items(frm) {
 
 
 // Helper: Handle "Add to Item Table" action
-// Helper: Handle "Add to Item Table" action
 async function handle_custom_add_to_item_table(frm) {
     if (frm.doc.docstatus !== 0) {
         frappe.msgprint(__('هذه التسعيرة ليست في حالة المسودة، لا يمكن إضافة عناصر.'));
@@ -286,32 +285,36 @@ async function handle_custom_add_to_item_table(frm) {
     const monthly_rate = Number(frm.doc.custom_monthly_rate);
     const qty = Number(frm.doc.custom_quantity) || 1;
 
+    // Validate required fields
     if (!bundle || !months || !monthly_rate || months <= 0 || monthly_rate <= 0 || qty <= 0) {
         frappe.msgprint(__('الرجاء اختيار جميع الحقول: حزمة المنتج، عدد الأشهر، والسعر الشهري.'));
         return;
     }
 
     try {
+        // Fetch the Product Bundle details
         const bundle_details = await frappe.call({
             method: "frappe.client.get",
             args: { doctype: "Product Bundle", name: bundle }
         });
 
         const bundle_data = bundle_details.message;
-        const bundle_items = (bundle_data.items || []).filter(i => i.item_code);
 
+        // Ensure the bundle has valid items
+        const bundle_items = (bundle_data.items || []).filter(i => i.item_code);
         if (bundle_items.length === 0) {
             frappe.msgprint(__('لا توجد عناصر في حزمة المنتج المحددة.'));
             return;
         }
 
+        // Arabic months text
         const months_text = months === 1 ? "شهر واحد" : months === 2 ? "شهرين" : `${months} أشهر`;
         const custom_subscription_data = `اشتراك لمدة ${months_text} في ${bundle_data.description || bundle}`;
 
+        // Check for duplicates
         const existing_items = frm.doc.items || [];
         const duplicate_item = existing_items.find(item => {
-            return item.custom_subscription_bundle === bundle || 
-                   item.custom_subscription_data === custom_subscription_data;
+            return item.custom_subscription_bundle === bundle || item.custom_subscription_data === custom_subscription_data;
         });
 
         if (duplicate_item) {
@@ -319,15 +322,27 @@ async function handle_custom_add_to_item_table(frm) {
             return;
         }
 
+        // Process each item in the Product Bundle
         for (let b_item of bundle_items) {
             const item_code = b_item.item_code;
+
+            // Fetch item details
+            const details = await get_item_details(item_code);
+
+            // Skip invalid items
+            if (!item_code || !details.item_name || !details.uom) {
+                frappe.msgprint(__('لا يمكن إضافة العنصر بسبب بيانات ناقصة للكود: {0}', [item_code || '(بدون كود)']));
+                continue;
+            }
+
             const rate_percent = parseFloat(b_item.custom_rate_percent || b_item.rate_percent || 0) || 0;
             const calculated_rate = months * monthly_rate * (rate_percent / 100);
 
+            // Add the item to the child table
             frm.add_child('items', {
                 item_code,
-                item_name: b_item.item_name,
-                uom: b_item.uom,
+                item_name: details.item_name,
+                uom: details.uom,
                 qty,
                 rate: calculated_rate,
                 custom_subscription: 1,
@@ -337,7 +352,7 @@ async function handle_custom_add_to_item_table(frm) {
             });
         }
 
-        // Clear temporary inputs (doesn't trigger save by itself)
+        // Clear input fields
         frm.set_value({
             custom_subscription_bundle: null,
             custom_no_of_months: null,
@@ -345,11 +360,49 @@ async function handle_custom_add_to_item_table(frm) {
             custom_quantity: null
         });
 
+        // Refresh the child table
         frm.refresh_field('items');
 
-        frappe.msgprint(__('تمت إضافة العناصر. لا يتم الحفظ تلقائياً — اضغط "حفظ" لتثبيت التغييرات.'));
+        // Automatically save the form
+        await frm.save();
+
+        // Notify the user of successful addition and save
+        frappe.msgprint(__('تمت إضافة العناصر وحفظ المستند بنجاح.'));
     } catch (error) {
+        // Handle errors gracefully
         frappe.msgprint(__('حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى.'));
         console.error(error);
     }
 }
+
+// Helper to fetch item details
+const get_item_details = async (item_code) => {
+    try {
+        // Ensure `item_code` is valid
+        if (!item_code) {
+            console.error('Missing item_code');
+            return {
+                item_name: __('اسم غير معروف'),
+                uom: __('وحدة غير معروفة')
+            };
+        }
+
+        // Fetch the full item document
+        const item_doc = await frappe.db.get_doc('Item', item_code);
+
+        // Check and return the required fields with fallbacks
+        return {
+            item_name: item_doc?.item_name || __('اسم غير معروف'),
+            uom: item_doc?.stock_uom || __('وحدة غير معروفة')
+        };
+    } catch (error) {
+        // Handle fetch errors
+        console.error(`Error fetching item details for ${item_code}:`, error);
+
+        // Return fallback values
+        return {
+            item_name: __('اسم غير معروف'),
+            uom: __('وحدة غير معروفة')
+        };
+    }
+};
