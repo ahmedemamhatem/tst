@@ -77,6 +77,7 @@ def create_device_setup(self):
         device_setup.vehicle_appointment = self.name
         device_setup.device_type = device_type
         device_setup.iccid = serial_to_use
+        device_setup.odometer = self.odometer
         # if it's a SIM, attach parent device serial
         if parent_item:
             device_setup.parent_item = parent_item

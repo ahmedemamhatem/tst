@@ -101,6 +101,7 @@ doc_events = {
         ],
         "on_submit": "tst.triggers.stock.material_request.material_request.on_submit",
     },
+    
 }
 
 
@@ -151,6 +152,8 @@ doctype_js = {
     "Sales Order": "triggers/selling/sales_order/sales_order.js",
     "Stock Entry": "triggers/stock/stock_entry/stock_entry.js",
     "Sales Invoice": "triggers/stock/stock_entry/sales_invoice.js",
+    "Supplier":"triggers/crm/supplier.js",
+    "Supplier Quotation":"triggers/buying/supplier_quotation.js"
 }
 
 # ------------------
