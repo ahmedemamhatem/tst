@@ -23,11 +23,79 @@ from frappe.model.workflow import (
     send_email_alert,
 )
 
-
 import frappe
 from frappe import _
 from frappe.utils import flt
+import frappe
+from frappe import _
 
+def validate_custom_subscription_bundle(doc, method):
+    """
+    Validate that all items from the custom_subscription_bundle are present in the Quotation's items table.
+    Includes bundle description, missing item names, and row details to remove incorrect items.
+    """
+    for row in doc.items:
+        # Check if the row has a custom_subscription_bundle
+        if row.custom_subscription_bundle:
+            # Fetch the bundle details, including description
+            bundle_details = frappe.get_doc("Product Bundle", row.custom_subscription_bundle)
+            bundle_description = bundle_details.description or "No description available"
+
+            # Fetch the items in the subscription bundle
+            bundle_items = frappe.get_all(
+                "Product Bundle Item",  # Child table of the Product Bundle
+                filters={"parent": row.custom_subscription_bundle},
+                fields=["item_code", "description"]  # Fetch both item code and name
+            )
+
+            # Extract item codes and names from the fetched bundle
+            bundle_item_map = {item["item_code"]: item["description"] for item in bundle_items}
+            bundle_item_codes = set(bundle_item_map.keys())
+
+            # Extract item codes from the Quotation's items table
+            quotation_item_codes = {item.item_code for item in doc.items}
+
+            # Find missing items
+            missing_items = bundle_item_codes - quotation_item_codes
+
+            # If there are missing items, prepare a detailed error message
+            if missing_items:
+                # List the missing items with item names
+                missing_items_html = "".join(
+                    f"<li style='margin-bottom: 5px;'>- {bundle_item_map[item]} ({item})</li>"
+                    for item in missing_items
+                )
+
+                # List the existing rows where the bundle is used
+                existing_rows_html = "".join(
+                    f"<li style='margin-bottom: 5px;'>صف رقم: {r.idx}, العنصر: {r.item_name} ({r.item_code})</li>"
+                    for r in doc.items if r.custom_subscription_bundle == row.custom_subscription_bundle
+                )
+
+                # Construct the enhanced error message
+                error_message = f"""
+                <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <h3 style="color: #d9534f;">⚠️ تصحيح الحزمة المطلوبة</h3>
+                    <p><b>وصف الحزمة:</b></p>
+                    <blockquote style="background: #f9f9f9; padding: 10px; border-left: 5px solid #ccc;">
+                        {bundle_description}
+                    </blockquote>
+                    <p><b>العناصر التالية مفقودة من العرض:</b></p>
+                    <ul style="padding-left: 20px; color: #000;">
+                        {missing_items_html}
+                    </ul>
+                    <p><b>الأسطر الحالية التي يجب إزالتها:</b></p>
+                    <ul style="padding-left: 20px; color: #000;">
+                        {existing_rows_html}
+                    </ul>
+                    <p style="color: #d9534f; font-weight: bold;">
+                        يرجى إزالة هذه الحزمة من الأسطر المذكورة أعلاه وإعادة إضافتها لضمان تصحيح العناصر المفقودة.
+                    </p>
+                </div>
+                """
+                frappe.throw(_(error_message), title=_("تصحيح الحزمة"))
+                
+                
 def skip_auto_item_price(doc, method):
     return
     """Skip saving Item Price if custom_user_added != 1."""

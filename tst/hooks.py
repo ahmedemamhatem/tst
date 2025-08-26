@@ -36,6 +36,7 @@ doc_events = {
     "Quotation": {
         "validate": [
             "tst.override.set_main_warehouse_qty",
+            "tst.override.validate_custom_subscription_bundle",
             "tst.override.validate_items_are_saleable",
             "tst.override.alert_supervisor_on_item_shortfall",
             "tst.override.validate_quotation_discount_limits",
