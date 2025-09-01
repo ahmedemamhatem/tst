@@ -1,0 +1,41 @@
+{
+ "add_total_row": 0,
+ "add_translate_data": 0,
+ "columns": [],
+ "creation": "2023-07-13 16:53:27.735091",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "json": "{}",
+ "letterhead": null,
+ "modified": "2025-09-01 14:05:00.793720",
+ "modified_by": "Administrator",
+ "module": "Tst",
+ "name": "Serial and Batch Summary",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Serial and Batch Bundle",
+ "report_name": "Serial and Batch Summary",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Purchase User"
+  },
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "Maintenance User"
+  }
+ ],
+ "timeout": 0
+}
