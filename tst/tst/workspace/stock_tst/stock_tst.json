@@ -13,7 +13,7 @@
  "is_hidden": 0,
  "label": "STOCK TST",
  "links": [],
- "modified": "2025-08-31 13:05:27.409155",
+ "modified": "2025-09-01 09:58:58.039055",
  "modified_by": "a.khater@tst-ksa.com",
  "module": "Tst",
  "name": "STOCK TST",
@@ -52,7 +52,7 @@
    "color": "Grey",
    "doc_view": "List",
    "label": "Stock Balance",
-   "link_to": "STOCK BALANCE (STOCK USER)",
+   "link_to": "Stock Balance",
    "report_ref_doctype": "Stock Ledger Entry",
    "type": "Report"
   },
@@ -76,7 +76,7 @@
    "color": "Grey",
    "doc_view": "List",
    "label": "Stock Ledger",
-   "link_to": "STOCK LEDGER ( STOCK USER)",
+   "link_to": "Stock Ledger",
    "report_ref_doctype": "Stock Ledger Entry",
    "type": "Report"
   },
