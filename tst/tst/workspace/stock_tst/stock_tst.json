@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"E1Xzr6dOjc\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">STOCK TST</span>\",\"col\":12}},{\"id\":\"3m8JF09goE\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Material Request\",\"col\":3}},{\"id\":\"8xm51rlCBQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Stock Entry\",\"col\":3}},{\"id\":\"YSoD4fwKcm\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Stock Balance\",\"col\":3}},{\"id\":\"Vx3rC71vum\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Stock Ledger\",\"col\":3}},{\"id\":\"zcmYS1d7CA\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item Group\",\"col\":3}},{\"id\":\"IRQ0jrnf7K\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Warehouse\",\"col\":3}},{\"id\":\"eNMLlwTf5W\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":3}},{\"id\":\"AI4ia3DfFO\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Product Bundle\",\"col\":3}},{\"id\":\"tmYJARCfuk\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Stock Reconciliation\",\"col\":3}},{\"id\":\"ipxTl4J4-O\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Asset Custody Request\",\"col\":3}},{\"id\":\"AWAwalma8J\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Receipt\",\"col\":3}}]",
+ "content": "[{\"id\":\"E1Xzr6dOjc\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">STOCK TST</span>\",\"col\":12}},{\"id\":\"3m8JF09goE\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Material Request\",\"col\":3}},{\"id\":\"8xm51rlCBQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Stock Entry\",\"col\":3}},{\"id\":\"YSoD4fwKcm\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Stock Balance\",\"col\":3}},{\"id\":\"Vx3rC71vum\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Stock Ledger\",\"col\":3}},{\"id\":\"eNMLlwTf5W\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":3}},{\"id\":\"zcmYS1d7CA\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item Group\",\"col\":3}},{\"id\":\"IRQ0jrnf7K\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Warehouse\",\"col\":3}},{\"id\":\"AI4ia3DfFO\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Product Bundle\",\"col\":3}},{\"id\":\"tmYJARCfuk\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Stock Reconciliation\",\"col\":3}},{\"id\":\"ipxTl4J4-O\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Asset Custody Request\",\"col\":3}},{\"id\":\"AWAwalma8J\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Receipt\",\"col\":3}},{\"id\":\"U1N0auah9r\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Serial and Batch Summary\",\"col\":3}}]",
  "creation": "2025-06-28 21:26:42.931589",
  "custom_blocks": [],
  "docstatus": 0,
@@ -13,8 +13,8 @@
  "is_hidden": 0,
  "label": "STOCK TST",
  "links": [],
- "modified": "2025-06-29 19:20:14.565042",
- "modified_by": "Administrator",
+ "modified": "2025-08-31 13:05:27.409155",
+ "modified_by": "a.khater@tst-ksa.com",
  "module": "Tst",
  "name": "STOCK TST",
  "number_cards": [],
@@ -52,8 +52,16 @@
    "color": "Grey",
    "doc_view": "List",
    "label": "Stock Balance",
-   "link_to": "Stock Balance",
+   "link_to": "STOCK BALANCE (STOCK USER)",
    "report_ref_doctype": "Stock Ledger Entry",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Serial and Batch Summary",
+   "link_to": "SERIAL AND BATCH SUMMARY ( STOCK USER )",
+   "report_ref_doctype": "Serial and Batch Bundle",
    "type": "Report"
   },
   {
@@ -68,7 +76,7 @@
    "color": "Grey",
    "doc_view": "List",
    "label": "Stock Ledger",
-   "link_to": "Stock Ledger",
+   "link_to": "STOCK LEDGER ( STOCK USER)",
    "report_ref_doctype": "Stock Ledger Entry",
    "type": "Report"
   },
