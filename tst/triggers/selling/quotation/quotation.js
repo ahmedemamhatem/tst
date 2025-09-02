@@ -89,16 +89,10 @@ function always_hide_print_and_email(frm) {
                 print_titles.concat(email_titles).forEach((title) => {
                     frm.page.wrapper
                         .find(`.btn[data-original-title="${title}"], .btn[data-label="${title}"]`)
-                        .hide();
-                });
-            }
-
-            if (frm.page && frm.page.menu) {
-                print_titles.concat(email_titles).forEach((text) => {
-                    frm.page.menu
-                        .find(`a:contains("${text}")`)
-                        .closest("li")
-                        .hide();
+                        .not('[data-label="طباعة عرض السعر"]') // Exclude "طباعة عرض السعر"
+                        .not('[data-label="إرسال البريد الإلكتروني"]') // Exclude "إرسال البريد الإلكتروني"
+                        .not('[data-label="إرسال واتساب"]') // Exclude "إرسال واتساب"
+                        .hide(); // Hide other buttons
                 });
             }
         }, 300);
