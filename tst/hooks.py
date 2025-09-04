@@ -114,6 +114,10 @@ fixtures = [
     {
         "dt": "PO Types",
     },
+    {"dt": "Server Script", "filters": [["name", "=", "submit_public_form"]]},
+    {"dt": "Notification", "filters": [["name", "=", "Supplier Data"]]},
+    {"dt": "Web Page", "filters": [["name", "=", "supplier-data"]]},
+
 ]
 
 # ------------------

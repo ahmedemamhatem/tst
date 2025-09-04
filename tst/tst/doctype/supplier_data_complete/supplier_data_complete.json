@@ -10,6 +10,7 @@
   "phone_number",
   "company_email",
   "supplier",
+  "supplier_full_name",
   "address",
   "contact_person_section",
   "contact_person_name",
@@ -120,13 +121,18 @@
    "fieldname": "address",
    "fieldtype": "Small Text",
    "label": "Address"
+  },
+  {
+   "fieldname": "supplier_full_name",
+   "fieldtype": "Data",
+   "label": "Supplier Full Name"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-25 02:48:25.243844",
+ "modified": "2025-08-31 18:59:05.727943",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Supplier Data Complete",

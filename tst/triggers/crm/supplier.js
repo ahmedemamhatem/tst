@@ -2,10 +2,18 @@ frappe.ui.form.on('Supplier', {
     refresh(frm) {
         if (!frm.doc.__islocal) {
             frm.add_custom_button(__('Create Data Submission Form'), function () {
+                // ✅ Check if email is missing
+                if (!frm.doc.custom_contact_person_email) {
+                    frappe.msgprint(__('Please fill Contact Person Email before creating Data Submission Form'));
+                    frappe.validated = false;
+                    return;
+                }
+
                 const new_doc = frappe.model.get_new_doc("Supplier Data Complete");
 
                 // Map fields from Supplier
                 new_doc.supplier = frm.doc.name;
+                new_doc.supplier_full_name=frm.doc.custom_supplier_full_name,
                 new_doc.company = frm.doc.supplier_name;
                 new_doc.job_title = frm.doc.custom_contact_person_job_title;
                 new_doc.email = frm.doc.custom_contact_person_email;
@@ -51,5 +59,9 @@ frappe.ui.form.on('Supplier', {
                 }
             });
         }
+    },
+    supplier_name: function(frm){
+        frm.set_value("custom_supplier_full_name",frm.doc.supplier_name)
+        frm.refresh_field("custom_supplier_full_name")
     }
 });
