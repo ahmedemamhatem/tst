@@ -102,17 +102,25 @@ def make_installation_order(source_name, target_doc=None):
 
 
 def set_contract_type(doc):
-    contract_type_row = frappe.get_all(
-        "Contract Type Settings",
-        filters={"min_qty": ["<", doc.total_qty]},
-        fields=["contract_type"],
-        order_by="min_qty desc",
-        limit=1,
+    """
+    Set the custom_contract_type for the current Sales Order based on the total custom_no_of_cars
+    for the same customer across all their Sales Orders.
+    """
+    if not doc.customer:
+        frappe.throw(_("Customer is required to set the contract type."))
+
+    # Calculate the total custom_no_of_cars for this customer across all their sales orders
+    total_cars_for_customer = frappe.db.sum(
+        "Sales Order",
+        filters={"customer": doc.customer, "docstatus": 1},  # Only consider submitted orders
+        fieldname="custom_no_of_cars",
     )
 
-    contract_type = contract_type_row[0].contract_type if contract_type_row else None
-
-    doc.custom_contract_type = contract_type
+    # Determine the contract type based on the total cars for this customer
+    if total_cars_for_customer and total_cars_for_customer >= 5:
+        doc.custom_contract_type = "B2B"
+    else:
+        doc.custom_contract_type = "B2C"
 
 
 @frappe.whitelist()
