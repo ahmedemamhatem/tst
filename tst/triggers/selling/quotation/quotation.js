@@ -1,3 +1,56 @@
+
+frappe.ui.form.on('Quotation', {
+    refresh(frm) {
+        frm.fields_dict['items'].grid.get_field('item_code').get_query = function(doc) {
+            return {
+                filters: {
+                    custom_is_bundle: 0,
+                    is_sales_item: 1,
+                    variant_of: '',
+                    is_fixed_asset: 0,
+                    disabled: 0
+                }
+            };
+        };
+    }
+});
+
+
+frappe.ui.form.on("Quotation", {
+    onload: function(frm) {
+        update_from_lead(frm);
+    },
+    party_name: function(frm) {
+        update_from_lead(frm);
+    }
+});
+
+function update_from_lead(frm) {
+    if (frm.doc.quotation_to === "Lead" && frm.doc.party_name) {
+        frappe.db.get_doc("Lead", frm.doc.party_name)
+            .then(lead => {
+                if (lead && lead.custom_customer_name) {
+                    let updates = {};
+
+                    if (frm.doc.customer_name !== lead.custom_customer_name) {
+                        updates["customer_name"] = lead.custom_customer_name;
+                    }
+                    if (frm.doc.title !== lead.custom_customer_name) {
+                        updates["title"] = lead.custom_customer_name;
+                    }
+
+                    if (Object.keys(updates).length > 0) {
+                        frm.set_value(updates);
+                        frm.save(); // 🔐 only save if something changed
+                    }
+                }
+            })
+            .catch(err => {
+                console.error("❌ Failed to fetch Lead:", err);
+            });
+    }
+}
+
 // Main setup for Quotation doctype
 frappe.ui.form.on('Quotation', {
     onload(frm) {

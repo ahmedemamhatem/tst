@@ -6,6 +6,24 @@ from erpnext.stock.utils import get_stock_balance
 from frappe import _
 from tst.tst.doctype.device_setup.device_setup import DeviceSetup
 
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_non_bundle_items(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""
+        SELECT name, item_name, item_group, stock_uom
+        FROM `tabItem`
+        WHERE custom_is_bundle = 0
+          AND {searchfield} LIKE %(txt)s
+        ORDER BY idx DESC, name
+        LIMIT %(start)s, %(page_len)s
+    """.format(searchfield=searchfield), {
+        "txt": "%%%s%%" % txt,
+        "start": start,
+        "page_len": page_len
+    })
+    
+    
 # In your_app_name/path/to/module.py
 def add_default_suppliers(doc, method):
     # Get unique default suppliers from items table
