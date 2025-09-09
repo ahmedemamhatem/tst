@@ -1,0 +1,62 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"4hd6tiYa8b\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Development</span>\",\"col\":12}},{\"id\":\"fRdYqwryLi\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"Dl36jta_Pj\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Development Request\",\"col\":3}},{\"id\":\"8fqhjCg_DM\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Feasibility Study\",\"col\":3}},{\"id\":\"_a-7f29eEQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Supplier Communication\",\"col\":3}},{\"id\":\"gvAtyRoTct\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"qQEUi2n-nF\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Development Request and Supplier Quotation\",\"col\":3}}]",
+ "creation": "2025-09-09 11:37:58.962528",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "upload",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Development",
+ "links": [],
+ "modified": "2025-09-09 12:26:54.022396",
+ "modified_by": "Administrator",
+ "module": "Tst",
+ "name": "Development",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 46.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Development Request",
+   "link_to": "Development Request",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Development Request and Supplier Quotation",
+   "link_to": "Development Request and Supplier Quotation",
+   "report_ref_doctype": "Supplier Communication",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Feasibility Study",
+   "link_to": "Feasibility Study",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Supplier Communication",
+   "link_to": "Supplier Communication",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "title": "Development"
+}
