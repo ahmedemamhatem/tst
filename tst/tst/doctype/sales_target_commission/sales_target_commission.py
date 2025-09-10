@@ -21,6 +21,6 @@ class SalesTargetCommission(Document):
         sales_target_by_item: DF.Table[SalesTargetByItem]
         total_target_item_quantity: DF.Float
         total_target_item_selling_amount: DF.Currency
-        user_id: DF.Link
+        user_id: DF.Link | None
     # end: auto-generated types
     pass

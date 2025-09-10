@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:employee",
  "creation": "2025-09-10 17:46:29.337528",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -12,8 +13,9 @@
   "user_id",
   "full_name",
   "target_criteria_section",
-  "total_target_item_quantity",
   "total_target_item_selling_amount",
+  "column_break_xuzf",
+  "total_target_item_quantity",
   "section_break_wnsa",
   "sales_target_by_item"
  ],
@@ -37,7 +39,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Employee Name"
+   "label": "Employee Name",
+   "read_only": 1
   },
   {
    "fieldname": "target_criteria_section",
@@ -76,22 +79,28 @@
    "fieldtype": "Link",
    "label": "User ID",
    "options": "User",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fetch_from": "user_id.full_name",
    "fieldname": "full_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Full Name"
+  },
+  {
+   "fieldname": "column_break_xuzf",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-10 18:00:19.812162",
+ "modified": "2025-09-10 19:00:48.324597",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Sales Target Commission",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -122,5 +131,7 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "timeline_field": "employee",
+ "title_field": "employee_name"
 }
