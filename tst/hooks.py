@@ -53,9 +53,7 @@ doc_events = {
     "Sales Invoice": {
         "before_validate": "tst.invoice_bundel.fill_items_from_product_bundles"
     },
-    "Request for Quotation": {
-        "before_validate": "tst.api.add_default_suppliers"
-    },
+    "Request for Quotation": {"before_validate": "tst.api.add_default_suppliers"},
     "Lead": {
         "validate": [
             "tst.triggers.crm.lead.lead.validate",
@@ -85,10 +83,9 @@ doc_events = {
     "Purchase Invoice": {
         "validate": "tst.triggers.buying.purchase_invoice.purchase_invoice.validate",
         "on_submit": "tst.triggers.buying.purchase_invoice.purchase_invoice.on_submit",
-    }, 
+    },
     "Supplier": {
         "validate": "tst.api.validate_supplier",
-       
     },
     "Material Request": {
         "after_insert": [
@@ -101,7 +98,6 @@ doc_events = {
         ],
         "on_submit": "tst.triggers.stock.material_request.material_request.on_submit",
     },
-    
 }
 
 
@@ -117,7 +113,6 @@ fixtures = [
     {"dt": "Server Script", "filters": [["name", "=", "submit_public_form"]]},
     {"dt": "Notification", "filters": [["name", "=", "Supplier Data"]]},
     {"dt": "Web Page", "filters": [["name", "=", "supplier-data"]]},
-
 ]
 
 # ------------------
@@ -156,8 +151,8 @@ doctype_js = {
     "Sales Order": "triggers/selling/sales_order/sales_order.js",
     "Stock Entry": "triggers/stock/stock_entry/stock_entry.js",
     "Sales Invoice": "triggers/stock/stock_entry/sales_invoice.js",
-    "Supplier":"triggers/crm/supplier.js",
-    "Supplier Quotation":"triggers/buying/supplier_quotation.js"
+    "Supplier": "triggers/crm/supplier.js",
+    "Supplier Quotation": "triggers/buying/supplier_quotation.js",
 }
 
 # ------------------
@@ -213,3 +208,4 @@ fixtures = [
 
 # # Home Pages, Generators, Jinja, Installation, Uninstallation, Integration, Desk Notifications, Permissions, DocType Class, Scheduled Tasks, Testing, Overriding Methods, Document Events, User Data Protection, Authentication and authorization, etc.
 # # (Uncomment and configure as needed)
+export_python_type_annotations = True

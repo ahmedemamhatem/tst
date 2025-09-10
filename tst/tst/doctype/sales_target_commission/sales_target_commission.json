@@ -1,0 +1,126 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-10 17:46:29.337528",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_details_section",
+  "employee",
+  "employee_name",
+  "column_break_tgya",
+  "user_id",
+  "full_name",
+  "target_criteria_section",
+  "total_target_item_quantity",
+  "total_target_item_selling_amount",
+  "section_break_wnsa",
+  "sales_target_by_item"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee_details_section",
+   "fieldtype": "Section Break",
+   "label": "Employee Details"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "unique": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Employee Name"
+  },
+  {
+   "fieldname": "target_criteria_section",
+   "fieldtype": "Section Break",
+   "label": "Target Criteria"
+  },
+  {
+   "fieldname": "total_target_item_quantity",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Target Item Quantity"
+  },
+  {
+   "fieldname": "total_target_item_selling_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Target Item Selling amount"
+  },
+  {
+   "fieldname": "section_break_wnsa",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "sales_target_by_item",
+   "fieldtype": "Table",
+   "label": "Sales Target By Item",
+   "options": "Sales Target By Item"
+  },
+  {
+   "fieldname": "column_break_tgya",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.user_id",
+   "fieldname": "user_id",
+   "fieldtype": "Link",
+   "label": "User ID",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "user_id.full_name",
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "label": "Full Name"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-09-10 18:00:19.812162",
+ "modified_by": "Administrator",
+ "module": "Tst",
+ "name": "Sales Target Commission",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
