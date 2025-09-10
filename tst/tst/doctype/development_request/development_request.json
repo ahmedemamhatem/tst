@@ -149,7 +149,7 @@
    "link_fieldname": "development_request"
   }
  ],
- "modified": "2025-09-09 11:30:51.530169",
+ "modified": "2025-09-10 15:25:56.445419",
  "modified_by": "Administrator",
  "module": "Tst",
  "name": "Development Request",
@@ -171,8 +171,12 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "request_type,customer,request_priority",
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
+ "timeline_field": "customer",
+ "title_field": "customer",
  "track_changes": 1
 }
